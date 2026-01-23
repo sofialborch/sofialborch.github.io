@@ -21,9 +21,9 @@
             --available: #00ff9d;
             --busy: #ff4d4d;
             --partial: #ffb347;
-            --noronna: #3b82f6;
-            --polar: #06b6d4;
-            --study: #a855f7;
+            --noronna: rgb(192, 132, 252);
+            --polar: rgb(244, 114, 182);
+            --study: rgb(248, 113, 113);
         }
 
         body { 
@@ -31,7 +31,7 @@
             background-color: var(--bg-color); 
             color: var(--text-color);
             overflow-x: hidden;
-            position: relative;
+            font-size: 18px;
         }
 
         .decor-blob {
@@ -42,29 +42,15 @@
             opacity: 0.12;
         }
 
-        .floating-heart {
-            position: fixed;
-            z-index: -1;
-            opacity: 0.08;
-            color: var(--pink);
-            animation: float 10s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(10deg); }
-        }
-
         .glass-panel {
-            background: rgba(20, 20, 27, 0.6);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(20, 20, 27, 0.7);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .calendar-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+            grid-template-columns: 45px repeat(7, 1fr);
             gap: 10px;
         }
 
@@ -74,203 +60,232 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 14px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid transparent;
-            position: relative;
+            border-radius: 12px;
+            transition: all 0.2s ease;
             cursor: pointer;
             background: rgba(255, 255, 255, 0.02);
+            font-size: 17px;
         }
         
         .day-cell:hover {
-            transform: translateY(-4px);
-            background-color: rgba(255, 255, 255, 0.05);
-            z-index: 5;
-            box-shadow: 0 10px 20px -10px rgba(0,0,0,0.5);
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 15px -5px rgba(0,0,0,0.6);
+            z-index: 10;
         }
 
-        .day-past { opacity: 0.15; filter: grayscale(1); pointer-events: none; }
-        
-        .badge { font-size: 13px; font-weight: 900; letter-spacing: -0.05em; }
-        .badge-nr { color: var(--noronna); }
-        .badge-pm { color: var(--polar); }
-        .badge-st { color: var(--study); }
-
-        .status-available { 
-            background-color: rgba(0, 255, 157, 0.05); 
-            border-color: rgba(0, 255, 157, 0.3); 
-            color: var(--available); 
+        .week-num-cell {
+            font-size: 19px;
+            font-weight: 900;
+            color: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
         }
-        .status-busy { background-color: rgba(255, 77, 77, 0.05); border-color: rgba(255, 77, 77, 0.2); }
-        .status-partial { background-color: rgba(255, 179, 71, 0.05); border-color: rgba(255, 179, 71, 0.2); }
+
+        .day-past { opacity: 0.1; filter: grayscale(1); pointer-events: none; }
+        .badge { font-size: 17px; font-weight: 900; }
+
+        .status-available { border: 1px solid rgba(0, 255, 157, 0.15); color: var(--available); }
+        .status-busy { border: 1px solid rgba(255, 77, 77, 0.15); }
+        .status-partial { border: 1px solid rgba(255, 179, 71, 0.15); }
 
         .today-focus {
             background: white !important;
             color: black !important;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
             border: none !important;
-            transform: scale(1.05);
-        }
-        .today-focus .badge { color: #000; }
-        .today-focus span { color: #000 !important; font-weight: 900; }
-
-        input[type="date"] {
-            color-scheme: dark;
-        }
-        
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            cursor: pointer;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-        }
-        
-        input[type="date"]::-webkit-calendar-picker-indicator:hover {
-            opacity: 1;
         }
 
-        .day-cell .tooltip {
-            visibility: hidden;
-            background-color: #000;
-            color: #fff;
+        .summary-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-align: center;
-            border-radius: 8px;
-            padding: 6px 12px;
+            box-shadow: 0 10px 25px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .summary-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-card.is-today {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .summary-card.status-available-card { border-bottom: 5px solid var(--available); }
+        .summary-card.status-busy-card { border-bottom: 5px solid var(--busy); }
+        .summary-card.status-partial-card { border-bottom: 5px solid var(--partial); }
+
+        .lookup-week-group {
+            border-left: 2px solid rgba(255,255,255,0.08);
+            padding-left: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        input[type="date"], .week-select { 
+            appearance: none;
+            -webkit-appearance: none;
+            color-scheme: dark; 
+            background-color: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 15px; 
+            border-radius: 1rem;
+            padding: 0.75rem 1.25rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .week-select {
+            padding-right: 2.5rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+            cursor: pointer;
+            font-weight: 800;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            min-width: 100px;
+        }
+
+        .week-select:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .week-select:focus {
+            background-color: white;
+            color: black;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        .tooltip {
+            visibility: hidden;
+            background: #000;
+            color: #fff;
+            padding: 10px 14px;
             position: absolute;
             z-index: 50;
             bottom: 125%;
             left: 50%;
             transform: translateX(-50%);
             opacity: 0;
-            transition: all 0.2s;
-            min-width: 120px;
-            font-size: 11px;
-            pointer-events: none;
-            box-shadow: 0 10px 15px -5px rgba(0,0,0,0.5);
+            transition: 0.2s;
+            font-size: 16px;
             border: 1px solid var(--border-color);
+            border-radius: 8px;
+            white-space: nowrap;
         }
-
-        .day-cell:hover .tooltip { visibility: visible; opacity: 1; bottom: 135%; }
-
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-
-        .summary-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 1.5rem;
-            padding: 1rem;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            text-align: center;
-            min-height: 120px;
-        }
-
-        .summary-card.is-today {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
-        }
-
-        .summary-card.status-available-card { border-bottom: 4px solid var(--available); }
-        .summary-card.status-busy-card { border-bottom: 4px solid var(--busy); }
-        .summary-card.status-partial-card { border-bottom: 4px solid var(--partial); }
+        .day-cell:hover .tooltip { visibility: visible; opacity: 1; }
     </style>
 </head>
 <body class="antialiased min-h-screen pb-20">
 
     <div class="decor-blob bg-pink-500 w-[500px] h-[500px] -top-60 -left-20"></div>
     <div class="decor-blob bg-blue-600 w-[400px] h-[400px] bottom-0 -right-40"></div>
-    
-    <div class="floating-heart text-5xl top-40 right-[15%]" style="animation-delay: 0s;"><i class="fas fa-heart"></i></div>
-    <div class="floating-heart text-2xl bottom-60 left-[10%]" style="animation-delay: 2s; opacity: 0.05;"><i class="fas fa-heart"></i></div>
-    <div class="fixed top-1/2 left-1/4 opacity-[0.03] text-white text-6xl pointer-events-none"><i class="fas fa-circle"></i></div>
 
     <header class="bg-[#0b0b0e]/60 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5">
         <nav class="container mx-auto px-6 flex items-center justify-between h-20">
-            <div class="flex items-center gap-2">
-                <span class="text-xl font-black tracking-tighter uppercase tracking-[0.1em]">Availability</span>
-            </div>
-            <span id="sync-status" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-4 py-1.5 rounded-full border border-white/5">Syncing...</span>
+            <span class="text-2xl font-black uppercase tracking-[0.2em]">Availability</span>
+            <span id="sync-status" class="text-xs font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5">...</span>
         </nav>            
     </header>
 
     <main class="container mx-auto px-6 lg:px-12 py-10">
         <section class="mb-12">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-1 glass-panel rounded-[2.5rem] p-8 flex flex-col justify-center border-l-4 border-pink-500/50">
-                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-pink-500/60 mb-2">Right Now</p>
-                    <h2 id="hero-date" class="text-4xl font-black tracking-tight mb-2">...</h2>
-                    <p id="hero-note" class="text-sm text-gray-400 mb-8 font-medium italic">...</p>
-                    <div id="hero-status-pill" class="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white/5 border border-white/5 w-fit">
-                        <span id="hero-dot" class="w-2.5 h-2.5 rounded-full"></span>
-                        <span id="hero-label" class="text-xs font-black uppercase tracking-widest">...</span>
+                <div class="lg:col-span-1 glass-panel rounded-[2.5rem] p-10 flex flex-col justify-center border-l-4 border-pink-500/50">
+                    <p class="text-s font-black uppercase tracking-[0.3em] text-pink-500/60 mb-3">Today</p>
+                    <h2 id="hero-date" class="text-5xl font-black tracking-tight mb-3">...</h2>
+                    <p id="hero-note" class="text-base text-gray-400 mb-10 font-medium italic leading-relaxed">...</p>
+                    <div id="hero-status-pill" class="inline-flex items-center gap-4 px-6 py-3 rounded-2xl bg-white/5 border border-white/5 w-fit">
+                        <span id="hero-dot" class="w-3 h-3 rounded-full"></span>
+                        <span id="hero-label" class="text-sm font-black uppercase tracking-widest">...</span>
                     </div>
                 </div>
 
-                <div class="lg:col-span-2 glass-panel rounded-[2.5rem] p-8">
-                    <div class="flex justify-between items-center mb-6">
+                <div class="lg:col-span-2 glass-panel rounded-[2.5rem] p-10">
+                    <div class="flex justify-between items-center mb-10">
                         <div class="flex items-center gap-4">
-                            <i class="fas fa-calendar-day text-gray-600"></i>
-                            <h3 class="text-xs font-black uppercase tracking-widest opacity-40">Weekly Outlook</h3>
+                            <i class="fas fa-bolt text-pink-500 text-lg"></i>
+                            <h3 class="text-sm font-black uppercase tracking-widest opacity-40">Quick Outlook</h3>
                         </div>
-                        <span class="text-[10px] font-black text-gray-400 bg-white/10 px-3 py-1 rounded-full">Week <span id="week-number">--</span></span>
+                        <div class="flex items-center gap-4">
+                            <label class="text-[16px] font-black text-gray-400 uppercase tracking-widest">Select Week</label>
+                            <select id="week-selector" class="week-select" onchange="onWeekChange(this.value)"></select>
+                        </div>
                     </div>
-                    <div id="week-summary-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3"></div>
+                    <div id="week-summary-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-5"></div>
                 </div>
             </div>
         </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <div class="lg:col-span-8">
                 <div class="glass-panel rounded-[2.5rem] p-10">
                     <div class="flex items-center justify-between mb-12">
-                        <h2 id="calendar-month" class="text-3xl font-black tracking-tighter uppercase">...</h2>
-                        <div class="flex gap-3">
-                            <button onclick="changeMonth(-1)" class="w-12 h-12 flex items-center justify-center hover:bg-white/10 rounded-2xl transition border border-white/5"><i class="fas fa-arrow-left"></i></button>
-                            <button onclick="changeMonth(1)" class="w-12 h-12 flex items-center justify-center hover:bg-white/10 rounded-2xl transition border border-white/5"><i class="fas fa-arrow-right"></i></button>
+                        <h2 id="calendar-month" class="text-4xl font-black tracking-tighter uppercase">...</h2>
+                        <div class="flex gap-4">
+                            <button onclick="changeMonth(-1)" class="w-14 h-14 flex items-center justify-center hover:bg-white/10 rounded-2xl transition border border-white/5"><i class="fas fa-chevron-left text-lg"></i></button>
+                            <button onclick="changeMonth(1)" class="w-14 h-14 flex items-center justify-center hover:bg-white/10 rounded-2xl transition border border-white/5"><i class="fas fa-chevron-right text-lg"></i></button>
                         </div>
                     </div>
 
-                    <div class="calendar-grid text-center mb-8 text-[10px] font-black uppercase tracking-widest text-gray-600">
-                        <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div class="text-pink-500/30">Sat</div><div class="text-pink-500/30">Sun</div>
+                    <div class="calendar-grid text-center mb-8 text-s font-black uppercase tracking-widest text-gray-500">
+                        <div class="text-white/60">Wk</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div class="text-pink-500/40">S</div><div class="text-pink-500/40">S</div>
                     </div>
                     <div id="calendar-days" class="calendar-grid"></div>
 
-                    <div class="mt-14 flex flex-wrap gap-10 text-[9px] font-black uppercase tracking-widest border-t border-white/5 pt-12">
+                    <div class="mt-14 flex flex-wrap gap-10 text-s font-black uppercase tracking-widest border-t border-white/5 pt-12">
                         <div class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-emerald-400"></span> Available</div>
                         <div class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-red-400"></span> Busy</div>
                         <div class="ml-auto flex gap-6">
-                            <span class="text-blue-400">NR: Norønna</span> 
-                            <span class="text-cyan-400">PM: Polarmåsen</span> 
-                            <span class="text-purple-400">ST: Study</span>
+                            <span class="text-purple-400">NR - Norønna</span> 
+                            <span class="text-pink-400">PM - Polarmåsen</span> 
+                            <span class="text-red-400">ST - Studie</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="lg:col-span-4 space-y-6">
-                <div class="glass-panel rounded-[2.5rem] p-8 border-t-2 border-white/10">
-                    <h3 class="text-xs font-black uppercase tracking-widest mb-10 opacity-30 flex items-center gap-2">
-                        <i class="fas fa-search text-[10px]"></i> Range Search
-                    </h3>
+                <div class="glass-panel rounded-[2.5rem] p-10 border-t-2 border-white/10 sticky top-24">
+                    <div class="flex items-center justify-between mb-10">
+                        <h3 class="text-sm font-black uppercase tracking-widest opacity-30 flex items-center gap-2">
+                            <i class="fas fa-search"></i> Lookup
+                        </h3>
+                    </div>
                     <div class="space-y-8">
-                        <div>
-                            <label class="block text-[10px] font-black text-gray-500 uppercase mb-3 tracking-widest">Start Date</label>
-                            <input type="date" id="lookup-start" class="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-white/20 transition-all">
+                        <div class="grid grid-cols-1 gap-6">
+                            <div>
+                                <label class="block text-xs font-black text-gray-500 uppercase mb-3 tracking-widest">Start Date</label>
+                                <input type="date" id="lookup-start" class="w-full">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-gray-500 uppercase mb-3 tracking-widest">End Date</label>
+                                <input type="date" id="lookup-end" class="w-full">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-gray-500 uppercase mb-3 tracking-widest">End Date</label>
-                            <input type="date" id="lookup-end" class="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-white/20 transition-all">
-                        </div>
-                        <button onclick="runLookup()" class="w-full bg-white text-black font-black py-5 rounded-2xl transition-all active:scale-95 text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-white/5">
-                            Search Availability
+                        <button onclick="runLookup()" class="w-full bg-white text-black font-black py-5 rounded-xl transition-all active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg">
+                            Search Range
                         </button>
                     </div>
-                    <div id="lookup-results" class="mt-10 space-y-3 hidden max-h-[400px] overflow-y-auto pr-2 custom-scrollbar"></div>
+                    
+                    <div id="lookup-container" class="mt-12 hidden border-t border-white/5 pt-10">
+                        <div id="lookup-results" class="space-y-10 max-h-[600px] overflow-y-auto pr-3 custom-scrollbar"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -281,6 +296,21 @@
         let currentViewDate = new Date();
         const getLocalDateString = (date) => date.toLocaleDateString('en-CA');
 
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        function getDateFromWeek(week, year) {
+            const d = new Date(year, 0, 1);
+            const dayNum = d.getDay();
+            const diff = (dayNum <= 4 ? 1 - dayNum : 8 - dayNum);
+            d.setDate(d.getDate() + diff + (week - 1) * 7);
+            return d;
+        }
+
         async function loadData() {
             try {
                 const response = await fetch('availability.json');
@@ -290,7 +320,7 @@
                     document.getElementById('sync-status').innerText = "Database Online";
                 }
             } catch (e) {
-                document.getElementById('sync-status').innerText = "Local Mode";
+                document.getElementById('sync-status').innerText = "Local Session";
             }
             init();
         }
@@ -319,11 +349,31 @@
         }
 
         function init() {
-            const todayStr = getLocalDateString(new Date());
+            const today = new Date();
+            const todayStr = getLocalDateString(today);
+            const currentWeek = getWeekNumber(today);
+
+            populateWeekDropdown(currentWeek);
             renderHero(todayStr);
-            renderWeekSummary(todayStr);
+            renderWeekSummary(currentWeek);
             renderCalendar(todayStr);
             document.getElementById('lookup-start').value = todayStr;
+        }
+
+        function populateWeekDropdown(currentWeek) {
+            const selector = document.getElementById('week-selector');
+            selector.innerHTML = '';
+            for (let i = 1; i <= 52; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.innerText = i;
+                if (i === currentWeek) opt.selected = true;
+                selector.appendChild(opt);
+            }
+        }
+
+        function onWeekChange(week) {
+            renderWeekSummary(parseInt(week));
         }
 
         function selectDay(dateStr) {
@@ -334,8 +384,8 @@
         function renderHero(todayStr) {
             const now = new Date();
             const info = getInfo(todayStr);
-            document.getElementById('hero-date').innerText = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            document.getElementById('hero-note').innerText = info.note || 'No specific plans logged for today.';
+            document.getElementById('hero-date').innerText = now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }).replace('/', '.');
+            document.getElementById('hero-note').innerText = info.note || 'No specific plans logged.';
             
             const label = document.getElementById('hero-label');
             const dot = document.getElementById('hero-dot');
@@ -345,14 +395,13 @@
                                        info.status === 'partial' ? 'var(--partial)' : '#333';
         }
 
-        function renderWeekSummary(todayStr) {
+        function renderWeekSummary(weekNumber) {
             const container = document.getElementById('week-summary-grid');
             container.innerHTML = '';
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const mondayOffset = today.getDay() === 0 ? -6 : 1 - today.getDay();
-            const monday = new Date(today);
-            monday.setDate(today.getDate() + mondayOffset);
+            
+            const year = new Date().getFullYear();
+            const monday = getDateFromWeek(weekNumber, year);
+            const todayStr = getLocalDateString(new Date());
 
             for (let i = 0; i < 5; i++) {
                 const curr = new Date(monday);
@@ -361,34 +410,26 @@
                 const info = getInfo(dateStr);
                 const isToday = dateStr === todayStr;
 
+                const day = String(curr.getDate()).padStart(2, '0');
+                const month = String(curr.getMonth() + 1).padStart(2, '0');
+                const dateLabel = `${day}.${month}`;
+
                 const div = document.createElement('div');
-                div.className = `summary-card status-${info.status}-card cursor-pointer transition-all ${isToday ? 'is-today' : ''}`;
+                div.className = `summary-card status-${info.status}-card cursor-pointer ${isToday ? 'is-today' : ''}`;
                 div.onclick = () => selectDay(dateStr);
                 
-                let content = `
-                    <span class="text-[10px] font-black uppercase tracking-widest text-white/40">${curr.toLocaleDateString('en-US', {weekday: 'short'})}</span>
-                    <div class="flex flex-col items-center py-2">
-                `;
-
-                if (info.badge) {
-                    content += `<span class="badge badge-${info.badge.toLowerCase()} text-lg">${info.badge}</span>`;
-                } else {
-                    const iconClass = info.status === 'available' ? 'fa-check-circle text-emerald-400' : 'fa-minus-circle text-red-400';
-                    content += `<i class="fas ${iconClass} text-xl opacity-80"></i>`;
-                }
-
-                content += `
+                div.innerHTML = `
+                    <div class="flex flex-col gap-0.5 mb-1">
+                        <span class="text-[16px] font-black text-white/80 tracking-tighter">${dateLabel}</span>
+                        <span class="text-xs font-black uppercase text-white/65 tracking-widest">${curr.toLocaleDateString('en-GB', {weekday: 'short'})}</span>
                     </div>
-                    <span class="text-[9px] font-bold text-gray-400 line-clamp-2 leading-tight">${info.note || (info.status === 'available' ? 'Available' : 'Busy')}</span>
+                    <div class="py-4 flex flex-col items-center">
+                        ${info.badge ? `<span class="badge badge-${info.badge.toLowerCase()} text-2xl font-black">${info.badge}</span>` : `<i class="fas ${info.status === 'available' ? 'fa-check text-emerald-400' : 'fa-minus text-red-500'} text-2xl opacity-40"></i>`}
+                    </div>
+                    <span class="text-sm font-bold text-gray-400 line-clamp-2 leading-tight">${info.note || info.status}</span>
                 `;
-                
-                div.innerHTML = content;
                 container.appendChild(div);
             }
-            
-            const firstJan = new Date(today.getFullYear(), 0, 1);
-            const weekNum = Math.ceil((((today - firstJan) / 86400000) + firstJan.getDay() + 1) / 7);
-            document.getElementById('week-number').innerText = weekNum;
         }
 
         function renderCalendar(todayStr) {
@@ -396,48 +437,58 @@
             daysEl.innerHTML = '';
             const year = currentViewDate.getFullYear();
             const month = currentViewDate.getMonth();
-            document.getElementById('calendar-month').innerText = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(currentViewDate);
+            document.getElementById('calendar-month').innerText = new Intl.DateTimeFormat('en-GB', { month: 'short' }).format(currentViewDate);
 
             let firstDay = new Date(year, month, 1).getDay();
             let padding = firstDay === 0 ? 6 : firstDay - 1;
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            for (let i = 0; i < padding; i++) {
-                const div = document.createElement('div');
-                div.className = 'day-cell opacity-0 pointer-events-none';
-                daysEl.appendChild(div);
-            }
-
             const todayObj = new Date();
             todayObj.setHours(0,0,0,0);
 
-            for (let d = 1; d <= daysInMonth; d++) {
-                const date = new Date(year, month, d);
-                const dateStr = getLocalDateString(date);
-                const info = getInfo(dateStr);
-                const isPast = date < todayObj;
-                const isToday = dateStr === todayStr;
-                
-                const div = document.createElement('div');
-                div.className = `day-cell status-${info.status} ${isPast ? 'day-past' : ''} ${isToday ? 'today-focus' : ''}`;
-                div.onclick = () => selectDay(dateStr);
-                
-                if (info.badge) {
-                    div.innerHTML = `
-                        <span class="text-[7px] font-black opacity-40 mb-1">${d}</span>
-                        <span class="badge badge-${info.badge.toLowerCase()}">${info.badge}</span>
-                    `;
-                } else {
-                    div.innerHTML = `<span class="text-xs font-black">${d}</span>`;
-                }
+            let currentDay = 1;
+            for (let r = 0; r < 6; r++) {
+                if (currentDay > daysInMonth && r > 0) break;
 
-                if (info.note) {
-                    const tip = document.createElement('span');
-                    tip.className = 'tooltip';
-                    tip.innerText = info.note;
-                    div.appendChild(tip);
+                const firstDateInRow = currentDay === 1 ? new Date(year, month, 1) : new Date(year, month, currentDay);
+                const wkCell = document.createElement('div');
+                wkCell.className = 'week-num-cell';
+                wkCell.innerText = getWeekNumber(firstDateInRow);
+                daysEl.appendChild(wkCell);
+
+                for (let c = 0; c < 7; c++) {
+                    const pos = r * 7 + c;
+                    if (pos < padding || currentDay > daysInMonth) {
+                        const empty = document.createElement('div');
+                        empty.className = 'day-cell opacity-0 pointer-events-none';
+                        daysEl.appendChild(empty);
+                    } else {
+                        const date = new Date(year, month, currentDay);
+                        const dateStr = getLocalDateString(date);
+                        const info = getInfo(dateStr);
+                        const isPast = date < todayObj;
+                        const isToday = dateStr === todayStr;
+                        
+                        const div = document.createElement('div');
+                        div.className = `day-cell status-${info.status} ${isPast ? 'day-past' : ''} ${isToday ? 'today-focus' : ''}`;
+                        div.onclick = () => selectDay(dateStr);
+                        
+                        if (info.badge) {
+                            div.innerHTML = `<span class="badge badge-${info.badge.toLowerCase()}">${info.badge}</span>`;
+                        } else {
+                            div.innerHTML = `<span class="font-bold">${currentDay}</span>`;
+                        }
+
+                        if (info.note) {
+                            const tip = document.createElement('span');
+                            tip.className = 'tooltip';
+                            tip.innerText = info.note;
+                            div.appendChild(tip);
+                        }
+                        daysEl.appendChild(div);
+                        currentDay++;
+                    }
                 }
-                daysEl.appendChild(div);
             }
         }
 
@@ -449,34 +500,58 @@
         function runLookup() {
             const startStr = document.getElementById('lookup-start').value;
             const endStr = document.getElementById('lookup-end').value;
+            const container = document.getElementById('lookup-container');
             const resultsEl = document.getElementById('lookup-results');
             if (!startStr) return;
-            resultsEl.classList.remove('hidden');
+
+            container.classList.remove('hidden');
             resultsEl.innerHTML = '';
+            
             let current = new Date(startStr + "T00:00:00");
             const end = endStr ? new Date(endStr + "T00:00:00") : new Date(startStr + "T00:00:00");
-            let limit = 0;
-            while (current <= end && limit < 100) {
+            
+            let currentWeek = -1;
+            let weekGroup = null;
+
+            while (current <= end) {
                 const dateStr = getLocalDateString(current);
                 const info = getInfo(dateStr);
+                const wk = getWeekNumber(current);
+
                 if (info.status !== 'weekend') {
+                    if (wk !== currentWeek) {
+                        currentWeek = wk;
+                        const header = document.createElement('div');
+                        header.className = 'flex items-center gap-4 mb-6';
+                        header.innerHTML = `<span class="text-sm font-black uppercase tracking-widest bg-pink-500/10 text-pink-400 px-5 py-2 rounded-full">Week ${wk}</span>`;
+                        resultsEl.appendChild(header);
+                        
+                        weekGroup = document.createElement('div');
+                        weekGroup.className = 'lookup-week-group space-y-4';
+                        resultsEl.appendChild(weekGroup);
+                    }
+
+                    const day = String(current.getDate()).padStart(2, '0');
+                    const month = String(current.getMonth() + 1).padStart(2, '0');
+                    const displayDate = `${day}.${month}`;
+
                     const row = document.createElement('div');
-                    row.className = 'flex items-center justify-between p-5 rounded-[1.5rem] bg-white/[0.03] border border-white/5 text-[10px] hover:bg-white/[0.05] transition-colors';
+                    row.className = 'flex items-center justify-between p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group';
                     const color = info.status === 'available' ? 'text-emerald-400' : 'text-red-400';
+                    
                     row.innerHTML = `
                         <div class="flex flex-col">
-                            <span class="text-gray-500 font-black uppercase tracking-tighter">${current.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'})}</span>
-                            <span class="text-white opacity-40 font-bold mt-0.5">${info.note || ''}</span>
+                            <span class="text-sm font-black uppercase text-gray-500 group-hover:text-gray-300 transition-colors">${current.toLocaleDateString('en-GB', {weekday: 'short'})} ${displayDate}</span>
+                            <span class="text-base text-white/80 font-medium mt-1">${info.note || 'No plans noted'}</span>
                         </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-6">
                             ${info.badge ? `<span class="badge badge-${info.badge.toLowerCase()} opacity-60">${info.badge}</span>` : ''}
-                            <span class="font-black uppercase tracking-widest ${color}">${info.status}</span>
+                            <span class="text-xs font-black uppercase tracking-widest ${color}">${info.status}</span>
                         </div>
                     `;
-                    resultsEl.appendChild(row);
+                    weekGroup.appendChild(row);
                 }
                 current.setDate(current.getDate() + 1);
-                limit++;
             }
         }
 
