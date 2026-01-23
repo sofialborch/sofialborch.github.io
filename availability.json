@@ -1,19 +1,284 @@
 {
-"overrides": {
-"2026-01-26": { "status": "busy", "note": "Working Norønna" },
-"2026-01-27": { "status": "busy", "note": "Working Norønna" },
-"2026-01-28": { "status": "busy", "note": "Working Norønna" },
-"2026-01-29": { "status": "busy", "note": "Working Norønna" },
-"2026-01-30": { "status": "busy", "note": "Working Norønna" },
-"2026-02-02": { "status": "busy", "note": "Studying" },
-"2026-02-03": { "status": "available", "note": "Open for meetings" },
-"2026-02-04": { "status": "available", "note": "Open for meetings" },
-"2026-02-05": { "status": "available", "note": "Open for meetings" },
-"2026-02-06": { "status": "available", "note": "Open for meetings" },
-"2026-02-09": { "status": "busy", "note": "Studying" },
-"2026-02-10": { "status": "busy", "note": "Studying" },
-"2026-02-11": { "status": "busy", "note": "Studying" },
-"2026-02-12": { "status": "busy", "note": "Studying" },
-"2026-02-13": { "status": "busy", "note": "Studying" }
-}
+  "overrides": {
+    "2026-01-26": {
+      "status": "busy",
+      "note": "Working Norønna"
+    },
+    "2026-01-27": {
+      "status": "busy",
+      "note": "Working Norønna"
+    },
+    "2026-01-28": {
+      "status": "busy",
+      "note": "Working Norønna"
+    },
+    "2026-01-29": {
+      "status": "busy",
+      "note": "Working Norønna"
+    },
+    "2026-01-30": {
+      "status": "busy",
+      "note": "Working Norønna"
+    },
+    "2026-02-02": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-03": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-02-04": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-02-05": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-02-06": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-02-09": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-10": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-11": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-12": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-13": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-04-20": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-04-13": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-04-14": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-04-15": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-04-16": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-04-17": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-03-09": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-03-10": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-03-11": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-03-12": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-03-13": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-03-23": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-03-02": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-23": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-24": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-25": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-26": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-27": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-16": {
+      "status": "busy",
+      "note": "Studying"
+    },
+    "2026-02-17": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-02-18": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-02-19": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-02-20": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-03": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-04": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-05": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-06": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-16": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-17": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-18": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-19": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-20": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-24": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-25": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-26": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-27": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-30": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-03-31": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-01": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-02": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-03": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-06": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-07": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-08": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-09": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-10": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-21": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-22": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-23": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-24": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-27": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-28": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-29": {
+      "status": "available",
+      "note": "Available"
+    },
+    "2026-04-30": {
+      "status": "available",
+      "note": "Available"
+    }
+  },
+  "settings": {
+    "certainUntil": "2026-04-30",
+    "phone": "+47 940 55 838"
+  }
 }

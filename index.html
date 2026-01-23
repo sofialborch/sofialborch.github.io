@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nb">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Availability Portal</title>
+    <title>Tilgjengelighetsportal</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,25 +34,9 @@
             font-size: 18px;
         }
 
-        .decor-blob {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(100px);
-            z-index: -1;
-            opacity: 0.12;
-        }
-
-        .glass-panel {
-            background: rgba(20, 20, 27, 0.7);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: 45px repeat(7, 1fr);
-            gap: 10px;
-        }
+        .decor-blob { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.12; }
+        .glass-panel { background: rgba(20, 20, 27, 0.7); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .calendar-grid { display: grid; grid-template-columns: 45px repeat(7, 1fr); gap: 10px; }
 
         .day-cell {
             aspect-ratio: 1 / 1;
@@ -67,24 +51,10 @@
             font-size: 17px;
         }
         
-        .day-cell:hover {
-            transform: scale(1.05);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 15px -5px rgba(0,0,0,0.6);
-            z-index: 10;
-        }
-
-        .week-num-cell {
-            font-size: 19px;
-            font-weight: 900;
-            color: rgba(255,255,255,0.25);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-        }
-
+        .day-cell:hover { transform: scale(1.05); background: rgba(255, 255, 255, 0.08); z-index: 10; }
+        .week-num-cell { font-size: 19px; font-weight: 900; color: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; pointer-events: none; }
         .day-past { opacity: 0.1; filter: grayscale(1); pointer-events: none; }
+        
         .badge { font-size: 17px; font-weight: 900; }
         .badge-nr { color: var(--noronna); }
         .badge-pm { color: var(--polar); }
@@ -94,123 +64,104 @@
         .status-busy { border: 1px solid rgba(255, 77, 77, 0.15); }
         .status-partial { border: 1px solid rgba(255, 179, 71, 0.15); }
 
-        .today-focus {
-            background: white !important;
-            color: black !important;
-            box-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-            border: none !important;
-        }
+        .today-focus { background: white !important; color: black !important; transform: scale(1.1); border: none !important; }
 
         .summary-card {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
             border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 1.5rem;
             padding: 1.5rem;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.4s;
             text-align: center;
-            box-shadow: 0 10px 25px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .summary-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .summary-card.is-today {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
+        .summary-card.is-today { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); }
         .summary-card.status-available-card { border-bottom: 5px solid var(--available); }
         .summary-card.status-busy-card { border-bottom: 5px solid var(--busy); }
         .summary-card.status-partial-card { border-bottom: 5px solid var(--partial); }
 
-        .lookup-week-group {
-            border-left: 2px solid rgba(255,255,255,0.08);
-            padding-left: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
+        .lookup-week-group { border-left: 2px solid rgba(255,255,255,0.08); padding-left: 1.5rem; margin-bottom: 2.5rem; }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-
-        input[type="date"], .week-select { 
-            appearance: none;
-            -webkit-appearance: none;
+        input[type="date"], input[type="month"], .week-select { 
+            appearance: none; 
+            -webkit-appearance: none; 
             color-scheme: dark; 
-            background-color: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: white;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            color: white; 
             font-size: 15px; 
-            border-radius: 1rem;
-            padding: 0.75rem 1.25rem;
+            border-radius: 1rem; 
+            padding: 0.75rem 1.25rem; 
             outline: none;
-            transition: all 0.2s ease;
+            cursor: pointer;
+            transition: border-color 0.2s;
         }
+
+        input:hover, .week-select:hover { border-color: rgba(255, 255, 255, 0.3); }
 
         .week-select {
-            padding-right: 2.5rem;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            padding-right: 3rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' stroke-opacity='0.4' stroke-width='3'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1.2em;
-            cursor: pointer;
-            font-weight: 800;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            min-width: 100px;
+            background-position: right 1.25rem center;
+            background-size: 1em;
         }
 
-        .week-select:hover {
-            background-color: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-        }
-
-        .week-select:focus {
-            background-color: white;
-            color: black;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-        }
+        .week-select option { background-color: var(--card-bg); color: white; }
 
         .tooltip {
-            visibility: hidden;
-            background: #000;
-            color: #fff;
-            padding: 10px 14px;
-            position: absolute;
-            z-index: 50;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: 0.2s;
-            font-size: 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            white-space: nowrap;
+            visibility: hidden; background: #000; color: #fff; padding: 10px 14px; position: absolute; z-index: 50;
+            bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: 0.2s; font-size: 16px;
+            border: 1px solid var(--border-color); border-radius: 8px; white-space: nowrap;
         }
         .day-cell:hover .tooltip { visibility: visible; opacity: 1; }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+        }
+        .pulse-pink { animation: pulse-glow 2s infinite; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
-<body class="antialiased min-h-screen pb-20">
+<body class="antialiased min-h-screen">
 
     <div class="decor-blob bg-pink-500 w-[500px] h-[500px] -top-60 -left-20"></div>
     <div class="decor-blob bg-blue-600 w-[400px] h-[400px] bottom-0 -right-40"></div>
 
     <header class="bg-[#0b0b0e]/60 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5">
         <nav class="container mx-auto px-6 flex items-center justify-between h-20">
-            <span class="text-2xl font-black uppercase tracking-[0.2em]">Availability</span>
-            <span id="sync-status" class="text-xs font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5">...</span>
+            <span class="text-2xl font-black uppercase tracking-[0.2em]" data-tr="title">Tilgjengelighet</span>
+            <div class="flex items-center gap-6">
+                <button onclick="toggleLanguage()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
+                    <span id="lang-flag" class="text-xl">🇳🇴</span>
+                    <span id="lang-label" class="text-[10px] font-black uppercase tracking-widest">NO</span>
+                </button>
+                <div class="h-6 w-px bg-white/10"></div>
+                <button onclick="togglePrintModal()" 
+                        class="pulse-pink group relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-pink-500 text-white text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-pink-500/20">
+                    <i class="fas fa-print"></i>
+                    <span data-tr="printBtn">Skriv ut</span>
+                </button>
+                <input type="file" id="manual-upload" class="hidden" accept=".json" onchange="handleManualUpload(event)">
+                <span id="sync-status" 
+                      onclick="document.getElementById('manual-upload').click()"
+                      class="text-xs font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5 cursor-pointer hover:bg-white/10 transition-all">
+                    Laster...
+                </span>
+            </div>
         </nav>            
     </header>
 
-    <main class="container mx-auto px-6 lg:px-12 py-10">
+    <main class="container mx-auto px-6 lg:px-12 py-10 min-h-[calc(100vh-280px)]">
         <section class="mb-12">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-1 glass-panel rounded-[2.5rem] p-10 flex flex-col justify-center border-l-4 border-pink-500/50">
-                    <p class="text-s font-black uppercase tracking-[0.3em] text-pink-500/60 mb-3">Today</p>
+                    <p class="text-s font-black uppercase tracking-[0.3em] text-pink-500/60 mb-3" data-tr="today">I dag</p>
                     <h2 id="hero-date" class="text-5xl font-black tracking-tight mb-3">...</h2>
                     <p id="hero-note" class="text-base text-gray-400 mb-10 font-medium italic leading-relaxed">...</p>
                     <div id="hero-status-pill" class="inline-flex items-center gap-4 px-6 py-3 rounded-2xl bg-white/5 border border-white/5 w-fit">
@@ -223,10 +174,10 @@
                     <div class="flex justify-between items-center mb-10">
                         <div class="flex items-center gap-4">
                             <i class="fas fa-bolt text-pink-500 text-lg"></i>
-                            <h3 class="text-sm font-black uppercase tracking-widest opacity-40">Quick Outlook</h3>
+                            <h3 class="text-sm font-black uppercase tracking-widest opacity-40" data-tr="quickOutlook">Hurtigoversikt</h3>
                         </div>
                         <div class="flex items-center gap-4">
-                            <label class="text-[16px] font-black text-gray-400 uppercase tracking-widest">Select Week</label>
+                            <label class="text-[16px] font-black text-gray-400 uppercase tracking-widest" data-tr="selectWeek">Velg uke</label>
                             <select id="week-selector" class="week-select" onchange="onWeekChange(this.value)"></select>
                         </div>
                     </div>
@@ -245,16 +196,14 @@
                             <button onclick="changeMonth(1)" class="w-14 h-14 flex items-center justify-center hover:bg-white/10 rounded-2xl transition border border-white/5"><i class="fas fa-chevron-right text-lg"></i></button>
                         </div>
                     </div>
-
                     <div class="calendar-grid text-center mb-8 text-s font-black uppercase tracking-widest text-gray-500">
-                        <div class="text-white/60">Wk</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div class="text-pink-500/40">S</div><div class="text-pink-500/40">S</div>
+                        <div class="text-white/60" data-tr="wk">Uke</div><div>M</div><div>T</div><div>O</div><div>T</div><div>F</div><div class="text-pink-500/40">L</div><div class="text-pink-500/40">S</div>
                     </div>
                     <div id="calendar-days" class="calendar-grid"></div>
-
                     <div class="mt-14 flex flex-wrap gap-10 text-s font-black uppercase tracking-widest border-t border-white/5 pt-12">
-                        <div class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-emerald-400"></span> Available</div>
-                        <div class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-red-400"></span> Busy</div>
-                        <div class="ml-auto flex gap-6">
+                        <div class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-emerald-400"></span> <span data-tr="ledig">Ledig</span></div>
+                        <div class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-red-400"></span> <span data-tr="opptatt">Opptatt</span></div>
+                        <div class="ml-auto flex flex-wrap gap-6">
                             <span class="text-purple-400">NR - Norønna</span> 
                             <span class="text-pink-400">PM - Polarmåsen</span> 
                             <span class="text-red-400">ST - Studie</span>
@@ -267,25 +216,24 @@
                 <div class="glass-panel rounded-[2.5rem] p-10 border-t-2 border-white/10 sticky top-24">
                     <div class="flex items-center justify-between mb-10">
                         <h3 class="text-sm font-black uppercase tracking-widest opacity-30 flex items-center gap-2">
-                            <i class="fas fa-search"></i> Lookup
+                            <i class="fas fa-search"></i> <span data-tr="lookup">Søk</span>
                         </h3>
                     </div>
                     <div class="space-y-8">
                         <div class="grid grid-cols-1 gap-6">
                             <div>
-                                <label class="block text-xs font-black text-gray-500 uppercase mb-3 tracking-widest">Start Date</label>
+                                <label class="block text-xs font-black text-gray-500 uppercase mb-3 tracking-widest" data-tr="start">Fra dato</label>
                                 <input type="date" id="lookup-start" class="w-full">
                             </div>
                             <div>
-                                <label class="block text-xs font-black text-gray-500 uppercase mb-3 tracking-widest">End Date</label>
+                                <label class="block text-xs font-black text-gray-500 uppercase mb-3 tracking-widest" data-tr="end">Til dato</label>
                                 <input type="date" id="lookup-end" class="w-full">
                             </div>
                         </div>
-                        <button onclick="runLookup()" class="w-full bg-white text-black font-black py-5 rounded-xl transition-all active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg">
-                            Search Range
+                        <button onclick="runLookup()" class="w-full bg-white text-black font-black py-5 rounded-xl transition-all active:scale-95 text-xs uppercase tracking-[0.2em]" data-tr="searchBtn">
+                            Søk i periode
                         </button>
                     </div>
-                    
                     <div id="lookup-container" class="mt-12 hidden border-t border-white/5 pt-10">
                         <div id="lookup-results" class="space-y-10 max-h-[600px] overflow-y-auto pr-3 custom-scrollbar"></div>
                     </div>
@@ -294,10 +242,104 @@
         </div>
     </main>
 
+    <footer class="container mx-auto px-6 lg:px-12 py-16 mt-12 border-t border-white/5">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex items-center gap-6">
+                <span class="text-2xl font-black uppercase tracking-[0.4em] text-white opacity-20 select-none">Z03Y</span>
+                <div class="h-8 w-px bg-white/5 hidden md:block"></div>
+                <div class="text-center md:text-left">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-600 mb-1">Developed for Precision</p>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v2.4</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div id="footer-phone" class="hidden px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-black tracking-widest text-gray-300"></div>
+                <div class="px-5 py-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                    &copy; 2026 PROJECT BY Z03Y
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div id="print-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="togglePrintModal()"></div>
+        <div class="glass-panel relative w-full max-w-md rounded-[2.5rem] p-10 overflow-hidden shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-black uppercase tracking-widest" data-tr="printSettings">Utskrift</h3>
+                <button onclick="togglePrintModal()" class="text-gray-500 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div id="certainty-notice" class="mb-8 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400"><i class="fas fa-shield-alt"></i></div>
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-emerald-500/60 leading-none mb-1" data-tr="certaintyLabel">Bekreftet status til</p>
+                    <p id="certainty-date-label" class="text-sm font-black text-emerald-400 tracking-tight">Laster...</p>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3" data-tr="fra">Fra</label>
+                        <input type="month" id="print-start-month" class="w-full">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3" data-tr="til">Til</label>
+                        <input type="month" id="print-end-month" class="w-full">
+                    </div>
+                </div>
+                <button onclick="executePrint()" class="w-full bg-pink-500 text-white font-black py-5 rounded-2xl transition-all active:scale-95 text-sm uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20 mt-4 flex items-center justify-center gap-3">
+                    <i class="fas fa-file-pdf"></i> <span data-tr="generatePdf">Generer PDF</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let AVAILABILITY_DATA = {};
+        const TR = {
+            nb: {
+                title: "Tilgjengelighet", printBtn: "Skriv ut", today: "I dag", quickOutlook: "Hurtigoversikt",
+                selectWeek: "Velg uke", wk: "Uke", ledig: "Ledig", opptatt: "Opptatt", delvis: "Delvis",
+                lookup: "Søk", start: "Fra dato", end: "Til dato", searchBtn: "Søk i periode",
+                printSettings: "Utskrift", certaintyLabel: "Bekreftet status til", fra: "Fra", til: "Til",
+                generatePdf: "Generer PDF", loading: "Laster...", online: "Tilkoblet", local: "Lokal økt",
+                noPlans: "Ingen planer registrert.", week: "Uke", monthLocale: 'nb-NO'
+            },
+            en: {
+                title: "Availability", printBtn: "Print Schedule", today: "Today", quickOutlook: "Quick Outlook",
+                selectWeek: "Select Week", wk: "Wk", ledig: "Available", opptatt: "Busy", delvis: "Partial",
+                lookup: "Lookup", start: "Start Date", end: "End Date", searchBtn: "Search Range",
+                printSettings: "Print Settings", certaintyLabel: "Status Secured Until", fra: "From", til: "To",
+                generatePdf: "Generate PDF", loading: "Loading...", online: "Online", local: "Local Session",
+                noPlans: "No specific plans logged.", week: "Week", monthLocale: 'en-GB'
+            }
+        };
+
+        const DYNAMIC_TR = {
+            "studying": "studerer", "working": "jobber", "norønna": "norønna", "weekend": "helg",
+            "vacation": "ferie", "traveling": "reiser", "at home": "hjemme", "busy": "opptatt", "available": "tilgjengelig"
+        };
+
+        let CURRENT_LANG = 'nb';
+        let DATA_STORE = { overrides: {}, settings: { certainUntil: '', phone: '' } };
         let currentViewDate = new Date();
+
         const getLocalDateString = (date) => date.toLocaleDateString('en-CA');
+        const t = (key) => TR[CURRENT_LANG][key] || key;
+
+        function translateNote(note) {
+            if (!note || CURRENT_LANG === 'en') return note;
+            let translated = note.toLowerCase();
+            Object.keys(DYNAMIC_TR).forEach(key => { translated = translated.replace(new RegExp(key, 'g'), DYNAMIC_TR[key]); });
+            return translated.charAt(0).toUpperCase() + translated.slice(1);
+        }
+
+        function toggleLanguage() {
+            CURRENT_LANG = CURRENT_LANG === 'nb' ? 'en' : 'nb';
+            document.getElementById('lang-flag').innerText = CURRENT_LANG === 'nb' ? '🇳🇴' : '🇬🇧';
+            document.getElementById('lang-label').innerText = CURRENT_LANG.toUpperCase();
+            document.querySelectorAll('[data-tr]').forEach(el => el.innerText = t(el.dataset.tr));
+            init();
+        }
 
         function getWeekNumber(d) {
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -319,48 +361,72 @@
                 const response = await fetch('availability.json');
                 if (response.ok) {
                     const data = await response.json();
-                    AVAILABILITY_DATA = data.overrides || {};
-                    document.getElementById('sync-status').innerText = "Database Online";
-                }
-            } catch (e) {
-                document.getElementById('sync-status').innerText = "Local Session";
-            }
+                    DATA_STORE.overrides = data.overrides || data;
+                    DATA_STORE.settings = data.settings || { certainUntil: '', phone: '' };
+                    updateStatus(t('online'), "emerald");
+                } else { updateStatus(t('local'), "gray"); }
+            } catch (e) { updateStatus(t('local'), "gray"); }
             init();
+        }
+
+        function updateStatus(text, color) {
+            const el = document.getElementById('sync-status');
+            el.innerText = text;
+            el.className = `text-xs font-bold text-${color}-500 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5 cursor-pointer hover:bg-white/10 transition-all`;
+        }
+
+        function handleManualUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    DATA_STORE.overrides = json.overrides || json;
+                    DATA_STORE.settings = json.settings || { certainUntil: '', phone: '' };
+                    init();
+                } catch (err) { alert("Invalid JSON file."); }
+            };
+            reader.readAsText(file);
         }
 
         function getInfo(dateStr) {
             const date = new Date(dateStr + "T00:00:00");
             const day = date.getDay();
-            if (day === 0 || day === 6) return { status: 'weekend', note: 'Weekend', badge: '' };
-            
-            const entry = AVAILABILITY_DATA[dateStr];
+            if (day === 0 || day === 6) return { status: 'weekend', note: translateNote('Weekend'), badge: '' };
+            const entry = DATA_STORE.overrides[dateStr];
             let status = 'available', note = '', badge = '';
-            
             if (typeof entry === 'object' && entry !== null) {
                 status = entry.status || 'available';
-                note = entry.note || '';
-            } else if (entry) {
-                status = entry;
-            }
-
-            const lowerNote = note.toLowerCase();
-            if (lowerNote.includes('norønna')) badge = 'NR';
-            else if (lowerNote.includes('polarmåsen')) badge = 'PM';
-            else if (lowerNote.includes('studying')) badge = 'ST';
-
+                note = translateNote(entry.note) || '';
+            } else if (entry) { status = entry; }
+            const ln = note.toLowerCase();
+            if (ln.includes('norønna')) badge = 'NR';
+            else if (ln.includes('polarmåsen')) badge = 'PM';
+            else if (ln.includes('studer')) badge = 'ST';
             return { status, note, badge };
         }
 
         function init() {
             const today = new Date();
             const todayStr = getLocalDateString(today);
-            const currentWeek = getWeekNumber(today);
-
-            populateWeekDropdown(currentWeek);
+            populateWeekDropdown(getWeekNumber(today));
             renderHero(todayStr);
-            renderWeekSummary(currentWeek);
+            renderWeekSummary(getWeekNumber(today));
             renderCalendar(todayStr);
             document.getElementById('lookup-start').value = todayStr;
+            if (DATA_STORE.settings.certainUntil) {
+                const cDate = new Date(DATA_STORE.settings.certainUntil + "T00:00:00");
+                document.getElementById('certainty-date-label').innerText = cDate.toLocaleDateString(t('monthLocale'), { day:'2-digit', month:'long', year:'numeric' });
+                document.getElementById('print-end-month').value = cDate.toISOString().slice(0, 7);
+                document.getElementById('certainty-notice').classList.remove('hidden');
+            } else { document.getElementById('certainty-notice').classList.add('hidden'); }
+            if (DATA_STORE.settings.phone) {
+                const pEl = document.getElementById('footer-phone');
+                pEl.innerText = DATA_STORE.settings.phone;
+                pEl.classList.remove('hidden');
+            }
+            document.getElementById('print-start-month').value = today.toISOString().slice(0, 7);
         }
 
         function populateWeekDropdown(currentWeek) {
@@ -369,31 +435,20 @@
             for (let i = 1; i <= 52; i++) {
                 const opt = document.createElement('option');
                 opt.value = i;
-                opt.innerText = i;
+                opt.innerText = `${t('week')} ${i}`;
                 if (i === currentWeek) opt.selected = true;
                 selector.appendChild(opt);
             }
         }
 
-        function onWeekChange(week) {
-            renderWeekSummary(parseInt(week));
-        }
-
-        function selectDay(dateStr) {
-            document.getElementById('lookup-start').value = dateStr;
-            runLookup();
-        }
+        function onWeekChange(week) { renderWeekSummary(parseInt(week)); }
 
         function renderHero(todayStr) {
-            const now = new Date();
             const info = getInfo(todayStr);
-            document.getElementById('hero-date').innerText = now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }).replace('/', '.');
-            document.getElementById('hero-note').innerText = info.note || 'No specific plans logged.';
-            
-            const label = document.getElementById('hero-label');
-            const dot = document.getElementById('hero-dot');
-            label.innerText = info.status;
-            dot.style.backgroundColor = info.status === 'available' ? 'var(--available)' : 
+            document.getElementById('hero-date').innerText = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }).replace('/', '.');
+            document.getElementById('hero-note').innerText = info.note || t('noPlans');
+            document.getElementById('hero-label').innerText = translateNote(t(info.status));
+            document.getElementById('hero-dot').style.backgroundColor = info.status === 'available' ? 'var(--available)' : 
                                        info.status === 'busy' ? 'var(--busy)' : 
                                        info.status === 'partial' ? 'var(--partial)' : '#333';
         }
@@ -401,36 +456,23 @@
         function renderWeekSummary(weekNumber) {
             const container = document.getElementById('week-summary-grid');
             container.innerHTML = '';
-            
-            const year = new Date().getFullYear();
-            const monday = getDateFromWeek(weekNumber, year);
+            const monday = getDateFromWeek(weekNumber, new Date().getFullYear());
             const todayStr = getLocalDateString(new Date());
-
             for (let i = 0; i < 5; i++) {
-                const curr = new Date(monday);
-                curr.setDate(monday.getDate() + i);
-                const dateStr = getLocalDateString(curr);
-                const info = getInfo(dateStr);
-                const isToday = dateStr === todayStr;
-
-                const day = String(curr.getDate()).padStart(2, '0');
-                const month = String(curr.getMonth() + 1).padStart(2, '0');
-                const dateLabel = `${day}.${month}`;
-
+                const curr = new Date(monday); curr.setDate(monday.getDate() + i);
+                const ds = getLocalDateString(curr); const info = getInfo(ds);
                 const div = document.createElement('div');
-                div.className = `summary-card status-${info.status}-card cursor-pointer ${isToday ? 'is-today' : ''}`;
-                div.onclick = () => selectDay(dateStr);
-                
+                div.className = `summary-card status-${info.status}-card cursor-pointer ${ds === todayStr ? 'is-today' : ''}`;
+                div.onclick = () => { document.getElementById('lookup-start').value = ds; runLookup(); };
                 div.innerHTML = `
                     <div class="flex flex-col gap-0.5 mb-1">
-                        <span class="text-[16px] font-black text-white/80 tracking-tighter">${dateLabel}</span>
-                        <span class="text-xs font-black uppercase text-white/65 tracking-widest">${curr.toLocaleDateString('en-GB', {weekday: 'short'})}</span>
+                        <span class="text-[16px] font-black text-white/80 tracking-tighter">${String(curr.getDate()).padStart(2, '0')}.${String(curr.getMonth() + 1).padStart(2, '0')}</span>
+                        <span class="text-xs font-black uppercase text-white/65 tracking-widest">${curr.toLocaleDateString(t('monthLocale'), {weekday: 'short'})}</span>
                     </div>
                     <div class="py-4 flex flex-col items-center">
                         ${info.badge ? `<span class="badge badge-${info.badge.toLowerCase()} text-2xl font-black">${info.badge}</span>` : `<i class="fas ${info.status === 'available' ? 'fa-check text-emerald-400' : 'fa-minus text-red-500'} text-2xl opacity-40"></i>`}
                     </div>
-                    <span class="text-sm font-bold text-gray-400 line-clamp-2 leading-tight">${info.note || info.status}</span>
-                `;
+                    <span class="text-sm font-bold text-gray-400 line-clamp-2 leading-tight">${info.note || translateNote(t(info.status))}</span>`;
                 container.appendChild(div);
             }
         }
@@ -438,126 +480,141 @@
         function renderCalendar(todayStr) {
             const daysEl = document.getElementById('calendar-days');
             daysEl.innerHTML = '';
-            const year = currentViewDate.getFullYear();
-            const month = currentViewDate.getMonth();
-            document.getElementById('calendar-month').innerText = new Intl.DateTimeFormat('en-GB', { month: 'short' }).format(currentViewDate);
-
+            const year = currentViewDate.getFullYear(); const month = currentViewDate.getMonth();
+            document.getElementById('calendar-month').innerText = new Intl.DateTimeFormat(t('monthLocale'), { month: 'short' }).format(currentViewDate);
             let firstDay = new Date(year, month, 1).getDay();
             let padding = firstDay === 0 ? 6 : firstDay - 1;
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            const todayObj = new Date();
-            todayObj.setHours(0,0,0,0);
-
+            const todayObj = new Date(); todayObj.setHours(0,0,0,0);
             let currentDay = 1;
             for (let r = 0; r < 6; r++) {
                 if (currentDay > daysInMonth && r > 0) break;
-
-                const firstDateInRow = currentDay === 1 ? new Date(year, month, 1) : new Date(year, month, currentDay);
-                const wkCell = document.createElement('div');
-                wkCell.className = 'week-num-cell';
-                wkCell.innerText = getWeekNumber(firstDateInRow);
+                const wkCell = document.createElement('div'); wkCell.className = 'week-num-cell';
+                wkCell.innerText = getWeekNumber(new Date(year, month, currentDay === 1 ? 1 : currentDay));
                 daysEl.appendChild(wkCell);
-
                 for (let c = 0; c < 7; c++) {
                     const pos = r * 7 + c;
                     if (pos < padding || currentDay > daysInMonth) {
-                        const empty = document.createElement('div');
-                        empty.className = 'day-cell opacity-0 pointer-events-none';
-                        daysEl.appendChild(empty);
+                        daysEl.appendChild(document.createElement('div')).className = 'day-cell opacity-0 pointer-events-none';
                     } else {
-                        const date = new Date(year, month, currentDay);
-                        const dateStr = getLocalDateString(date);
-                        const info = getInfo(dateStr);
-                        const isPast = date < todayObj;
-                        const isToday = dateStr === todayStr;
-                        
+                        const date = new Date(year, month, currentDay); const ds = getLocalDateString(date); const info = getInfo(ds);
                         const div = document.createElement('div');
-                        div.className = `day-cell status-${info.status} ${isPast ? 'day-past' : ''} ${isToday ? 'today-focus' : ''}`;
-                        div.onclick = () => selectDay(dateStr);
-                        
-                        if (info.badge) {
-                            div.innerHTML = `<span class="badge badge-${info.badge.toLowerCase()}">${info.badge}</span>`;
-                        } else {
-                            div.innerHTML = `<span class="font-bold">${currentDay}</span>`;
-                        }
-
+                        div.className = `day-cell status-${info.status} ${date < todayObj ? 'day-past' : ''} ${ds === todayStr ? 'today-focus' : ''}`;
+                        div.onclick = () => { document.getElementById('lookup-start').value = ds; runLookup(); };
+                        div.innerHTML = info.badge ? `<span class="badge badge-${info.badge.toLowerCase()}">${info.badge}</span>` : `<span class="font-bold">${currentDay}</span>`;
                         if (info.note) {
-                            const tip = document.createElement('span');
-                            tip.className = 'tooltip';
-                            tip.innerText = info.note;
-                            div.appendChild(tip);
+                            const tip = document.createElement('span'); tip.className = 'tooltip'; tip.innerText = info.note; div.appendChild(tip);
                         }
-                        daysEl.appendChild(div);
-                        currentDay++;
+                        daysEl.appendChild(div); currentDay++;
                     }
                 }
             }
         }
 
-        function changeMonth(offset) {
-            currentViewDate.setMonth(currentViewDate.getMonth() + offset);
-            renderCalendar(getLocalDateString(new Date()));
-        }
+        function changeMonth(offset) { currentViewDate.setMonth(currentViewDate.getMonth() + offset); renderCalendar(getLocalDateString(new Date())); }
 
         function runLookup() {
             const startStr = document.getElementById('lookup-start').value;
             const endStr = document.getElementById('lookup-end').value;
-            const container = document.getElementById('lookup-container');
             const resultsEl = document.getElementById('lookup-results');
             if (!startStr) return;
-
-            container.classList.remove('hidden');
+            document.getElementById('lookup-container').classList.remove('hidden');
             resultsEl.innerHTML = '';
-            
             let current = new Date(startStr + "T00:00:00");
             const end = endStr ? new Date(endStr + "T00:00:00") : new Date(startStr + "T00:00:00");
-            
             let currentWeek = -1;
-            let weekGroup = null;
-
             while (current <= end) {
-                const dateStr = getLocalDateString(current);
-                const info = getInfo(dateStr);
-                const wk = getWeekNumber(current);
-
+                const ds = getLocalDateString(current); const info = getInfo(ds); const wk = getWeekNumber(current);
                 if (info.status !== 'weekend') {
                     if (wk !== currentWeek) {
                         currentWeek = wk;
-                        const header = document.createElement('div');
-                        header.className = 'flex items-center gap-4 mb-6';
-                        header.innerHTML = `<span class="text-sm font-black uppercase tracking-widest bg-pink-500/10 text-pink-400 px-5 py-2 rounded-full">Week ${wk}</span>`;
-                        resultsEl.appendChild(header);
-                        
-                        weekGroup = document.createElement('div');
-                        weekGroup.className = 'lookup-week-group space-y-4';
-                        resultsEl.appendChild(weekGroup);
+                        resultsEl.appendChild(Object.assign(document.createElement('div'), {
+                            className: 'flex items-center gap-4 mb-6',
+                            innerHTML: `<span class="text-sm font-black uppercase tracking-widest bg-pink-500/10 text-pink-400 px-5 py-2 rounded-full">${t('week')} ${wk}</span>`
+                        }));
+                        var weekGroup = resultsEl.appendChild(Object.assign(document.createElement('div'), { className: 'lookup-week-group space-y-4' }));
                     }
-
-                    const day = String(current.getDate()).padStart(2, '0');
-                    const month = String(current.getMonth() + 1).padStart(2, '0');
-                    const displayDate = `${day}.${month}`;
-
-                    const row = document.createElement('div');
-                    row.className = 'flex items-center justify-between p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group';
-                    const color = info.status === 'available' ? 'text-emerald-400' : 'text-red-400';
-                    
-                    row.innerHTML = `
-                        <div class="flex flex-col">
-                            <span class="text-sm font-black uppercase text-gray-500 group-hover:text-gray-300 transition-colors">${current.toLocaleDateString('en-GB', {weekday: 'short'})} ${displayDate}</span>
-                            <span class="text-base text-white/80 font-medium mt-1">${info.note || 'No plans noted'}</span>
-                        </div>
-                        <div class="flex items-center gap-6">
-                            ${info.badge ? `<span class="badge badge-${info.badge.toLowerCase()} opacity-60">${info.badge}</span>` : ''}
-                            <span class="text-xs font-black uppercase tracking-widest ${color}">${info.status}</span>
-                        </div>
-                    `;
-                    weekGroup.appendChild(row);
+                    weekGroup.appendChild(Object.assign(document.createElement('div'), {
+                        className: 'flex items-center justify-between p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group',
+                        innerHTML: `
+                            <div class="flex flex-col">
+                                <span class="text-sm font-black uppercase text-gray-500 group-hover:text-gray-300 transition-colors">${current.toLocaleDateString(t('monthLocale'), {weekday: 'short'})} ${current.getDate()}.${String(current.getMonth()+1).padStart(2,'0')}</span>
+                                <span class="text-base text-white/80 font-medium mt-1">${info.note || t('noPlans')}</span>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                ${info.badge ? `<span class="badge badge-${info.badge.toLowerCase()} opacity-60">${info.badge}</span>` : ''}
+                                <span class="text-xs font-black uppercase tracking-widest ${info.status === 'available' ? 'text-emerald-400' : 'text-red-400'}">${t(info.status)}</span>
+                            </div>`
+                    }));
                 }
                 current.setDate(current.getDate() + 1);
             }
         }
 
+        function togglePrintModal() { document.getElementById('print-modal').classList.toggle('hidden'); }
+
+        function executePrint() {
+            const sm = document.getElementById('print-start-month').value;
+            const em = document.getElementById('print-end-month').value;
+            if(!sm || !em) return;
+            const start = new Date(sm + "-01T00:00:00"); const end = new Date(em + "-01T00:00:00");
+            end.setMonth(end.getMonth() + 1); end.setDate(0);
+            generatePrintSummary(start, end); togglePrintModal();
+        }
+
+        function generatePrintSummary(start, end) {
+            const printWindow = window.open('', '_blank');
+            let html = `<html><head><title>${t('title')}</title><style>
+                @page { margin: 0.5cm; size: A4; }
+                body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; color: #000; -webkit-print-color-adjust: exact; }
+                header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding: 10px 0; margin-bottom: 15px; }
+                h1 { margin: 0; font-size: 20px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; }
+                .meta { font-weight: bold; color: #666; font-size: 9px; text-transform: uppercase; }
+                .month-title { font-size: 15px; font-weight: 900; text-transform: uppercase; border-left: 10px solid #000; padding: 4px 12px; margin: 25px 0 10px 0; display: inline-block; break-after: avoid; }
+                .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); border: 2px solid #000; margin-bottom: 20px; page-break-inside: avoid; }
+                .day-header { background: #000; color: #fff; padding: 5px; font-weight: 900; font-size: 9px; text-transform: uppercase; text-align: center; border: 1px solid #000; }
+                .day-cell { background: #fff; min-height: 55px; padding: 5px; border: 1px solid #000; position: relative; overflow: hidden; }
+                .day-top { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+                .day-num { font-weight: 900; font-size: 12px; line-height: 1; }
+                .status-badge { font-size: 7.5px; font-weight: 900; text-transform: uppercase; background: #000; color: #fff; padding: 2px 6px; border-radius: 99px; white-space: nowrap; }
+                .note-text { font-size: 10px; line-height: 1.1; color: #000; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+                .busy-cell { background: #fee2e2 !important; } .available-cell { background: #f0fdf4 !important; } .partial-cell { background: #fef3c7 !important; } .weekend-cell { background: #f8fafc !important; }
+                .footer { display: flex; justify-content: space-between; align-items: flex-end; page-break-inside: avoid; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px; }
+                .trademark { font-weight: 900; font-size: 11px; letter-spacing: 2px; }
+                @media print { .no-print { display: none; } }
+            </style></head><body>
+            <div class="no-print" style="padding: 10px; text-align: center; background: #eee; position: sticky; top: 0;"><button onclick="window.print()" style="padding: 10px 40px; font-weight: 900; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 6px;">PRINT PDF</button></div>
+            <div style="padding: 20px;">
+            <header><div><h1>${t('title')}</h1><div class="meta">${start.toLocaleDateString(t('monthLocale'), {month:'long', year:'numeric'})} - ${end.toLocaleDateString(t('monthLocale'), {month:'long', year:'numeric'})}</div></div><div class="trademark">Z03Y &trade;</div></header>`;
+            const dayNames = CURRENT_LANG === 'nb' ? ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            let iter = new Date(start); let curM = -1; let mRend = 0;
+            while (iter <= end) {
+                if (iter.getMonth() !== curM) {
+                    if (curM !== -1) html += `</div>`;
+                    if (mRend > 0 && mRend % 2 === 0) html += `<div style="page-break-after: always;"></div>`;
+                    curM = iter.getMonth(); mRend++;
+                    html += `<div class="month-title">${iter.toLocaleString(t('monthLocale'), { month: 'long', year: 'numeric' })}</div><div class="calendar-grid">`;
+                    dayNames.forEach(d => html += `<div class="day-header">${d}</div>`);
+                    let padding = new Date(iter.getFullYear(), iter.getMonth(), 1).getDay(); padding = padding === 0 ? 6 : padding - 1;
+                    for(let p=0; p<padding; p++) html += `<div class="day-cell empty"></div>`;
+                }
+                const ds = getLocalDateString(iter); const info = getInfo(ds);
+                const isW = iter.getDay() === 0 || iter.getDay() === 6; const st = info.status === 'weekend' ? 'weekend' : info.status;
+                let bText = info.badge || (st !== 'available' && st !== 'weekend' ? (st === 'partial' ? t('delvis') : t('opptatt')) : '');
+                html += `<div class="day-cell ${st}-cell ${isW ? 'weekend-cell' : ''}">
+                    <div class="day-top"><span class="day-num">${iter.getDate()}</span>${bText ? `<span class="status-badge">${bText}</span>` : ''}</div>
+                    <div class="note-text">${info.note || ''}</div>
+                </div>`;
+                let next = new Date(iter); next.setDate(iter.getDate() + 1);
+                if (next.getMonth() !== curM || next > end) {
+                    let last = iter.getDay(); let endP = last === 0 ? 0 : 7 - last;
+                    for(let ep=0; ep<endP; ep++) html += `<div class="day-cell empty"></div>`;
+                }
+                iter = next;
+            }
+            html += `</div><div class="footer"><div><div class="trademark">PROJECT BY Z03Y</div>${DATA_STORE.settings.phone ? `<div style="font-size: 14px; font-weight: 900; margin-top: 8px; background: #000; color: #fff; padding: 4px 12px; border-radius: 6px; display: inline-block;">${DATA_STORE.settings.phone}</div>` : ''}</div><div style="text-align: right; font-size: 9px; font-weight: 900; text-transform: uppercase; color: #999;">Exported via Portal</div></div></div></body></html>`;
+            printWindow.document.write(html); printWindow.document.close();
+        }
         window.onload = loadData;
     </script>
 </body>
