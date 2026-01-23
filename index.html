@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Availability Tracker</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0f0f13;
+            --card-bg: #1e1c28;
+            --border-color: #4a465a;
+            --text-color: #f8f8f2;
+            --pink: #ec4899;
+            --available: #10b981;
+            --busy: #ef4444;
+            --partial: #f59e0b;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+        }
+
+        .glass-panel {
+            background: rgba(30, 28, 40, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .title-font { font-family: 'Playfair Display', serif; }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .calendar-grid > div:nth-child(7n),
+        .calendar-grid > div:nth-child(7n-1) {
+            background-color: rgba(236, 72, 153, 0.03);
+            border-radius: 8px;
+        }
+
+        .day-cell {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .day-past { opacity: 0.2; filter: grayscale(1); pointer-events: none; }
+        
+        .status-available { background-color: rgba(16, 185, 129, 0.1); border-color: var(--available); color: var(--available); }
+        .status-busy { background-color: rgba(239, 68, 68, 0.1); border-color: var(--busy); color: var(--busy); }
+        .status-partial { background-color: rgba(245, 158, 11, 0.1); border-color: var(--partial); color: var(--partial); }
+        .status-weekend { border-color: rgba(255, 255, 255, 0.03); color: #4a465a; }
+
+        .today-ring {
+            box-shadow: 0 0 0 2px var(--bg-color), 0 0 0 4px var(--pink);
+            z-index: 10;
+        }
+
+        /* Tooltip behavior */
+        .day-cell .tooltip {
+            visibility: hidden;
+            background-color: #1e1c28;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 20;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            width: 120px;
+            font-size: 10px;
+            border: 1px solid var(--border-color);
+            pointer-events: none;
+        }
+
+        .day-cell:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+    </style>
+</head>
+<body class="antialiased min-h-screen pb-20">
+
+    <header class="bg-[#3c394a]/80 backdrop-blur-sm sticky top-0 z-40 border-b border-[var(--border-color)]">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+            <span class="text-xl font-bold title-font tracking-tight">StatusPortal</span>
+            <span id="sync-status" class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Checking Sync...</span>
+        </nav>            
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <section class="mb-12">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Today Focus -->
+                <div class="lg:col-span-1 glass-panel rounded-[2rem] p-8 flex flex-col justify-center border-l-8 border-pink-500">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-pink-400 mb-2">Today</p>
+                    <h2 id="hero-date" class="text-3xl font-bold title-font mb-2 italic">...</h2>
+                    <p id="hero-note" class="text-sm text-gray-400 mb-6 italic leading-snug">...</p>
+                    <div id="hero-status-pill" class="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white/5 border border-white/10 w-fit">
+                        <span id="hero-dot" class="w-3 h-3 rounded-full"></span>
+                        <span id="hero-label" class="text-lg font-bold tracking-tight uppercase">...</span>
+                    </div>
+                </div>
+
+                <!-- Week Summary -->
+                <div class="lg:col-span-2 glass-panel rounded-[2rem] p-8">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold title-font">Weekly Outlook</h3>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Mon — Fri</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Week <span id="week-number">--</span></span>
+                    </div>
+                    <div id="week-summary-grid" class="grid grid-cols-5 gap-4"></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Calendar -->
+            <div class="lg:col-span-8">
+                <div class="glass-panel rounded-3xl p-8">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 id="calendar-month" class="text-2xl font-bold title-font">...</h2>
+                        <div class="flex gap-2">
+                            <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition border border-white/5"><i class="fas fa-chevron-left"></i></button>
+                            <button onclick="changeMonth(1)" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition border border-white/5"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="calendar-grid text-center mb-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                        <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+                    </div>
+                    <div id="calendar-days" class="calendar-grid"></div>
+
+                    <div class="mt-10 flex flex-wrap gap-6 text-[10px] font-bold uppercase tracking-widest border-t border-white/5 pt-8">
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Available</div>
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span> Busy</div>
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Partial</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="glass-panel rounded-3xl p-8 border-t-4 border-pink-500">
+                    <h3 class="text-lg font-bold mb-6 title-font">Range Lookup</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Start</label>
+                            <input type="date" id="lookup-start" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">End</label>
+                            <input type="date" id="lookup-end" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500">
+                        </div>
+                        <button onclick="runLookup()" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3.5 rounded-xl transition text-sm">
+                            Check Availability
+                        </button>
+                    </div>
+                    <div id="lookup-results" class="mt-6 space-y-2 hidden max-h-80 overflow-y-auto pr-2 custom-scrollbar"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let AVAILABILITY_DATA = {};
+        let currentViewDate = new Date();
+
+        const getLocalDateString = (date) => date.toLocaleDateString('en-CA');
+
+        async function loadData() {
+            try {
+                const response = await fetch('availability.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    AVAILABILITY_DATA = data.overrides || {};
+                    document.getElementById('sync-status').innerText = "JSON Synced";
+                }
+            } catch (e) {
+                document.getElementById('sync-status').innerText = "Offline";
+            }
+            init();
+        }
+
+        function getInfo(dateStr) {
+            const date = new Date(dateStr + "T00:00:00");
+            const day = date.getDay();
+            if (day === 0 || day === 6) return { status: 'weekend', note: 'Weekend' };
+            
+            const entry = AVAILABILITY_DATA[dateStr];
+            if (typeof entry === 'object' && entry !== null) {
+                return { status: entry.status || 'available', note: entry.note || '' };
+            }
+            return { status: entry || 'available', note: '' };
+        }
+
+        function init() {
+            const todayStr = getLocalDateString(new Date());
+            renderHero(todayStr);
+            renderWeekSummary(todayStr);
+            renderCalendar(todayStr);
+            document.getElementById('lookup-start').value = todayStr;
+        }
+
+        function renderHero(todayStr) {
+            const now = new Date();
+            const info = getInfo(todayStr);
+            document.getElementById('hero-date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+            document.getElementById('hero-note').innerText = info.note || (info.status === 'available' ? 'No specific plans logged.' : 'Busy');
+            
+            const label = document.getElementById('hero-label');
+            const dot = document.getElementById('hero-dot');
+            label.innerText = info.status;
+            dot.style.backgroundColor = info.status === 'available' ? 'var(--available)' : 
+                                       info.status === 'busy' ? 'var(--busy)' : 
+                                       info.status === 'partial' ? 'var(--partial)' : '#333';
+        }
+
+        function renderWeekSummary(todayStr) {
+            const container = document.getElementById('week-summary-grid');
+            container.innerHTML = '';
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const mondayOffset = today.getDay() === 0 ? -6 : 1 - today.getDay();
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + mondayOffset);
+
+            for (let i = 0; i < 5; i++) {
+                const curr = new Date(monday);
+                curr.setDate(monday.getDate() + i);
+                const dateStr = getLocalDateString(curr);
+                const info = getInfo(dateStr);
+                const isToday = dateStr === todayStr;
+
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-2xl flex flex-col items-center gap-1 border text-center ${isToday ? 'bg-pink-500/10 border-pink-500/50' : 'bg-white/5 border-white/5'}`;
+                
+                let icon = 'fa-check-circle text-emerald-500';
+                if (info.status === 'busy') icon = 'fa-times-circle text-red-500';
+                if (info.status === 'partial') icon = 'fa-adjust text-amber-500';
+
+                div.innerHTML = `
+                    <span class="text-[9px] uppercase font-bold text-gray-500">${curr.toLocaleDateString('en-US', {weekday: 'short'})}</span>
+                    <i class="fas ${icon} text-lg"></i>
+                    <span class="text-[10px] font-bold text-white leading-tight mt-1 truncate w-full">${info.note || info.status}</span>
+                `;
+                container.appendChild(div);
+            }
+            
+            const firstJan = new Date(today.getFullYear(), 0, 1);
+            const weekNum = Math.ceil((((today - firstJan) / 86400000) + firstJan.getDay() + 1) / 7);
+            document.getElementById('week-number').innerText = weekNum;
+        }
+
+        function renderCalendar(todayStr) {
+            const daysEl = document.getElementById('calendar-days');
+            daysEl.innerHTML = '';
+            const year = currentViewDate.getFullYear();
+            const month = currentViewDate.getMonth();
+            document.getElementById('calendar-month').innerText = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentViewDate);
+
+            let firstDay = new Date(year, month, 1).getDay();
+            let padding = firstDay === 0 ? 6 : firstDay - 1;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < padding; i++) {
+                const div = document.createElement('div');
+                div.className = 'day-cell opacity-0';
+                daysEl.appendChild(div);
+            }
+
+            const todayObj = new Date();
+            todayObj.setHours(0,0,0,0);
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const date = new Date(year, month, d);
+                const dateStr = getLocalDateString(date);
+                const info = getInfo(dateStr);
+                const isPast = date < todayObj;
+                
+                const div = document.createElement('div');
+                div.className = `day-cell text-[11px] font-bold status-${info.status} ${isPast ? 'day-past' : ''}`;
+                if (dateStr === todayStr) div.classList.add('today-ring');
+                
+                div.innerHTML = `<span>${d}</span>`;
+                if (info.note) {
+                    const tip = document.createElement('span');
+                    tip.className = 'tooltip';
+                    tip.innerText = info.note;
+                    div.appendChild(tip);
+                }
+                
+                daysEl.appendChild(div);
+            }
+        }
+
+        function changeMonth(offset) {
+            currentViewDate.setMonth(currentViewDate.getMonth() + offset);
+            renderCalendar(getLocalDateString(new Date()));
+        }
+
+        function runLookup() {
+            const startStr = document.getElementById('lookup-start').value;
+            const endStr = document.getElementById('lookup-end').value;
+            const resultsEl = document.getElementById('lookup-results');
+            if (!startStr) return;
+            resultsEl.classList.remove('hidden');
+            resultsEl.innerHTML = '';
+            let current = new Date(startStr + "T00:00:00");
+            const end = endStr ? new Date(endStr + "T00:00:00") : new Date(startStr + "T00:00:00");
+            let limit = 0;
+            while (current <= end && limit < 100) {
+                const dateStr = getLocalDateString(current);
+                const info = getInfo(dateStr);
+                if (info.status !== 'weekend') {
+                    const row = document.createElement('div');
+                    row.className = 'flex flex-col p-4 rounded-xl bg-white/5 border border-white/5 text-xs';
+                    const color = info.status === 'available' ? 'text-emerald-400' : info.status === 'busy' ? 'text-red-400' : 'text-amber-400';
+                    row.innerHTML = `
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-gray-400 font-bold">${current.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'})}</span>
+                            <span class="font-bold uppercase tracking-tighter ${color}">${info.status}</span>
+                        </div>
+                        ${info.note ? `<p class="text-[10px] text-gray-500 italic mt-1 border-t border-white/5 pt-1">${info.note}</p>` : ''}
+                    `;
+                    resultsEl.appendChild(row);
+                }
+                current.setDate(current.getDate() + 1);
+                limit++;
+            }
+        }
+
+        window.onload = loadData;
+    </script>
+
+</body>
+</html>

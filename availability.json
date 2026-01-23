@@ -1,0 +1,19 @@
+{
+"overrides": {
+"2026-01-26": { "status": "busy", "note": "Working Norønna" },
+"2026-01-27": { "status": "busy", "note": "Working Norønna" },
+"2026-01-28": { "status": "busy", "note": "Working Norønna" },
+"2026-01-29": { "status": "busy", "note": "Working Norønna" },
+"2026-01-30": { "status": "busy", "note": "Working Norønna" },
+"2026-02-02": { "status": "busy", "note": "Studying" },
+"2026-02-03": { "status": "available", "note": "Open for meetings" },
+"2026-02-04": { "status": "available", "note": "Open for meetings" },
+"2026-02-05": { "status": "available", "note": "Open for meetings" },
+"2026-02-06": { "status": "available", "note": "Open for meetings" },
+"2026-02-09": { "status": "busy", "note": "Studying" },
+"2026-02-10": { "status": "busy", "note": "Studying" },
+"2026-02-11": { "status": "busy", "note": "Studying" },
+"2026-02-12": { "status": "busy", "note": "Studying" },
+"2026-02-13": { "status": "busy", "note": "Studying" }
+}
+}
