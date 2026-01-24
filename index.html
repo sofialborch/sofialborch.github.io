@@ -13,17 +13,36 @@
     
     <style>
         :root {
-            --bg-color: #0b0b0e;
-            --card-bg: #14141b;
-            --border-color: #252530;
-            --text-color: #f8f8f2;
-            --pink: #ec4899;
-            --available: #00ff9d;
-            --busy: #ff4d4d;
-            --partial: #ffb347;
+            /* HIGH CONTRAST DARK (Default) */
+            --bg-color: #0f0f12;
+            --card-bg: #0f0f12;
+            --border-color: #2d2d35;
+            --text-color: #ffffff;
+            --pink: #f472b6;
+            --available: #10b981;
+            --busy: #f43f5e;
+            --partial: #fbbf24;
             --noronna: rgb(192, 132, 252);
             --polar: rgb(244, 114, 182);
             --study: rgb(248, 113, 113);
+            --panel-blur: 30px;
+            --panel-opacity: 0.8;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --shadow-style: 0 4px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-mode {
+            /* REFINED PINK LIGHT MODE */
+            --bg-color: #f5e9f3;
+            --card-bg: #ffffff;
+            --border-color: #c4b5c3; 
+            --text-color: #1a0f1d; 
+            --available: #065f46;
+            --busy: #9f1239;
+            --partial: #92400e;
+            --panel-opacity: 0.98;
+            --glass-border: rgba(139, 92, 246, 0.15);
+            --shadow-style: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
         body { 
@@ -31,12 +50,29 @@
             background-color: var(--bg-color); 
             color: var(--text-color);
             overflow-x: hidden;
-            font-size: 18px;
+            font-size: 16px;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        .decor-blob { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.12; }
-        .glass-panel { background: rgba(20, 20, 27, 0.7); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .calendar-grid { display: grid; grid-template-columns: 45px repeat(7, 1fr); gap: 10px; }
+        body.light-mode {
+            background-image: linear-gradient(135deg, #f5e9f3 0%, #ecd6ec 100%);
+            background-attachment: fixed;
+        }
+
+        @media (min-width: 1024px) { body { font-size: 18px; } }
+
+        .decor-blob { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.15; transition: opacity 0.5s; }
+        body.light-mode .decor-blob { opacity: 0.2; background-color: #d8b4fe; }
+
+        .glass-panel { 
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--panel-blur)); 
+            border: 1px solid var(--glass-border); 
+            box-shadow: var(--shadow-style);
+        }
+        
+        .calendar-grid { display: grid; grid-template-columns: 30px repeat(7, 1fr); gap: 4px; }
+        @media (min-width: 640px) { .calendar-grid { grid-template-columns: 45px repeat(7, 1fr); gap: 10px; } }
 
         .day-cell {
             aspect-ratio: 1 / 1;
@@ -44,250 +80,261 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
+            border-radius: 8px;
             transition: all 0.2s ease;
             cursor: pointer;
-            background: rgba(255, 255, 255, 0.02);
-            font-size: 17px;
+            background: rgba(128, 128, 128, 0.08);
+            font-size: 14px;
         }
+
+        body.light-mode .day-cell { background: rgba(0, 0, 0, 0.03); }
+
+        @media (min-width: 640px) { .day-cell { border-radius: 12px; font-size: 17px; } }
         
-        .day-cell:hover { transform: scale(1.05); background: rgba(255, 255, 255, 0.08); z-index: 10; }
-        .week-num-cell { font-size: 19px; font-weight: 900; color: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .day-cell:hover { transform: scale(1.05); background: rgba(128, 128, 128, 0.15); z-index: 10; }
+        .week-num-cell { font-size: 14px; font-weight: 900; color: rgba(128, 128, 128, 0.35); display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        
+        @media (min-width: 640px) { .week-num-cell { font-size: 19px; } }
         .day-past { opacity: 0.1; filter: grayscale(1); pointer-events: none; }
         
-        .badge { font-size: 17px; font-weight: 900; }
+        .badge { font-size: 12px; font-weight: 900; }
+        @media (min-width: 640px) { .badge { font-size: 17px; } }
+
         .badge-nr { color: var(--noronna); }
         .badge-pm { color: var(--polar); }
         .badge-st { color: var(--study); }
 
-        .status-available { border: 1px solid rgba(0, 255, 157, 0.15); color: var(--available); }
-        .status-busy { border: 1px solid rgba(255, 77, 77, 0.15); }
-        .status-partial { border: 1px solid rgba(255, 179, 71, 0.15); }
+        .status-available { border: 1px solid rgba(16, 185, 129, 0.25); color: var(--available); }
+        .status-busy { border: 1px solid rgba(244, 63, 94, 0.25); }
+        .status-partial { border: 1px solid rgba(251, 191, 36, 0.25); }
 
-        .today-focus { background: white !important; color: black !important; transform: scale(1.1); border: none !important; }
+        .today-focus { background: var(--text-color) !important; color: var(--bg-color) !important; transform: scale(1.1); border: none !important; }
 
         .summary-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 1.5rem;
-            padding: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1.25rem;
+            padding: 1rem;
             transition: all 0.4s;
             text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        .summary-card.is-today { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); }
+        @media (min-width: 1024px) { .summary-card { border-radius: 1.5rem; padding: 1.5rem; } }
+
+        .summary-card.is-today { border-color: var(--pink); border-width: 3px; }
         .summary-card.status-available-card { border-bottom: 5px solid var(--available); }
         .summary-card.status-busy-card { border-bottom: 5px solid var(--busy); }
         .summary-card.status-partial-card { border-bottom: 5px solid var(--partial); }
 
-        .lookup-week-group { border-left: 2px solid rgba(255,255,255,0.08); padding-left: 1.5rem; margin-bottom: 2.5rem; }
+        .lookup-week-group { border-left: 3px solid var(--border-color); padding-left: 1rem; margin-bottom: 2rem; }
+        @media (min-width: 1024px) { .lookup-week-group { padding-left: 1.5rem; margin-bottom: 2.5rem; } }
 
         input[type="date"], input[type="month"], .week-select { 
             appearance: none; 
-            -webkit-appearance: none; 
-            color-scheme: dark; 
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.15); 
-            color: white; 
-            font-size: 15px; 
-            border-radius: 1rem; 
-            padding: 0.75rem 1.25rem; 
+            background: var(--card-bg);
+            border: 2px solid var(--border-color); 
+            color: var(--text-color); 
+            font-size: 14px; 
+            border-radius: 0.75rem; 
+            padding: 0.6rem 1rem; 
             outline: none;
             cursor: pointer;
-            transition: border-color 0.2s;
+            font-weight: 700;
         }
 
-        input:hover, .week-select:hover { border-color: rgba(255, 255, 255, 0.3); }
+        body:not(.light-mode) input, body:not(.light-mode) .week-select { color-scheme: dark; }
 
         .week-select {
-            padding-right: 3rem;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' stroke-opacity='0.4' stroke-width='3'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            padding-right: 2.5rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 1.25rem center;
-            background-size: 1em;
+            background-position: right 1rem center;
+            background-size: 0.8em;
         }
-
-        .week-select option { background-color: var(--card-bg); color: white; }
 
         .tooltip {
-            visibility: hidden; background: #000; color: #fff; padding: 10px 14px; position: absolute; z-index: 50;
-            bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: 0.2s; font-size: 16px;
-            border: 1px solid var(--border-color); border-radius: 8px; white-space: nowrap;
+            visibility: hidden; background: #000; color: #fff; padding: 8px 12px; position: absolute; z-index: 50;
+            bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: 0.2s; font-size: 14px;
+            border-radius: 8px; white-space: nowrap; pointer-events: none; border: 1px solid rgba(255,255,255,0.1);
         }
-        .day-cell:hover .tooltip { visibility: visible; opacity: 1; }
+        @media (min-width: 1024px) { .day-cell:hover .tooltip { visibility: visible; opacity: 1; } }
 
         @keyframes pulse-glow {
-            0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(244, 114, 182, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(244, 114, 182, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 114, 182, 0); }
         }
         .pulse-pink { animation: pulse-glow 2s infinite; }
-        
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 10px; }
     </style>
 </head>
-<body class="antialiased min-h-screen">
+<body class="antialiased min-h-screen light-mode">
 
-    <div class="decor-blob bg-pink-500 w-[500px] h-[500px] -top-60 -left-20"></div>
-    <div class="decor-blob bg-blue-600 w-[400px] h-[400px] bottom-0 -right-40"></div>
+    <div class="decor-blob bg-pink-500 w-[300px] h-[300px] lg:w-[500px] lg:h-[500px] -top-20 -left-20 lg:-top-60 lg:-left-20"></div>
+    <div class="decor-blob bg-blue-600 w-[300px] h-[300px] lg:w-[400px] lg:h-[400px] bottom-0 -right-20 lg:-right-40"></div>
 
-    <header class="bg-[#0b0b0e]/60 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5">
-        <nav class="container mx-auto px-6 flex items-center justify-between h-20">
-            <span class="text-2xl font-black uppercase tracking-[0.2em]" data-tr="title">Tilgjengelighet</span>
-            <div class="flex items-center gap-6">
-                <button onclick="toggleLanguage()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
-                    <span id="lang-flag" class="text-xl">🇳🇴</span>
-                    <span id="lang-label" class="text-[10px] font-black uppercase tracking-widest">NO</span>
+    <header class="bg-black/10 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5 shadow-sm">
+        <nav class="container mx-auto px-4 lg:px-6 flex items-center justify-between h-16 lg:h-20">
+            <span class="text-lg lg:text-2xl font-black uppercase tracking-[0.15em] lg:tracking-[0.2em]" data-tr="title">Tilgjengelighet</span>
+            <div class="flex items-center gap-2 lg:gap-4">
+                <button onclick="toggleTheme()" class="w-10 h-10 lg:w-11 lg:h-11 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
+                    <i id="theme-icon" class="fas fa-sun text-base lg:text-lg"></i>
                 </button>
-                <div class="h-6 w-px bg-white/10"></div>
+                <button onclick="toggleLanguage()" class="flex items-center gap-2 px-2 py-1.5 lg:px-3 lg:py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
+                    <span id="lang-flag" class="text-base lg:text-xl">🇳🇴</span>
+                    <span id="lang-label" class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest">NO</span>
+                </button>
+                <div class="h-6 w-px bg-white/10 hidden xs:block"></div>
                 <button onclick="togglePrintModal()" 
-                        class="pulse-pink group relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-pink-500 text-white text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-pink-500/20">
+                        class="pulse-pink group relative flex items-center gap-2 px-3 py-2 lg:px-5 lg:py-2.5 rounded-full bg-pink-500 text-white text-[10px] lg:text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-pink-500/20">
                     <i class="fas fa-print"></i>
-                    <span data-tr="printBtn">Skriv ut</span>
+                    <span class="hidden sm:inline" data-tr="printBtn">Skriv ut</span>
                 </button>
                 <input type="file" id="manual-upload" class="hidden" accept=".json" onchange="handleManualUpload(event)">
                 <span id="sync-status" 
                       onclick="document.getElementById('manual-upload').click()"
-                      class="text-xs font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5 cursor-pointer hover:bg-white/10 transition-all">
+                      class="hidden md:inline-block text-xs font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5 cursor-pointer hover:bg-white/10 transition-all">
                     Laster...
                 </span>
             </div>
         </nav>            
     </header>
 
-    <main class="container mx-auto px-6 lg:px-12 py-10 min-h-[calc(100vh-280px)]">
-        <section class="mb-12">
+    <main class="container mx-auto px-4 lg:px-12 py-6 lg:py-10 min-h-[calc(100vh-280px)]">
+        <section class="mb-8 lg:mb-12">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-1 glass-panel rounded-[2.5rem] p-10 flex flex-col justify-center border-l-4 border-pink-500/50">
-                    <p class="text-s font-black uppercase tracking-[0.3em] text-pink-500/60 mb-3" data-tr="today">I dag</p>
-                    <h2 id="hero-date" class="text-5xl font-black tracking-tight mb-3">...</h2>
-                    <p id="hero-note" class="text-base text-gray-400 mb-10 font-medium italic leading-relaxed">...</p>
-                    <div id="hero-status-pill" class="inline-flex items-center gap-4 px-6 py-3 rounded-2xl bg-white/5 border border-white/5 w-fit">
-                        <span id="hero-dot" class="w-3 h-3 rounded-full"></span>
-                        <span id="hero-label" class="text-sm font-black uppercase tracking-widest">...</span>
+                <div class="lg:col-span-1 glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col justify-center border-l-4 border-pink-500/50">
+                    <p class="text-[10px] lg:text-s font-black uppercase tracking-[0.3em] text-pink-500/60 mb-2 lg:mb-3" data-tr="today">I dag</p>
+                    <h2 id="hero-date" class="text-3xl lg:text-5xl font-black tracking-tight mb-2 lg:mb-3">...</h2>
+                    <p id="hero-note" class="text-sm lg:text-base opacity-90 font-bold italic leading-relaxed mb-6 lg:mb-10">...</p>
+                    <div id="hero-status-pill" class="inline-flex items-center gap-3 lg:gap-4 px-4 py-2 lg:px-6 lg:py-3 rounded-xl lg:rounded-2xl bg-white/5 border border-white/5 w-fit">
+                        <span id="hero-dot" class="w-2.5 h-2.5 lg:w-3 h-3 rounded-full"></span>
+                        <span id="hero-label" class="text-[11px] lg:text-sm font-black uppercase tracking-widest">...</span>
                     </div>
                 </div>
 
-                <div class="lg:col-span-2 glass-panel rounded-[2.5rem] p-10">
-                    <div class="flex justify-between items-center mb-10">
-                        <div class="flex items-center gap-4">
-                            <i class="fas fa-bolt text-pink-500 text-lg"></i>
-                            <h3 class="text-sm font-black uppercase tracking-widest opacity-40" data-tr="quickOutlook">Hurtigoversikt</h3>
+                <div class="lg:col-span-2 glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-10">
+                        <div class="flex items-center gap-3 lg:gap-4">
+                            <i class="fas fa-bolt text-pink-500 text-base lg:text-lg"></i>
+                            <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest opacity-60" data-tr="quickOutlook">Hurtigoversikt</h3>
                         </div>
-                        <div class="flex items-center gap-4">
-                            <label class="text-[16px] font-black text-gray-400 uppercase tracking-widest" data-tr="selectWeek">Velg uke</label>
-                            <select id="week-selector" class="week-select" onchange="onWeekChange(this.value)"></select>
+                        <div class="flex items-center gap-3 lg:gap-4 w-full sm:w-auto">
+                            <label class="text-[13px] lg:text-[16px] font-black opacity-60 uppercase tracking-widest whitespace-nowrap" data-tr="selectWeek">Velg uke</label>
+                            <select id="week-selector" class="week-select flex-grow sm:flex-grow-0"></select>
                         </div>
                     </div>
-                    <div id="week-summary-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-5"></div>
+                    <div id="week-summary-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 lg:gap-5"></div>
                 </div>
             </div>
         </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
             <div class="lg:col-span-8">
-                <div class="glass-panel rounded-[2.5rem] p-10">
-                    <div class="flex items-center justify-between mb-12">
-                        <h2 id="calendar-month" class="text-4xl font-black tracking-tighter uppercase">...</h2>
-                        <div class="flex gap-4">
-                            <button onclick="changeMonth(-1)" class="w-14 h-14 flex items-center justify-center hover:bg-white/10 rounded-2xl transition border border-white/5"><i class="fas fa-chevron-left text-lg"></i></button>
-                            <button onclick="changeMonth(1)" class="w-14 h-14 flex items-center justify-center hover:bg-white/10 rounded-2xl transition border border-white/5"><i class="fas fa-chevron-right text-lg"></i></button>
+                <div class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10">
+                    <div class="flex items-center justify-between mb-8 lg:mb-12">
+                        <h2 id="calendar-month" class="text-2xl lg:text-4xl font-black tracking-tighter uppercase">...</h2>
+                        <div class="flex gap-2 lg:gap-4">
+                            <button onclick="changeMonth(-1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover:bg-white/10 rounded-xl lg:rounded-2xl transition border border-white/5"><i class="fas fa-chevron-left text-sm lg:text-lg"></i></button>
+                            <button onclick="changeMonth(1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover:bg-white/10 rounded-xl lg:rounded-2xl transition border border-white/5"><i class="fas fa-chevron-right text-sm lg:text-lg"></i></button>
                         </div>
                     </div>
-                    <div class="calendar-grid text-center mb-8 text-s font-black uppercase tracking-widest text-gray-500">
-                        <div class="text-white/60" data-tr="wk">Uke</div><div>M</div><div>T</div><div>O</div><div>T</div><div>F</div><div class="text-pink-500/40">L</div><div class="text-pink-500/40">S</div>
+                    <div class="calendar-grid text-center mb-4 lg:mb-8 text-[10px] lg:text-s font-black uppercase tracking-widest opacity-80">
+                        <div class="opacity-60" data-tr="wk">Uke</div><div>M</div><div>T</div><div>O</div><div>T</div><div>F</div><div class="text-pink-500/80">L</div><div class="text-pink-500/80">S</div>
                     </div>
                     <div id="calendar-days" class="calendar-grid"></div>
-                    <div class="mt-14 flex flex-wrap gap-10 text-s font-black uppercase tracking-widest border-t border-white/5 pt-12">
-                        <div class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-emerald-400"></span> <span data-tr="ledig">Ledig</span></div>
-                        <div class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-red-400"></span> <span data-tr="opptatt">Opptatt</span></div>
-                        <div class="ml-auto flex flex-wrap gap-6">
-                            <span class="text-purple-400">NR - Norønna</span> 
-                            <span class="text-pink-400">PM - Polarmåsen</span> 
-                            <span class="text-red-400">ST - Studie</span>
+                    <div class="mt-8 lg:mt-14 flex flex-col sm:flex-row flex-wrap gap-4 lg:gap-10 text-[10px] lg:text-s font-black uppercase tracking-widest border-t border-white/5 pt-8 lg:pt-12">
+                        <div class="flex flex-wrap gap-6">
+                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> <span data-tr="ledig">Ledig</span></div>
+                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> <span data-tr="opptatt">Opptatt</span></div>
+                        </div>
+                        <div class="sm:ml-auto flex flex-wrap gap-4 lg:gap-6 font-bold">
+                            <span class="text-purple-500">NR - Norønna</span> 
+                            <span class="text-pink-500">PM - Polarmåsen</span> 
+                            <span class="text-red-500">ST - Studie</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="lg:col-span-4 space-y-6">
-                <div class="glass-panel rounded-[2.5rem] p-10 border-t-2 border-white/10 sticky top-24">
-                    <div class="flex items-center justify-between mb-10">
-                        <h3 class="text-sm font-black uppercase tracking-widest opacity-30 flex items-center gap-2">
+                <div class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-white/10 lg:sticky lg:top-24">
+                    <div class="flex items-center justify-between mb-6 lg:mb-10">
+                        <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest opacity-40 flex items-center gap-2">
                             <i class="fas fa-search"></i> <span data-tr="lookup">Søk</span>
                         </h3>
                     </div>
-                    <div class="space-y-8">
-                        <div class="grid grid-cols-1 gap-6">
+                    <div class="space-y-6 lg:space-y-8">
+                        <div class="grid grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-6">
                             <div>
-                                <label class="block text-xs font-black text-gray-500 uppercase mb-3 tracking-widest" data-tr="start">Fra dato</label>
+                                <label class="block text-[10px] font-black opacity-70 uppercase mb-2 lg:mb-3 tracking-widest" data-tr="start">Fra</label>
                                 <input type="date" id="lookup-start" class="w-full">
                             </div>
                             <div>
-                                <label class="block text-xs font-black text-gray-500 uppercase mb-3 tracking-widest" data-tr="end">Til dato</label>
+                                <label class="block text-[10px] font-black opacity-70 uppercase mb-2 lg:mb-3 tracking-widest" data-tr="end">Til</label>
                                 <input type="date" id="lookup-end" class="w-full">
                             </div>
                         </div>
-                        <button onclick="runLookup()" class="w-full bg-white text-black font-black py-5 rounded-xl transition-all active:scale-95 text-xs uppercase tracking-[0.2em]" data-tr="searchBtn">
+                        <button onclick="runLookup()" class="w-full bg-pink-500 text-white font-black py-4 lg:py-5 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20" data-tr="searchBtn">
                             Søk i periode
                         </button>
                     </div>
-                    <div id="lookup-container" class="mt-12 hidden border-t border-white/5 pt-10">
-                        <div id="lookup-results" class="space-y-10 max-h-[600px] overflow-y-auto pr-3 custom-scrollbar"></div>
+                    <div id="lookup-container" class="mt-8 lg:mt-12 hidden border-t border-white/5 pt-6 lg:pt-10">
+                        <div id="lookup-results" class="space-y-6 lg:space-y-10 max-h-[400px] lg:max-h-[600px] overflow-y-auto pr-2 custom-scrollbar"></div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <footer class="container mx-auto px-6 lg:px-12 py-16 mt-12 border-t border-white/5">
+    <footer class="container mx-auto px-6 lg:px-12 py-10 lg:py-16 mt-8 lg:mt-12 border-t border-white/5">
         <div class="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div class="flex items-center gap-6">
-                <span class="text-2xl font-black uppercase tracking-[0.4em] text-white opacity-20 select-none">Z03Y</span>
-                <div class="h-8 w-px bg-white/5 hidden md:block"></div>
+            <div class="flex items-center gap-4 lg:gap-6">
+                <span class="text-xl lg:text-2xl font-black uppercase tracking-[0.3em] lg:tracking-[0.4em] opacity-30 select-none">Z03Y</span>
+                <div class="h-8 w-px bg-white/10 hidden md:block"></div>
                 <div class="text-center md:text-left">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-600 mb-1">Developed for Precision</p>
-                    <p class="text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v2.4</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v2.5</p>
                 </div>
             </div>
             
-            <div class="flex items-center gap-4">
-                <div id="footer-phone" class="hidden px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-black tracking-widest text-gray-300"></div>
-                <div class="px-5 py-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-[10px] font-black uppercase tracking-widest text-gray-500">
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+                <div id="footer-phone" class="hidden px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-[11px] lg:text-xs font-black tracking-widest opacity-80"></div>
+                <div class="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 text-center sm:text-left">
                     &copy; 2026 PROJECT BY Z03Y
                 </div>
             </div>
         </div>
     </footer>
 
-    <div id="print-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6">
+    <div id="print-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-6">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="togglePrintModal()"></div>
-        <div class="glass-panel relative w-full max-w-md rounded-[2.5rem] p-10 overflow-hidden shadow-2xl">
+        <div class="glass-panel relative w-full max-w-md rounded-[2rem] lg:rounded-[2.5rem] p-8 lg:p-10 overflow-hidden shadow-2xl">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-black uppercase tracking-widest" data-tr="printSettings">Utskrift</h3>
-                <button onclick="togglePrintModal()" class="text-gray-500 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
+                <h3 class="text-lg lg:text-xl font-black uppercase tracking-widest" data-tr="printSettings">Utskrift</h3>
+                <button onclick="togglePrintModal()" class="text-gray-500 hover:text-white transition p-2"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div id="certainty-notice" class="mb-8 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-4">
-                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400"><i class="fas fa-shield-alt"></i></div>
+            <div id="certainty-notice" class="mb-6 lg:mb-8 p-4 rounded-xl lg:rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-4">
+                <div class="shrink-0 w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400"><i class="fas fa-shield-alt"></i></div>
                 <div>
-                    <p class="text-[10px] font-black uppercase tracking-widest text-emerald-500/60 leading-none mb-1" data-tr="certaintyLabel">Bekreftet status til</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-emerald-500/60 leading-none mb-1" data-tr="certaintyLabel">Bekreftet status til</p>
                     <p id="certainty-date-label" class="text-sm font-black text-emerald-400 tracking-tight">Laster...</p>
                 </div>
             </div>
             <div class="space-y-6">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3" data-tr="fra">Fra</label>
+                        <label class="block text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-60 mb-2 lg:mb-3" data-tr="fra">Fra</label>
                         <input type="month" id="print-start-month" class="w-full">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3" data-tr="til">Til</label>
+                        <label class="block text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-60 mb-2 lg:mb-3" data-tr="til">Til</label>
                         <input type="month" id="print-end-month" class="w-full">
                     </div>
                 </div>
-                <button onclick="executePrint()" class="w-full bg-pink-500 text-white font-black py-5 rounded-2xl transition-all active:scale-95 text-sm uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20 mt-4 flex items-center justify-center gap-3">
+                <button onclick="executePrint()" class="w-full bg-pink-500 text-white font-black py-4 lg:py-5 rounded-xl lg:rounded-2xl transition-all active:scale-95 text-xs lg:text-sm uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20 mt-2 flex items-center justify-center gap-3">
                     <i class="fas fa-file-pdf"></i> <span data-tr="generatePdf">Generer PDF</span>
                 </button>
             </div>
@@ -301,7 +348,8 @@
                 title: "Tilgjengelighet", printBtn: "Skriv ut", today: "I dag", quickOutlook: "Hurtigoversikt",
                 selectWeek: "Velg uke", wk: "Uke", ledig: "Ledig", opptatt: "Opptatt", delvis: "Delvis",
                 lookup: "Søk", start: "Fra dato", end: "Til dato", searchBtn: "Søk i periode",
-                printSettings: "Utskrift", certaintyLabel: "Bekreftet status til", fra: "Fra", til: "Til",
+                fra: "Fra", til: "Til",
+                printSettings: "Utskrift", certaintyLabel: "Bekreftet status til",
                 generatePdf: "Generer PDF", loading: "Laster...", online: "Tilkoblet", local: "Lokal økt",
                 noPlans: "Ingen planer registrert.", week: "Uke", monthLocale: 'nb-NO'
             },
@@ -309,7 +357,8 @@
                 title: "Availability", printBtn: "Print Schedule", today: "Today", quickOutlook: "Quick Outlook",
                 selectWeek: "Select Week", wk: "Wk", ledig: "Available", opptatt: "Busy", delvis: "Partial",
                 lookup: "Lookup", start: "Start Date", end: "End Date", searchBtn: "Search Range",
-                printSettings: "Print Settings", certaintyLabel: "Status Secured Until", fra: "From", til: "To",
+                fra: "From", til: "To",
+                printSettings: "Print Settings", certaintyLabel: "Status Secured Until",
                 generatePdf: "Generate PDF", loading: "Loading...", online: "Online", local: "Local Session",
                 noPlans: "No specific plans logged.", week: "Week", monthLocale: 'en-GB'
             }
@@ -333,6 +382,13 @@
 
         const getLocalDateString = (date) => date.toLocaleDateString('en-CA');
         const t = (key) => TR[CURRENT_LANG][key] || key;
+
+        function toggleTheme() {
+            const isLight = document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('theme-icon');
+            icon.className = isLight ? 'fas fa-sun text-base lg:text-lg' : 'fas fa-moon text-base lg:text-lg';
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
 
         function translateNote(note) {
             if (!note || CURRENT_LANG === 'en') return note;
@@ -367,6 +423,7 @@
         }
 
         async function loadData() {
+            if(localStorage.getItem('theme') === 'light') toggleTheme();
             try {
                 const response = await fetch('availability.json');
                 if (response.ok) {
@@ -381,8 +438,9 @@
 
         function updateStatus(text, color) {
             const el = document.getElementById('sync-status');
+            if(!el) return;
             el.innerText = text;
-            el.className = `text-xs font-bold text-${color}-500 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5 cursor-pointer hover:bg-white/10 transition-all`;
+            el.className = `hidden md:inline-block text-xs font-bold text-${color}-500 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5 cursor-pointer hover:bg-white/10 transition-all`;
         }
 
         function handleManualUpload(event) {
@@ -470,14 +528,14 @@
                 div.className = `summary-card status-${info.status}-card cursor-pointer ${ds === todayStr ? 'is-today' : ''}`;
                 div.onclick = () => { document.getElementById('lookup-start').value = ds; runLookup(); };
                 div.innerHTML = `
-                    <div class="flex flex-col gap-0.5 mb-1">
-                        <span class="text-[16px] font-black text-white/80 tracking-tighter">${String(curr.getDate()).padStart(2, '0')}.${String(curr.getMonth() + 1).padStart(2, '0')}</span>
-                        <span class="text-xs font-black uppercase text-white/65 tracking-widest">${curr.toLocaleDateString(t('monthLocale'), {weekday: 'short'})}</span>
+                    <div class="flex flex-col gap-0.5 mb-1 lg:mb-2">
+                        <span class="text-[14px] lg:text-[16px] font-black opacity-90 tracking-tighter">${String(curr.getDate()).padStart(2, '0')}.${String(curr.getMonth() + 1).padStart(2, '0')}</span>
+                        <span class="text-[9px] lg:text-xs font-black uppercase opacity-60 tracking-widest">${curr.toLocaleDateString(t('monthLocale'), {weekday: 'short'})}</span>
                     </div>
-                    <div class="py-4 flex flex-col items-center">
-                        ${info.badge ? `<span class="badge badge-${info.badge.toLowerCase()} text-2xl font-black">${info.badge}</span>` : `<i class="fas ${info.status === 'available' ? 'fa-check text-emerald-400' : 'fa-minus text-red-500'} text-2xl opacity-40"></i>`}
+                    <div class="py-2 lg:py-4 flex flex-col items-center">
+                        ${info.badge ? `<span class="badge badge-${info.badge.toLowerCase()} text-lg lg:text-2xl font-black">${info.badge}</span>` : `<i class="fas ${info.status === 'available' ? 'fa-check text-emerald-500' : 'fa-minus text-red-500'} text-lg lg:text-2xl opacity-40"></i>`}
                     </div>
-                    <span class="text-sm font-bold text-gray-400 line-clamp-2 leading-tight">${info.note || translateNote(t(info.status))}</span>`;
+                    <span class="text-[10px] lg:text-sm font-bold opacity-90 line-clamp-2 leading-tight">${info.note || translateNote(t(info.status))}</span>`;
                 container.appendChild(div);
             }
         }
@@ -506,7 +564,7 @@
                         const div = document.createElement('div');
                         div.className = `day-cell status-${info.status} ${date < todayObj ? 'day-past' : ''} ${ds === todayStr ? 'today-focus' : ''}`;
                         div.onclick = () => { document.getElementById('lookup-start').value = ds; runLookup(); };
-                        div.innerHTML = info.badge ? `<span class="badge badge-${info.badge.toLowerCase()}">${info.badge}</span>` : `<span class="font-bold">${currentDay}</span>`;
+                        div.innerHTML = info.badge ? `<span class=\"badge badge-${info.badge.toLowerCase()}\">${info.badge}</span>` : `<span class=\"font-bold\">${currentDay}</span>`;
                         if (info.note) {
                             const tip = document.createElement('span'); tip.className = 'tooltip'; tip.innerText = info.note; div.appendChild(tip);
                         }
@@ -534,21 +592,21 @@
                     if (wk !== currentWeek) {
                         currentWeek = wk;
                         resultsEl.appendChild(Object.assign(document.createElement('div'), {
-                            className: 'flex items-center gap-4 mb-6',
-                            innerHTML: `<span class="text-sm font-black uppercase tracking-widest bg-pink-500/10 text-pink-400 px-5 py-2 rounded-full">${t('week')} ${wk}</span>`
+                            className: 'flex items-center gap-3 mb-4 lg:mb-6',
+                            innerHTML: `<span class="text-[10px] lg:text-sm font-black uppercase tracking-widest bg-pink-500/10 text-pink-500 px-4 py-1.5 lg:px-5 lg:py-2 rounded-full">${t('week')} ${wk}</span>`
                         }));
                         var weekGroup = resultsEl.appendChild(Object.assign(document.createElement('div'), { className: 'lookup-week-group space-y-4' }));
                     }
                     weekGroup.appendChild(Object.assign(document.createElement('div'), {
-                        className: 'flex items-center justify-between p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group',
+                        className: 'flex items-center justify-between p-4 lg:p-6 rounded-xl lg:rounded-2xl bg-white/10 border border-white/20 hover:bg-white/30 transition-all group',
                         innerHTML: `
                             <div class="flex flex-col">
-                                <span class="text-sm font-black uppercase text-gray-500 group-hover:text-gray-300 transition-colors">${current.toLocaleDateString(t('monthLocale'), {weekday: 'short'})} ${current.getDate()}.${String(current.getMonth()+1).padStart(2,'0')}</span>
-                                <span class="text-base text-white/80 font-medium mt-1">${info.note || t('noPlans')}</span>
+                                <span class="text-[10px] lg:text-sm font-black uppercase opacity-60 group-hover:opacity-100 transition-opacity">${current.toLocaleDateString(t('monthLocale'), {weekday: 'short'})} ${current.getDate()}.${String(current.getMonth()+1).padStart(2,'0')}</span>
+                                <span class="text-sm lg:text-base font-bold mt-1">${info.note || t('noPlans')}</span>
                             </div>
-                            <div class="flex items-center gap-6">
+                            <div class="flex items-center gap-4 lg:gap-6">
                                 ${info.badge ? `<span class="badge badge-${info.badge.toLowerCase()} opacity-60">${info.badge}</span>` : ''}
-                                <span class="text-xs font-black uppercase tracking-widest ${info.status === 'available' ? 'text-emerald-400' : 'text-red-400'}">${t(info.status)}</span>
+                                <span class="text-[9px] lg:text-xs font-black uppercase tracking-widest ${info.status === 'available' ? 'text-emerald-500' : 'text-red-500'}">${t(info.status)}</span>
                             </div>`
                     }));
                 }
@@ -590,36 +648,36 @@
                 .trademark { font-weight: 900; font-size: 11px; letter-spacing: 2px; }
                 @media print { .no-print { display: none; } }
             </style></head><body>
-            <div class="no-print" style="padding: 10px; text-align: center; background: #eee; position: sticky; top: 0;"><button onclick="window.print()" style="padding: 10px 40px; font-weight: 900; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 6px;">PRINT PDF</button></div>
-            <div style="padding: 20px;">
-            <header><div><h1>${t('title')}</h1><div class="meta">${start.toLocaleDateString(t('monthLocale'), {month:'long', year:'numeric'})} - ${end.toLocaleDateString(t('monthLocale'), {month:'long', year:'numeric'})}</div></div><div class="trademark">Z03Y &trade;</div></header>`;
+            <div class="no-print" style=\"padding: 10px; text-align: center; background: #eee; position: sticky; top: 0;\"><button onclick=\"window.print()\" style=\"padding: 10px 40px; font-weight: 900; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 6px;\">PRINT PDF</button></div>
+            <div style=\"padding: 20px;\">
+            <header><div><h1>${t('title')}</h1><div class=\"meta\">${start.toLocaleDateString(t('monthLocale'), {month:'long', year:'numeric'})} - ${end.toLocaleDateString(t('monthLocale'), {month:'long', year:'numeric'})}</div></div><div class=\"trademark\">Z03Y &trade;</div></header>`;
             const dayNames = CURRENT_LANG === 'nb' ? ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             let iter = new Date(start); let curM = -1; let mRend = 0;
             while (iter <= end) {
                 if (iter.getMonth() !== curM) {
                     if (curM !== -1) html += `</div>`;
-                    if (mRend > 0 && mRend % 2 === 0) html += `<div style="page-break-after: always;"></div>`;
+                    if (mRend > 0 && mRend % 2 === 0) html += `<div style=\"page-break-after: always;\"></div>`;
                     curM = iter.getMonth(); mRend++;
-                    html += `<div class="month-title">${iter.toLocaleString(t('monthLocale'), { month: 'long', year: 'numeric' })}</div><div class="calendar-grid">`;
-                    dayNames.forEach(d => html += `<div class="day-header">${d}</div>`);
+                    html += `<div class=\"month-title\">${iter.toLocaleString(t('monthLocale'), { month: 'long', year: 'numeric' })}</div><div class=\"calendar-grid\">`;
+                    dayNames.forEach(d => html += `<div class=\"day-header\">${d}</div>`);
                     let padding = new Date(iter.getFullYear(), iter.getMonth(), 1).getDay(); padding = padding === 0 ? 6 : padding - 1;
-                    for(let p=0; p<padding; p++) html += `<div class="day-cell empty"></div>`;
+                    for(let p=0; p<padding; p++) html += `<div class=\"day-cell empty\"></div>`;
                 }
                 const ds = getLocalDateString(iter); const info = getInfo(ds);
                 const isW = iter.getDay() === 0 || iter.getDay() === 6; const st = info.status === 'weekend' ? 'weekend' : info.status;
                 let bText = info.badge || (st !== 'available' && st !== 'weekend' ? (st === 'partial' ? t('delvis') : t('opptatt')) : '');
-                html += `<div class="day-cell ${st}-cell ${isW ? 'weekend-cell' : ''}">
-                    <div class="day-top"><span class="day-num">${iter.getDate()}</span>${bText ? `<span class="status-badge">${bText}</span>` : ''}</div>
-                    <div class="note-text">${info.note || ''}</div>
+                html += `<div class=\"day-cell ${st}-cell ${isW ? 'weekend-cell' : ''}\">
+                    <div class=\"day-top\"><span class=\"day-num\">${iter.getDate()}</span>${bText ? `<span class=\"status-badge\">${bText}</span>` : ''}</div>
+                    <div class=\"note-text\">${info.note || ''}</div>
                 </div>`;
                 let next = new Date(iter); next.setDate(iter.getDate() + 1);
                 if (next.getMonth() !== curM || next > end) {
                     let last = iter.getDay(); let endP = last === 0 ? 0 : 7 - last;
-                    for(let ep=0; ep<endP; ep++) html += `<div class="day-cell empty"></div>`;
+                    for(let ep=0; ep<endP; ep++) html += `<div class=\"day-cell empty\"></div>`;
                 }
                 iter = next;
             }
-            html += `</div><div class="footer"><div><div class="trademark">PROJECT BY Z03Y</div>${DATA_STORE.settings.phone ? `<div style="font-size: 14px; font-weight: 900; margin-top: 8px; background: #000; color: #fff; padding: 4px 12px; border-radius: 6px; display: inline-block;">${DATA_STORE.settings.phone}</div>` : ''}</div><div class="qr-box"><img src="${qrUrl}"><div style="font-size: 8px; font-weight: 900; margin-top: 5px; text-align: center;">LIVE UPDATES</div></div></div></div></body></html>`;
+            html += `</div><div class=\"footer\"><div><div class=\"trademark\">PROJECT BY Z03Y</div>${DATA_STORE.settings.phone ? `<div style=\"font-size: 14px; font-weight: 900; margin-top: 8px; background: #000; color: #fff; padding: 4px 12px; border-radius: 6px; display: inline-block;\">${DATA_STORE.settings.phone}</div>` : ''}</div><div class=\"qr-box\"><img src=\"${qrUrl}\"><div style=\"font-size: 8px; font-weight: 900; margin-top: 5px; text-align: center;\">LIVE UPDATES</div></div></div></div></body></html>`;
             printWindow.document.write(html); printWindow.document.close();
         }
         window.onload = loadData;
