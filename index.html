@@ -32,17 +32,12 @@
                 
                 <!-- Admin Tools Container -->
                 <div id="admin-tools" class="hidden flex items-center gap-2">
-                    <!-- NEW: Inbox Button -->
                     <button onclick="openAdminRequests()" title="Inbox" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 hover:bg-pink-500/30 transition-all">
                         <i class="fas fa-inbox text-xs"></i>
                     </button>
-
-                    <!-- Migration Button -->
                     <button onclick="triggerMigration()" title="Upload Local JSON to Cloud" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all">
                         <i class="fas fa-cloud-upload-alt text-xs"></i>
                     </button>
-                    
-                    <!-- Admin Indicator/Logout -->
                     <button onclick="signOutUser()" title="Sign Out Admin" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all">
                         <i class="fas fa-user-shield text-xs"></i>
                     </button>
@@ -54,7 +49,6 @@
                     <span class="hidden sm:inline" data-tr="printBtn">Skriv ut</span>
                 </button>
                 
-                <!-- Manual Upload -->
                 <input type="file" id="manual-upload" class="hidden" accept=".json" onchange="handleManualUpload(event)">
                 <span id="sync-status" 
                       onclick="document.getElementById('manual-upload').click()"
@@ -124,7 +118,7 @@
 
             <!-- Sidebar -->
             <div class="lg:col-span-4 space-y-6">
-                <!-- NEW Request Panel -->
+                <!-- Request Panel -->
                 <div id="request-panel" class="hidden glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-pink-500/50 lg:sticky lg:top-24 transition-all duration-300">
                      <div class="flex items-center justify-between mb-6">
                         <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest text-pink-500 flex items-center gap-2">
@@ -140,7 +134,7 @@
                     </button>
                 </div>
 
-                <!-- Existing Lookup Panel -->
+                <!-- Lookup Panel -->
                 <div id="lookup-panel" class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-white/10 lg:sticky lg:top-24">
                     <div class="flex items-center justify-between mb-6 lg:mb-10">
                         <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest opacity-40 flex items-center gap-2">
@@ -186,7 +180,6 @@
                 <div class="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 text-center sm:text-left">
                     &copy; 2026 PROJECT BY Z03Y
                 </div>
-                <!-- Admin Button -->
                 <button onclick="toggleAuthModal()" class="px-2 py-2 text-[10px] font-black uppercase tracking-widest opacity-20 hover:opacity-100 transition-opacity">
                     <i class="fas fa-lock"></i>
                 </button>
@@ -232,12 +225,10 @@
         <div class="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity" onclick="toggleAuthModal()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-3xl p-8 border border-white/10 shadow-2xl transform transition-all scale-100 flex flex-col items-center">
             <h3 class="text-xl font-black uppercase tracking-widest mb-6 text-center text-white">System Access</h3>
-            
             <button id="google-login-btn" class="w-full bg-white text-gray-900 font-bold py-3 rounded-xl uppercase tracking-widest text-xs transition shadow-lg shadow-white/10 active:scale-95 flex items-center justify-center gap-3 hover:bg-gray-100">
                 <i class="fab fa-google text-lg text-red-500"></i>
                 <span>Sign in with Google</span>
             </button>
-            
             <p id="auth-error" class="text-red-400 text-xs mt-4 text-center font-bold hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20 w-full"></p>
         </div>
     </div>
@@ -247,16 +238,12 @@
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeEditModal()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-white/10 shadow-2xl transform transition-all">
             <h3 class="text-xl font-black uppercase tracking-widest mb-6" id="edit-date-display">...</h3>
-            
             <div class="space-y-4">
-                <!-- Status Buttons -->
                 <div class="grid grid-cols-3 gap-2">
                     <button onclick="setEditStatus('available')" class="edit-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
                     <button onclick="setEditStatus('busy')" class="edit-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
                     <button onclick="setEditStatus('partial')" class="edit-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
                 </div>
-
-                <!-- Badges -->
                  <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Badge (Valgfritt)</label>
                     <div class="flex gap-2">
@@ -265,19 +252,13 @@
                         <button onclick="toggleBadge('ST')" id="badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-white/10 text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
                     </div>
                 </div>
-
-                <!-- Note Input -->
                 <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Notat</label>
                     <textarea id="edit-note" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                 </div>
-
-                <!-- Save / Delete -->
                 <div class="flex gap-3 mt-4">
                     <button onclick="deleteDay()" class="px-4 py-3 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 font-black text-xs uppercase tracking-widest"><i class="fas fa-trash"></i></button>
-                    <button onclick="saveDay()" class="flex-1 bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
-                        Lagre
-                    </button>
+                    <button onclick="saveDay()" class="flex-1 bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Lagre</button>
                 </div>
             </div>
         </div>
@@ -289,7 +270,6 @@
         <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-white/10 shadow-2xl transform transition-all">
             <h3 class="text-lg lg:text-xl font-black uppercase tracking-widest mb-2" data-tr="reqTitle">Send Forespørsel</h3>
             <p class="text-[10px] opacity-60 font-bold uppercase tracking-widest mb-6" id="req-subtitle">For ... dager</p>
-            
             <div class="space-y-4">
                 <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Navn / Kontakt</label>
@@ -299,15 +279,12 @@
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Melding</label>
                     <textarea id="req-msg" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                 </div>
-
-                <button onclick="submitRequest()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
-                    Send
-                </button>
+                <button onclick="submitRequest()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Send</button>
             </div>
         </div>
     </div>
     
-    <!-- Admin Inbox Modal (NEW) -->
+    <!-- Admin Inbox Modal -->
     <div id="admin-requests-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeAdminRequests()"></div>
         <div class="glass-panel relative w-full max-w-lg rounded-[2rem] p-8 border border-white/10 shadow-2xl transform transition-all flex flex-col max-h-[80vh]">
@@ -318,19 +295,15 @@
                 </h3>
                 <button onclick="closeAdminRequests()" class="text-white/50 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
             </div>
-            
             <div id="admin-requests-list" class="space-y-4 overflow-y-auto custom-scrollbar pr-2 flex-1">
-                <!-- Items injected here -->
                 <p class="text-center opacity-50 py-10 font-bold uppercase tracking-widest text-xs">Ingen forespørsler</p>
             </div>
         </div>
     </div>
 
     <script type="module">
-      // Updated to stable versions
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-      // ADDED: signInAnonymously to imports
       import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
       import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -350,37 +323,23 @@
       const provider = new GoogleAuthProvider();
       const db = getFirestore(app);
 
-      // Expose Firestore AND Auth to global window object for script.js
       window.db = db;
       window.auth = auth;
       window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc };
-
-      // --- Migration Utility ---
       window.uploadLocalDataToFirestore = async function(localOverrides) {
-        if (!auth.currentUser) {
-            alert("Please log in as admin first.");
-            return;
-        }
-        
+        if (!auth.currentUser) { alert("Please log in as admin first."); return; }
         const count = Object.keys(localOverrides).length;
-        if(count === 0) {
-            alert("No local data to migrate.");
-            return;
-        }
-
-        if(!confirm(`Migrate ${count} entries from local JSON to Cloud Firestore? This will overwrite cloud data for these dates.`)) return;
-
+        if(count === 0) { alert("No local data to migrate."); return; }
+        if(!confirm(`Migrate ${count} entries?`)) return;
         updateStatus("Migrating...", "blue");
-
         try {
-            // Simple iteration for migration
             let successCount = 0;
             for (const [date, data] of Object.entries(localOverrides)) {
                 await setDoc(doc(db, "availability", date), data);
                 successCount++;
             }
             alert(`Migration Complete! ${successCount} entries uploaded.`);
-            window.location.reload(); // Reload to fetch from cloud
+            window.location.reload(); 
         } catch (e) {
             console.error(e);
             alert("Migration failed: " + e.message);
@@ -388,25 +347,18 @@
         }
       }
 
-      // --- Hidden Login Logic ---
-
       window.toggleAuthModal = function() {
-          const modal = document.getElementById('auth-modal');
-          modal.classList.toggle('hidden');
+          document.getElementById('auth-modal').classList.toggle('hidden');
       };
-
-      // SECRET TRIGGER: Ctrl + Shift + L
       document.addEventListener('keydown', (e) => {
           if (e.ctrlKey && e.shiftKey && (e.key === 'l' || e.key === 'L')) {
               e.preventDefault();
               toggleAuthModal();
           }
       });
-
       document.getElementById('google-login-btn').addEventListener('click', async () => {
           const errorMsg = document.getElementById('auth-error');
           errorMsg.classList.add('hidden');
-          
           try {
               await signInWithPopup(auth, provider);
               toggleAuthModal();
@@ -416,47 +368,34 @@
               errorMsg.classList.remove('hidden');
           }
       });
-
       window.signOutUser = async function() {
-          if(confirm("Log out of admin mode?")) {
-            await signOut(auth);
-          }
+          if(confirm("Log out of admin mode?")) await signOut(auth);
       }
 
-      // --- AUTH STATE LISTENER (UPDATED) ---
-      // IMPORTANT: REPLACE THE EMAIL BELOW WITH YOURS!
       const ADMIN_EMAIL = "sofia.l.borch@gmail.com"; 
 
       onAuthStateChanged(auth, (user) => {
           const adminTools = document.getElementById('admin-tools');
-          
           if (!user) {
-              // GUEST: No user, so sign in anonymously to allow DB writes
               console.log("No user, signing in anonymously...");
-              signInAnonymously(auth).catch((error) => {
-                  console.error("Anonymous auth failed", error);
-              });
+              signInAnonymously(auth).catch((error) => console.error("Anonymous auth failed", error));
               return;
           }
-
           if (user.email === ADMIN_EMAIL) {
               console.log("Admin Mode Active: " + user.email);
               adminTools.classList.remove('hidden'); 
               window.isAdmin = true;
           } else {
-              if (user.isAnonymous) {
-                  console.log("Guest (Anonymous) Active");
-              } else {
-                  console.log("Guest Logged in: " + user.email + " (Read-only)");
-              }
-              
+              console.log("Guest Logged in");
               adminTools.classList.add('hidden');
               window.isAdmin = false;
           }
-          // Re-render calendar if data is loaded to update click listeners
           if(typeof window.init === 'function') window.init();
       });
     </script>
-    <script src="script.js"></script>
+    
+    <script src="settings.js"></script>
+    <script src="app.js"></script>
+    <script src="admin.js"></script>
 </body>
 </html>
