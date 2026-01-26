@@ -238,7 +238,8 @@ function renderWeekSummary(weekNumber) {
         const curr = new Date(monday); curr.setDate(monday.getDate() + i);
         const ds = getLocalDateString(curr); const info = getInfo(ds);
         const div = document.createElement('div');
-        div.className = `summary-card status-${info.status}-card cursor-pointer ${ds === todayStr ? 'is-today' : ''} ${selectedRequestDates.has(ds) ? 'request-selected' : ''}`;
+        // Added last:col-span-2 sm:last:col-span-1 to fix mobile grid symmetry for the 5th item
+        div.className = `summary-card status-${info.status}-card cursor-pointer last:col-span-2 sm:last:col-span-1 ${ds === todayStr ? 'is-today' : ''} ${selectedRequestDates.has(ds) ? 'request-selected' : ''}`;
         
         div.onclick = () => { 
             if (window.isAdmin) openEditModal(ds, info);

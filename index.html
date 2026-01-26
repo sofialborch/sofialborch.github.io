@@ -23,24 +23,28 @@
     <div class="decor-blob bg-blue-600 w-[300px] h-[300px] lg:w-[400px] lg:h-[400px] bottom-0 -right-20 lg:-right-40"></div>
 
     <header class="bg-[var(--card-bg)] backdrop-blur-xl sticky top-0 z-40 border-b border-dynamic shadow-sm transition-colors duration-300">
-        <nav class="container mx-auto px-4 lg:px-6 flex items-center justify-between h-16 lg:h-20">
-            <span class="text-lg lg:text-2xl font-black uppercase tracking-[0.15em] lg:tracking-[0.2em]" data-tr="title">Tilgjengelighet</span>
-            <div class="flex items-center gap-2 lg:gap-4">
-                <button onclick="toggleTheme()" class="w-10 h-10 lg:w-11 lg:h-11 flex items-center justify-center rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
-                    <i id="theme-icon" class="fas fa-sun text-base lg:text-lg"></i>
+        <!-- Added flex-nowrap to prevent wrapping on tiny screens -->
+        <nav class="container mx-auto px-4 lg:px-6 flex items-center justify-between h-16 lg:h-20 flex-nowrap">
+            <!-- Adjusted font size: text-xs on mobile, sm:text-lg on tablet, 2xl on desktop -->
+            <span class="text-xs sm:text-lg lg:text-2xl font-black uppercase tracking-[0.15em] lg:tracking-[0.2em] truncate mr-2" data-tr="title">Tilgjengelighet</span>
+            
+            <!-- Added flex-shrink-0 so buttons never squash -->
+            <div class="flex items-center gap-2 lg:gap-4 flex-shrink-0">
+                <button onclick="toggleTheme()" class="w-8 h-8 lg:w-11 lg:h-11 flex items-center justify-center rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
+                    <i id="theme-icon" class="fas fa-sun text-xs lg:text-lg"></i>
                 </button>
                 <button onclick="toggleLanguage()" class="flex items-center gap-2 px-2 py-1.5 lg:px-3 lg:py-2 rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
-                    <span id="lang-flag" class="text-base lg:text-xl">🇳🇴</span>
+                    <span id="lang-flag" class="text-sm lg:text-xl">🇳🇴</span>
                     <span id="lang-label" class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest">NO</span>
                 </button>
-                <div class="h-6 w-px bg-dynamic hidden xs:block"></div>
+                
+                <div class="h-6 w-px bg-dynamic hidden sm:block"></div>
                 
                 <!-- Admin Tools Container -->
                 <div id="admin-tools" class="hidden flex items-center gap-2">
                     <button onclick="openAdminRequests()" title="Inbox" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 hover:bg-pink-500/30 transition-all">
                         <i class="fas fa-inbox text-xs"></i>
                     </button>
-                    <!-- NEW: Settings Button -->
                     <button onclick="openAdminSettings()" title="Global Settings" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-gray-500/20 text-gray-500 border border-gray-500/30 hover:bg-gray-500/30 transition-all">
                         <i class="fas fa-cog text-xs"></i>
                     </button>
@@ -58,11 +62,12 @@
                 </button>
 
                 <button onclick="toggleAuthModal()" class="w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Help">
-                    <i class="fas fa-lock"></i>
+                    <i class="fas fa-lock text-[10px] lg:text-xs"></i>
                 </button>
 
+                <!-- Hidden on very small screens, icon only on mobile -->
                 <button onclick="togglePrintModal()" 
-                        class="pulse-pink group relative flex items-center gap-2 px-3 py-2 lg:px-5 lg:py-2.5 rounded-full bg-pink-500 text-white text-[10px] lg:text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-pink-500/20">
+                        class="hidden xs:flex pulse-pink group relative items-center gap-2 px-3 py-2 lg:px-5 lg:py-2.5 rounded-full bg-pink-500 text-white text-[10px] lg:text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-pink-500/20">
                     <i class="fas fa-print"></i>
                     <span class="hidden sm:inline" data-tr="printBtn">Skriv ut</span>
                 </button>
@@ -427,7 +432,7 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Melding</label>
-                    <textarea id="req-msg" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                    <textarea id="req-msg" placeholder="Valgfritt" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                 </div>
                 <button onclick="submitRequest()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Send</button>
                 <div id="req-modal-footer"></div> <!-- Placeholder for Phone/Auth tip -->

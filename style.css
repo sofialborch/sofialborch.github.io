@@ -223,7 +223,8 @@ input[type="date"], input[type="month"], .week-select {
     background: var(--card-bg);
     border: 2px solid var(--border-color); 
     color: var(--text-color); 
-    font-size: 14px; 
+    /* Fixed: Increased to 16px to prevent iOS auto-zoom on focus */
+    font-size: 16px; 
     border-radius: 0.75rem; 
     padding: 0.6rem 1rem; 
     outline: none;
