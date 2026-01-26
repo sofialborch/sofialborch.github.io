@@ -7,7 +7,8 @@ const TR = {
         printSettings: "Utskrift", certaintyLabel: "Bekreftet status til",
         generatePdf: "Generer PDF", loading: "Laster...", online: "Tilkoblet", local: "Lokal økt",
         noPlans: "Ingen planer registrert.", week: "Uke", monthLocale: 'nb-NO',
-        days: ['M', 'T', 'O', 'T', 'F', 'L', 'S']
+        days: ['M', 'T', 'O', 'T', 'F', 'L', 'S'],
+        reqTitle: "Send Forespørsel"
     },
     en: {
         title: "Availability", printBtn: "Print Schedule", today: "Today", quickOutlook: "Quick Outlook",
@@ -17,7 +18,8 @@ const TR = {
         printSettings: "Print Settings", certaintyLabel: "Status Secured Until",
         generatePdf: "Generate PDF", loading: "Loading...", online: "Online", local: "Local Session",
         noPlans: "No specific plans logged.", week: "Week", monthLocale: 'en-GB',
-        days: ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+        days: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+        reqTitle: "Send Request"
     }
 };
 
@@ -41,6 +43,9 @@ let currentViewDate = new Date();
 let currentEditDate = null;
 let currentEditStatus = 'available';
 let currentBadge = null;
+
+// Request State
+let selectedRequestDates = new Set();
 
 const getLocalDateString = (date) => date.toLocaleDateString('en-CA');
 const t = (key) => TR[CURRENT_LANG][key] || key;
@@ -252,6 +257,9 @@ function init() {
     if(!document.getElementById('print-start-month').value) {
         document.getElementById('print-start-month').value = today.toISOString().slice(0, 7);
     }
+    
+    // Clear selection on re-init
+    updateRequestSidebar(); 
 }
 
 function populateWeekDropdown(currentWeek) {
@@ -291,15 +299,13 @@ function renderWeekSummary(weekNumber) {
         const curr = new Date(monday); curr.setDate(monday.getDate() + i);
         const ds = getLocalDateString(curr); const info = getInfo(ds);
         const div = document.createElement('div');
-        div.className = `summary-card status-${info.status}-card cursor-pointer ${ds === todayStr ? 'is-today' : ''}`;
+        div.className = `summary-card status-${info.status}-card cursor-pointer ${ds === todayStr ? 'is-today' : ''} ${selectedRequestDates.has(ds) ? 'request-selected' : ''}`;
         
-        // Logic split for Admin vs Guest
         div.onclick = () => { 
             if (window.isAdmin) {
                 openEditModal(ds, info);
             } else {
-                document.getElementById('lookup-start').value = ds; 
-                runLookup(); 
+                toggleRequestDate(ds);
             }
         };
 
@@ -353,16 +359,16 @@ function renderCalendar(todayStr) {
                 daysEl.appendChild(document.createElement('div')).className = 'day-cell opacity-0 pointer-events-none';
             } else {
                 const date = new Date(year, month, currentDay); const ds = getLocalDateString(date); const info = getInfo(ds);
+                const isSelected = selectedRequestDates.has(ds);
                 const div = document.createElement('div');
-                div.className = `day-cell status-${info.status} ${date < todayObj ? 'day-past' : ''} ${ds === todayStr ? 'today-focus' : ''}`;
+                div.className = `day-cell status-${info.status} ${date < todayObj ? 'day-past' : ''} ${ds === todayStr ? 'today-focus' : ''} ${isSelected ? 'request-selected' : ''}`;
                 
-                // --- ADMIN CLICK LOGIC ---
                 div.onclick = () => { 
                     if (window.isAdmin) {
                         openEditModal(ds, info);
                     } else {
-                        document.getElementById('lookup-start').value = ds; 
-                        runLookup(); 
+                        // Toggle Request Mode
+                        toggleRequestDate(ds);
                     }
                 };
 
@@ -375,6 +381,101 @@ function renderCalendar(todayStr) {
         }
     }
 }
+
+// --- REQUEST FEATURE LOGIC ---
+
+function toggleRequestDate(dateStr) {
+    if(selectedRequestDates.has(dateStr)) {
+        selectedRequestDates.delete(dateStr);
+    } else {
+        selectedRequestDates.add(dateStr);
+    }
+    
+    // Refresh UI
+    renderCalendar(getLocalDateString(new Date()));
+    // If current week view contains this date, refresh it too
+    const weekSel = document.getElementById('week-selector').value;
+    if(weekSel) renderWeekSummary(parseInt(weekSel));
+    
+    updateRequestSidebar();
+}
+
+function updateRequestSidebar() {
+    const panel = document.getElementById('request-panel');
+    const lookupPanel = document.getElementById('lookup-panel');
+    const list = document.getElementById('request-list');
+    const count = document.getElementById('request-count');
+    
+    if (selectedRequestDates.size > 0) {
+        panel.classList.remove('hidden');
+        lookupPanel.classList.add('hidden'); // Swap panels
+        count.innerText = selectedRequestDates.size;
+        
+        list.innerHTML = '';
+        Array.from(selectedRequestDates).sort().forEach(ds => {
+            const d = new Date(ds);
+            const info = getInfo(ds);
+            const item = document.createElement('div');
+            item.className = "flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10";
+            item.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-[10px] font-black uppercase text-pink-500">${d.getDate()}.${d.getMonth()+1}</span>
+                    <span class="text-xs font-bold opacity-80">${t(info.status)}</span>
+                </div>
+                <button onclick="toggleRequestDate('${ds}')" class="text-white/40 hover:text-white transition"><i class="fas fa-times"></i></button>
+            `;
+            list.appendChild(item);
+        });
+        
+        // Mobile scroll to action
+        if(window.innerWidth < 1024) {
+            panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    } else {
+        panel.classList.add('hidden');
+        lookupPanel.classList.remove('hidden'); // Show lookup again
+    }
+}
+
+function openRequestModal() {
+    document.getElementById('req-subtitle').innerText = `For ${selectedRequestDates.size} dager`;
+    document.getElementById('request-modal').classList.remove('hidden');
+}
+
+window.closeRequestModal = function() {
+    document.getElementById('request-modal').classList.add('hidden');
+}
+
+window.submitRequest = async function() {
+    const name = document.getElementById('req-name').value;
+    const msg = document.getElementById('req-msg').value;
+    
+    if(!name) { alert("Vennligst skriv inn navn"); return; }
+    
+    const reqData = {
+        name,
+        message: msg,
+        dates: Array.from(selectedRequestDates),
+        submittedAt: new Date().toISOString()
+    };
+    
+    try {
+        await window.dbFormat.addDoc(window.dbFormat.collection(window.db, "requests"), reqData);
+        alert("Forespørsel sendt!");
+        selectedRequestDates.clear();
+        document.getElementById('req-name').value = '';
+        document.getElementById('req-msg').value = '';
+        closeRequestModal();
+        init(); // Resets UI
+    } catch(e) {
+        alert("Kunne ikke sende: " + e.message);
+    }
+}
+
+// Global exposure
+window.toggleRequestDate = toggleRequestDate;
+window.openRequestModal = openRequestModal;
+
 
 function changeMonth(offset) { currentViewDate.setMonth(currentViewDate.getMonth() + offset); renderCalendar(getLocalDateString(new Date())); }
 

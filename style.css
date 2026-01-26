@@ -108,6 +108,19 @@ body.light-mode .day-cell { background: rgba(0, 0, 0, 0.03); }
 
 .today-focus { background: var(--text-color) !important; color: var(--bg-color) !important; transform: scale(1.1); border: none !important; }
 
+/* NEW: Selection Ring for Requests */
+.request-selected {
+    box-shadow: 0 0 0 3px var(--pink) !important;
+    animation: pulse-ring 2s infinite;
+    z-index: 20;
+}
+
+@keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0px rgba(244, 114, 182, 0.7); }
+    70% { box-shadow: 0 0 0 6px rgba(244, 114, 182, 0); }
+    100% { box-shadow: 0 0 0 0px rgba(244, 114, 182, 0); }
+}
+
 .summary-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);

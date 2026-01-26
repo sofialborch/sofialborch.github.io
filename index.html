@@ -117,8 +117,26 @@
                 </div>
             </div>
 
+            <!-- Sidebar -->
             <div class="lg:col-span-4 space-y-6">
-                <div class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-white/10 lg:sticky lg:top-24">
+                <!-- NEW Request Panel -->
+                <div id="request-panel" class="hidden glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-pink-500/50 lg:sticky lg:top-24 transition-all duration-300">
+                     <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest text-pink-500 flex items-center gap-2">
+                            <i class="fas fa-heart"></i> <span>Forespørsler</span>
+                        </h3>
+                        <span id="request-count" class="bg-pink-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</span>
+                    </div>
+                    <div id="request-list" class="space-y-3 mb-6 max-h-[200px] overflow-y-auto custom-scrollbar">
+                        <!-- Items injected here -->
+                    </div>
+                    <button onclick="openRequestModal()" class="w-full bg-pink-500 text-white font-black py-4 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
+                        Send Forespørsel
+                    </button>
+                </div>
+
+                <!-- Existing Lookup Panel -->
+                <div id="lookup-panel" class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-white/10 lg:sticky lg:top-24">
                     <div class="flex items-center justify-between mb-6 lg:mb-10">
                         <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest opacity-40 flex items-center gap-2">
                             <i class="fas fa-search"></i> <span data-tr="lookup">Søk</span>
@@ -135,7 +153,7 @@
                                 <input type="date" id="lookup-end" class="w-full">
                             </div>
                         </div>
-                        <button onclick="runLookup()" class="w-full bg-pink-500 text-white font-black py-4 lg:py-5 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20" data-tr="searchBtn">
+                        <button onclick="runLookup()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black py-4 lg:py-5 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em]" data-tr="searchBtn">
                             Søk i periode
                         </button>
                     </div>
@@ -154,7 +172,7 @@
                 <div class="h-8 w-px bg-white/10 hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.1 (Cloud Migrated)</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.2 (Requests Enabled)</p>
                 </div>
             </div>
             
@@ -260,12 +278,36 @@
         </div>
     </div>
     
+    <!-- Request Modal (For Guests) -->
+    <div id="request-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeRequestModal()"></div>
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-white/10 shadow-2xl transform transition-all">
+            <h3 class="text-lg lg:text-xl font-black uppercase tracking-widest mb-2" data-tr="reqTitle">Send Forespørsel</h3>
+            <p class="text-[10px] opacity-60 font-bold uppercase tracking-widest mb-6" id="req-subtitle">For ... dager</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Navn / Kontakt</label>
+                    <input type="text" id="req-name" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Melding</label>
+                    <textarea id="req-msg" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                </div>
+
+                <button onclick="submitRequest()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
+                    Send
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
       // Updated to stable versions
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
       import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyC6wkHeUtbYdlYeZZA_4RDbjes7MuP-i4E",
@@ -285,7 +327,7 @@
 
       // Expose Firestore to global window object for script.js
       window.db = db;
-      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch };
+      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc };
 
       // --- Migration Utility ---
       window.uploadLocalDataToFirestore = async function(localOverrides) {
