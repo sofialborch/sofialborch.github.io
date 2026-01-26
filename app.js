@@ -2,10 +2,11 @@ const getLocalDateString = (date) => date.toLocaleDateString('en-CA');
 const t = (key) => TR[CURRENT_LANG][key] || key;
 
 function toggleTheme() {
-    const isLight = document.body.classList.toggle('light-mode');
+    // New logic: Default is Light. Toggle 'dark-mode' class.
+    const isDark = document.body.classList.toggle('dark-mode');
     const icon = document.getElementById('theme-icon');
-    icon.className = isLight ? 'fas fa-sun text-base lg:text-lg' : 'fas fa-moon text-base lg:text-lg';
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    icon.className = isDark ? 'fas fa-moon text-base lg:text-lg' : 'fas fa-sun text-base lg:text-lg';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
 }
 
 function translateNote(note) {
@@ -46,13 +47,14 @@ function getDateFromWeek(week, year) {
 }
 
 async function loadData() {
+    // Theme Loading: Default to Light (No class) if not set or set to 'light'
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-        document.getElementById('theme-icon').className = 'fas fa-sun text-base lg:text-lg';
-    } else {
-        document.body.classList.remove('light-mode');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
         document.getElementById('theme-icon').className = 'fas fa-moon text-base lg:text-lg';
+    } else {
+        document.body.classList.remove('dark-mode');
+        document.getElementById('theme-icon').className = 'fas fa-sun text-base lg:text-lg';
     }
     
     const savedLang = localStorage.getItem('lang');
@@ -106,6 +108,15 @@ async function loadData() {
     }
     init();
     if(window.checkRequestStatus) window.checkRequestStatus(); // NEW: Check for request updates
+    
+    // Smooth Preloader Exit
+    const preloader = document.getElementById('preloader');
+    if (preloader) {
+        setTimeout(() => {
+            preloader.style.opacity = '0';
+            preloader.style.visibility = 'hidden';
+        }, 500);
+    }
 }
 
 function updateStatus(text, color) {
@@ -328,13 +339,15 @@ function updateRequestSidebar() {
             const d = new Date(ds);
             const info = getInfo(ds);
             const item = document.createElement('div');
-            item.className = "flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10";
+            // Updated: Use dynamic classes for border/bg visibility in light mode
+            item.className = "flex items-center justify-between p-3 rounded-xl bg-dynamic border border-dynamic";
             item.innerHTML = `
                 <div class="flex items-center gap-3">
                     <span class="text-[10px] font-black uppercase text-pink-500">${d.getDate()}.${d.getMonth()+1}</span>
                     <span class="text-xs font-bold opacity-80">${t(info.status)}</span>
                 </div>
-                <button onclick="toggleRequestDate('${ds}')" class="text-white/40 hover:text-white transition"><i class="fas fa-times"></i></button>
+                <!-- Updated: Use text-muted-dynamic so it's visible in light mode -->
+                <button onclick="toggleRequestDate('${ds}')" class="text-muted-dynamic hover:text-[var(--text-color)] transition"><i class="fas fa-times"></i></button>
             `;
             list.appendChild(item);
         });
@@ -356,7 +369,7 @@ function openRequestModal() {
         let footerHtml = '';
         if(DATA_STORE.settings.phone) {
              footerHtml += `<p class="text-[10px] font-black uppercase tracking-widest opacity-60 mt-4 text-center">
-                ${t('callMe')} <span class="text-white select-all">${DATA_STORE.settings.phone}</span>
+                ${t('callMe')} <span class="text-[var(--text-color)] select-all">${DATA_STORE.settings.phone}</span>
              </p>`;
         }
         if(!window.auth.currentUser || window.auth.currentUser.isAnonymous) {
@@ -453,10 +466,10 @@ window.checkRequestStatus = async function() {
                 };
 
                 const div = document.createElement('div');
-                div.className = "mb-2 p-2 rounded-lg bg-white/5 border border-white/5 flex justify-between items-center";
+                div.className = "mb-2 p-2 rounded-lg bg-dynamic border border-dynamic flex justify-between items-center";
                 div.innerHTML = `
                     <div class="flex flex-col">
-                        <span class="text-[10px] font-bold text-white/80">${data.dates.length} dager</span>
+                        <span class="text-[10px] font-bold opacity-80">${data.dates.length} dager</span>
                         <span class="text-[9px] opacity-50">${new Date(data.submittedAt).toLocaleDateString()}</span>
                     </div>
                     <span class="px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider border ${statusColors[data.status] || statusColors['pending']}">
@@ -497,7 +510,7 @@ function runLookup() {
                 weekGroup = resultsEl.appendChild(Object.assign(document.createElement('div'), { className: 'lookup-week-group space-y-4' }));
             }
             weekGroup.appendChild(Object.assign(document.createElement('div'), {
-                className: 'flex items-center justify-between p-4 lg:p-6 rounded-xl lg:rounded-2xl bg-white/10 border border-white/20 hover:bg-white/30 transition-all group',
+                className: 'flex items-center justify-between p-4 lg:p-6 rounded-xl lg:rounded-2xl bg-dynamic border border-dynamic hover-bg-dynamic transition-all group',
                 innerHTML: `
                     <div class="flex flex-col">
                         <span class="text-[10px] lg:text-sm font-black uppercase opacity-60 group-hover:opacity-100 transition-opacity">${current.toLocaleDateString(t('monthLocale'), {weekday: 'short'})} ${current.getDate()}.${String(current.getMonth()+1).padStart(2,'0')}</span>

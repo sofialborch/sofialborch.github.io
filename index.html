@@ -14,21 +14,26 @@
 </head>
 <body class="antialiased min-h-screen">
 
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="preloader-logo">Z03Y</div>
+    </div>
+
     <div class="decor-blob bg-pink-500 w-[300px] h-[300px] lg:w-[500px] lg:h-[500px] -top-20 -left-20 lg:-top-60 lg:-left-20"></div>
     <div class="decor-blob bg-blue-600 w-[300px] h-[300px] lg:w-[400px] lg:h-[400px] bottom-0 -right-20 lg:-right-40"></div>
 
-    <header class="bg-black/10 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5 shadow-sm">
+    <header class="bg-[var(--card-bg)] backdrop-blur-xl sticky top-0 z-40 border-b border-dynamic shadow-sm transition-colors duration-300">
         <nav class="container mx-auto px-4 lg:px-6 flex items-center justify-between h-16 lg:h-20">
             <span class="text-lg lg:text-2xl font-black uppercase tracking-[0.15em] lg:tracking-[0.2em]" data-tr="title">Tilgjengelighet</span>
             <div class="flex items-center gap-2 lg:gap-4">
-                <button onclick="toggleTheme()" class="w-10 h-10 lg:w-11 lg:h-11 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
-                    <i id="theme-icon" class="fas fa-moon text-base lg:text-lg"></i>
+                <button onclick="toggleTheme()" class="w-10 h-10 lg:w-11 lg:h-11 flex items-center justify-center rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
+                    <i id="theme-icon" class="fas fa-sun text-base lg:text-lg"></i>
                 </button>
-                <button onclick="toggleLanguage()" class="flex items-center gap-2 px-2 py-1.5 lg:px-3 lg:py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
+                <button onclick="toggleLanguage()" class="flex items-center gap-2 px-2 py-1.5 lg:px-3 lg:py-2 rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
                     <span id="lang-flag" class="text-base lg:text-xl">🇳🇴</span>
                     <span id="lang-label" class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest">NO</span>
                 </button>
-                <div class="h-6 w-px bg-white/10 hidden xs:block"></div>
+                <div class="h-6 w-px bg-dynamic hidden xs:block"></div>
                 
                 <!-- Admin Tools Container -->
                 <div id="admin-tools" class="hidden flex items-center gap-2">
@@ -44,7 +49,7 @@
                 </div>
 
                 <!-- Tutorial Trigger -->
-                <button onclick="openTutorial()" class="w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition" title="Help">
+                <button onclick="openTutorial()" class="w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Help">
                     <i class="fas fa-question text-[10px] lg:text-xs"></i>
                 </button>
 
@@ -57,7 +62,7 @@
                 <input type="file" id="manual-upload" class="hidden" accept=".json" onchange="handleManualUpload(event)">
                 <span id="sync-status" 
                       onclick="document.getElementById('manual-upload').click()"
-                      class="hidden md:inline-block text-xs font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5 cursor-pointer hover:bg-white/10 transition-all">
+                      class="hidden md:inline-block text-xs font-bold text-gray-500 uppercase tracking-widest bg-dynamic px-4 py-2 rounded-full border border-dynamic cursor-pointer hover-bg-dynamic transition-all">
                     Laster...
                 </span>
             </div>
@@ -71,7 +76,7 @@
                     <p class="text-[10px] lg:text-s font-black uppercase tracking-[0.3em] text-pink-500/60 mb-2 lg:mb-3" data-tr="today">I dag</p>
                     <h2 id="hero-date" class="text-3xl lg:text-5xl font-black tracking-tight mb-2 lg:mb-3">...</h2>
                     <p id="hero-note" class="text-sm lg:text-base opacity-90 font-bold italic leading-relaxed mb-6 lg:mb-10">....</p>
-                    <div id="hero-status-pill" class="inline-flex items-center gap-3 lg:gap-4 px-4 py-2 lg:px-6 lg:py-3 rounded-xl lg:rounded-2xl bg-white/5 border border-white/5 w-fit">
+                    <div id="hero-status-pill" class="inline-flex items-center gap-3 lg:gap-4 px-4 py-2 lg:px-6 lg:py-3 rounded-xl lg:rounded-2xl bg-dynamic border border-dynamic w-fit">
                         <span id="hero-dot" class="w-2.5 h-2.5 lg:w-3 h-3 rounded-full"></span>
                         <span id="hero-label" class="text-[11px] lg:text-sm font-black uppercase tracking-widest">...</span>
                     </div>
@@ -99,15 +104,15 @@
                     <div class="flex items-center justify-between mb-8 lg:mb-12">
                         <h2 id="calendar-month" class="text-2xl lg:text-4xl font-black tracking-tighter uppercase">...</h2>
                         <div class="flex gap-2 lg:gap-4">
-                            <button onclick="changeMonth(-1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover:bg-white/10 rounded-xl lg:rounded-2xl transition border border-white/5"><i class="fas fa-chevron-left text-sm lg:text-lg"></i></button>
-                            <button onclick="changeMonth(1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover:bg-white/10 rounded-xl lg:rounded-2xl transition border border-white/5"><i class="fas fa-chevron-right text-sm lg:text-lg"></i></button>
+                            <button onclick="changeMonth(-1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-left text-sm lg:text-lg"></i></button>
+                            <button onclick="changeMonth(1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-right text-sm lg:text-lg"></i></button>
                         </div>
                     </div>
                     <div id="calendar-header" class="calendar-grid text-center mb-4 lg:mb-8 text-[10px] lg:text-s font-black uppercase tracking-widest opacity-80">
                         <!-- Populated by JS -->
                     </div>
                     <div id="calendar-days" class="calendar-grid"></div>
-                    <div class="mt-8 lg:mt-14 flex flex-col sm:flex-row flex-wrap gap-4 lg:gap-10 text-[10px] lg:text-s font-black uppercase tracking-widest border-t border-white/5 pt-8 lg:pt-12">
+                    <div class="mt-8 lg:mt-14 flex flex-col sm:flex-row flex-wrap gap-4 lg:gap-10 text-[10px] lg:text-s font-black uppercase tracking-widest border-t border-dynamic pt-8 lg:pt-12">
                         <div class="flex flex-wrap gap-6">
                             <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[var(--available)]"></span> <span data-tr="ledig">Ledig</span></div>
                             <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[var(--busy)]"></span> <span data-tr="opptatt">Opptatt</span></div>
@@ -145,7 +150,7 @@
                 </div>
 
                 <!-- Lookup Panel -->
-                <div id="lookup-panel" class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-white/10 lg:sticky lg:top-24">
+                <div id="lookup-panel" class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-dynamic lg:sticky lg:top-24">
                     <div class="flex items-center justify-between mb-6 lg:mb-10">
                         <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest opacity-40 flex items-center gap-2">
                             <i class="fas fa-search"></i> <span data-tr="lookup">Søk</span>
@@ -162,11 +167,11 @@
                                 <input type="date" id="lookup-end" class="w-full">
                             </div>
                         </div>
-                        <button onclick="runLookup()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black py-4 lg:py-5 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em]" data-tr="searchBtn">
+                        <button onclick="runLookup()" class="w-full bg-dynamic hover-bg-dynamic border border-dynamic text-[var(--text-color)] font-black py-4 lg:py-5 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em]" data-tr="searchBtn">
                             Søk i periode
                         </button>
                     </div>
-                    <div id="lookup-container" class="mt-8 lg:mt-12 hidden border-t border-white/5 pt-6 lg:pt-10">
+                    <div id="lookup-container" class="mt-8 lg:mt-12 hidden border-t border-dynamic pt-6 lg:pt-10">
                         <div id="lookup-results" class="space-y-6 lg:space-y-10 max-h-[400px] lg:max-h-[600px] overflow-y-auto pr-2 custom-scrollbar"></div>
                     </div>
                 </div>
@@ -174,11 +179,12 @@
         </div>
     </main>
 
-    <footer class="container mx-auto px-6 lg:px-12 py-10 lg:py-16 mt-8 lg:mt-12 border-t border-white/5">
+    <!-- Footer updated with dynamic borders and text colors -->
+    <footer class="container mx-auto px-6 lg:px-12 py-10 lg:py-16 mt-8 lg:mt-12 border-t border-dynamic">
         <div class="flex flex-col md:flex-row justify-between items-center gap-8">
             <div class="flex items-center gap-4 lg:gap-6">
                 <span class="text-xl lg:text-2xl font-black uppercase tracking-[0.3em] lg:tracking-[0.4em] opacity-30 select-none">Z03Y</span>
-                <div class="h-8 w-px bg-white/10 hidden md:block"></div>
+                <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.5</p>
@@ -186,8 +192,8 @@
             </div>
             
             <div class="flex flex-col sm:flex-row items-center gap-4">
-                <div id="footer-phone" class="hidden px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-[11px] lg:text-xs font-black tracking-widest opacity-80"></div>
-                <div class="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 text-center sm:text-left">
+                <div id="footer-phone" class="hidden px-5 py-2 rounded-xl bg-dynamic border border-dynamic text-[11px] lg:text-xs font-black tracking-widest opacity-80"></div>
+                <div class="px-5 py-2 rounded-xl bg-dynamic border border-dynamic text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 text-center sm:text-left">
                     &copy; 2026 PROJECT BY Z03Y
                 </div>
                 <button onclick="toggleAuthModal()" class="px-2 py-2 text-[10px] font-black uppercase tracking-widest opacity-20 hover:opacity-100 transition-opacity">
@@ -200,7 +206,7 @@
     <!-- Tutorial Modal (The Glass Guide) -->
     <div id="tutorial-modal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeTutorial()"></div>
-        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 lg:p-10 border border-white/10 shadow-2xl transform transition-all flex flex-col items-center text-center">
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 lg:p-10 border border-dynamic shadow-2xl transform transition-all flex flex-col items-center text-center">
             
             <!-- Slide 1: Status -->
             <div id="tut-slide-0" class="flex flex-col items-center animate-fade-in">
@@ -217,7 +223,7 @@
 
             <!-- Slide 2: Selection -->
             <div id="tut-slide-1" class="hidden flex flex-col items-center animate-fade-in">
-                <div class="w-16 h-16 mb-6 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center relative">
+                <div class="w-16 h-16 mb-6 rounded-2xl bg-dynamic border border-dynamic flex items-center justify-center relative">
                     <i class="fas fa-calendar text-2xl opacity-50"></i>
                     <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-hand-pointer text-white text-xs"></i></div>
                 </div>
@@ -240,9 +246,9 @@
 
             <!-- Dots -->
             <div class="flex gap-2 mt-8 mb-8">
-                <div id="tut-dot-0" class="w-2 h-2 rounded-full bg-white transition-all duration-300"></div>
-                <div id="tut-dot-1" class="w-2 h-2 rounded-full bg-white opacity-20 transition-all duration-300"></div>
-                <div id="tut-dot-2" class="w-2 h-2 rounded-full bg-white opacity-20 transition-all duration-300"></div>
+                <div id="tut-dot-0" class="w-2 h-2 rounded-full bg-[var(--text-color)] transition-all duration-300"></div>
+                <div id="tut-dot-1" class="w-2 h-2 rounded-full bg-[var(--text-color)] opacity-20 transition-all duration-300"></div>
+                <div id="tut-dot-2" class="w-2 h-2 rounded-full bg-[var(--text-color)] opacity-20 transition-all duration-300"></div>
             </div>
 
             <!-- Actions -->
@@ -261,7 +267,7 @@
         <div class="glass-panel relative w-full max-w-md rounded-[2rem] lg:rounded-[2.5rem] p-8 lg:p-10 overflow-hidden shadow-2xl">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg lg:text-xl font-black uppercase tracking-widest" data-tr="printSettings">Utskrift</h3>
-                <button onclick="togglePrintModal()" class="text-gray-500 hover:text-white transition p-2"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="togglePrintModal()" class="text-gray-500 hover:text-[var(--text-color)] transition p-2"><i class="fas fa-times text-xl"></i></button>
             </div>
             <div id="certainty-notice" class="mb-6 lg:mb-8 p-4 rounded-xl lg:rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-4">
                 <div class="shrink-0 w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400"><i class="fas fa-shield-alt"></i></div>
@@ -304,25 +310,25 @@
     <!-- Edit Modal (For Admin) -->
     <div id="edit-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeEditModal()"></div>
-        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-white/10 shadow-2xl transform transition-all">
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all">
             <h3 class="text-xl font-black uppercase tracking-widest mb-6" id="edit-date-display">...</h3>
             <div class="space-y-4">
                 <div class="grid grid-cols-3 gap-2">
-                    <button onclick="setEditStatus('available')" class="edit-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
-                    <button onclick="setEditStatus('busy')" class="edit-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
-                    <button onclick="setEditStatus('partial')" class="edit-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
+                    <button onclick="setEditStatus('available')" class="edit-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
+                    <button onclick="setEditStatus('busy')" class="edit-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
+                    <button onclick="setEditStatus('partial')" class="edit-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
                 </div>
                  <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Badge (Valgfritt)</label>
                     <div class="flex gap-2">
-                        <button onclick="toggleBadge('NR')" id="badge-nr" class="badge-btn flex-1 py-2 rounded-lg border border-white/10 text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
-                        <button onclick="toggleBadge('PM')" id="badge-pm" class="badge-btn flex-1 py-2 rounded-lg border border-white/10 text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
-                        <button onclick="toggleBadge('ST')" id="badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-white/10 text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
+                        <button onclick="toggleBadge('NR')" id="badge-nr" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
+                        <button onclick="toggleBadge('PM')" id="badge-pm" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
+                        <button onclick="toggleBadge('ST')" id="badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
                     </div>
                 </div>
                 <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Notat</label>
-                    <textarea id="edit-note" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                    <textarea id="edit-note" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                 </div>
                 <div class="flex gap-3 mt-4">
                     <button onclick="deleteDay()" class="px-4 py-3 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 font-black text-xs uppercase tracking-widest"><i class="fas fa-trash"></i></button>
@@ -335,7 +341,7 @@
     <!-- NEW: Bulk Edit Modal (For Processing Requests) -->
     <div id="bulk-modal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeBulkModal()"></div>
-        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-white/10 shadow-2xl transform transition-all flex flex-col max-h-[90vh]">
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all flex flex-col max-h-[90vh]">
             <div class="mb-6">
                 <h3 class="text-xl font-black uppercase tracking-widest" id="bulk-title">...</h3>
                 <p class="text-[10px] opacity-60 font-bold uppercase tracking-widest mt-1" id="bulk-subtitle">... dager</p>
@@ -347,21 +353,21 @@
 
                 <div class="space-y-4">
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="setBulkStatus('available')" class="bulk-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
-                        <button onclick="setBulkStatus('busy')" class="bulk-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
-                        <button onclick="setBulkStatus('partial')" class="bulk-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
+                        <button onclick="setBulkStatus('available')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
+                        <button onclick="setBulkStatus('busy')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
+                        <button onclick="setBulkStatus('partial')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
                     </div>
                      <div>
                         <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Badge</label>
                         <div class="flex gap-2">
-                            <button onclick="toggleBulkBadge('NR')" id="bulk-badge-nr" class="badge-btn flex-1 py-2 rounded-lg border border-white/10 text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
-                            <button onclick="toggleBulkBadge('PM')" id="bulk-badge-pm" class="badge-btn flex-1 py-2 rounded-lg border border-white/10 text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
-                            <button onclick="toggleBulkBadge('ST')" id="bulk-badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-white/10 text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
+                            <button onclick="toggleBulkBadge('NR')" id="bulk-badge-nr" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
+                            <button onclick="toggleBulkBadge('PM')" id="bulk-badge-pm" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
+                            <button onclick="toggleBulkBadge('ST')" id="bulk-badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
                         </div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Notat</label>
-                        <textarea id="bulk-note" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                        <textarea id="bulk-note" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                     </div>
                 </div>
             </div>
@@ -370,7 +376,7 @@
                 <button onclick="saveBulkAction()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20" data-tr="applyToDates">
                     Lagre
                 </button>
-                <button onclick="archiveBulkRequest()" class="w-full bg-white/5 text-white/50 hover:text-red-400 font-black py-3 rounded-xl transition text-[10px] uppercase tracking-widest" data-tr="archive">
+                <button onclick="archiveBulkRequest()" class="w-full bg-dynamic text-muted-dynamic hover:text-red-400 font-black py-3 rounded-xl transition text-[10px] uppercase tracking-widest" data-tr="archive">
                     Arkiver / Slett
                 </button>
             </div>
@@ -380,17 +386,17 @@
     <!-- Request Modal (For Guests) -->
     <div id="request-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeRequestModal()"></div>
-        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-white/10 shadow-2xl transform transition-all">
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all">
             <h3 class="text-lg lg:text-xl font-black uppercase tracking-widest mb-2" data-tr="reqTitle">Send Forespørsel</h3>
             <p class="text-[10px] opacity-60 font-bold uppercase tracking-widest mb-6" id="req-subtitle">For ... dager</p>
             <div class="space-y-4">
                 <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Navn / Kontakt</label>
-                    <input type="text" id="req-name" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition">
+                    <input type="text" id="req-name" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition">
                 </div>
                 <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Melding</label>
-                    <textarea id="req-msg" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                    <textarea id="req-msg" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                 </div>
                 <button onclick="submitRequest()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Send</button>
                 <div id="req-modal-footer"></div> <!-- Placeholder for Phone/Auth tip -->
@@ -401,13 +407,13 @@
     <!-- Admin Inbox Modal -->
     <div id="admin-requests-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeAdminRequests()"></div>
-        <div class="glass-panel relative w-full max-w-lg rounded-[2rem] p-8 border border-white/10 shadow-2xl transform transition-all flex flex-col max-h-[80vh]">
+        <div class="glass-panel relative w-full max-w-lg rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all flex flex-col max-h-[80vh]">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-black uppercase tracking-widest flex items-center gap-3">
                     <i class="fas fa-inbox text-pink-500"></i>
                     <span data-tr="requestsTitle">Innboks</span>
                 </h3>
-                <button onclick="closeAdminRequests()" class="text-white/50 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="closeAdminRequests()" class="text-muted-dynamic hover:text-[var(--text-color)] transition"><i class="fas fa-times text-xl"></i></button>
             </div>
             <div id="admin-requests-list" class="space-y-4 overflow-y-auto custom-scrollbar pr-2 flex-1">
                 <p class="text-center opacity-50 py-10 font-bold uppercase tracking-widest text-xs">Ingen forespørsler</p>

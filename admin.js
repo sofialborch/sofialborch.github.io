@@ -91,13 +91,17 @@ function renderAdminRequestList(reqs) {
                 conflictCount++;
             } else if (info.status === 'available' || info.status === 'weekend') {
                 colorClass = "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+            } else {
+                // Fallback for bright mode visibility on 'other'
+                colorClass = "bg-dynamic text-muted-dynamic border-dynamic"; 
             }
             
             return `<span class="px-2 py-1 rounded text-[10px] font-black border ${colorClass}" title="${t(info.status)}">${niceDate}</span>`;
         }).join('');
 
         const el = document.createElement('div');
-        el.className = "p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-pink-500/30 transition group relative";
+        // Updated styling to use dynamic classes for bright mode compatibility
+        el.className = "p-5 rounded-2xl bg-dynamic border border-dynamic hover:border-pink-500/30 transition group relative";
         
         // Warning HTML if conflicts exist
         const warningHTML = conflictCount > 0 
@@ -109,7 +113,7 @@ function renderAdminRequestList(reqs) {
         el.innerHTML = `
             <div class="flex justify-between items-start mb-3">
                 <div>
-                    <h4 class="font-black text-sm uppercase tracking-wide text-white flex items-center gap-2">
+                    <h4 class="font-black text-sm uppercase tracking-wide flex items-center gap-2">
                         ${req.name || 'Ukjent Navn'}
                         ${req.uid ? '<i class="fas fa-user-check text-blue-400 text-xs" title="Registered User"></i>' : ''}
                     </h4>
@@ -119,12 +123,12 @@ function renderAdminRequestList(reqs) {
                     <button onclick="openBulkAction('${req.id}')" class="bg-pink-500 hover:bg-pink-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition shadow-lg shadow-pink-500/20">
                         ${t('approve')}
                     </button>
-                    <button onclick="deleteRequest('${req.id}')" class="bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-400 px-3 py-1.5 rounded-lg transition"><i class="fas fa-trash"></i></button>
+                    <button onclick="deleteRequest('${req.id}')" class="bg-dynamic hover:bg-red-500/20 text-muted-dynamic hover:text-red-400 px-3 py-1.5 rounded-lg transition"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
             
             <div class="mb-4">
-                <p class="text-sm font-medium opacity-80 leading-relaxed bg-black/20 p-3 rounded-lg border border-white/5 italic">"${req.message || ''}"</p>
+                <p class="text-sm font-medium opacity-80 leading-relaxed bg-black/5 dark:bg-black/20 p-3 rounded-lg border border-dynamic italic">"${req.message || ''}"</p>
                 ${warningHTML}
             </div>
 
@@ -167,9 +171,9 @@ function openBulkAction(reqId) {
             const dobj = new Date(d);
             const niceDate = dobj.getDate() + '.' + (dobj.getMonth()+1);
             const isConflict = info.status !== 'available' && info.status !== 'weekend';
-            const color = isConflict ? 'text-red-400' : 'text-emerald-400';
+            const color = isConflict ? 'text-red-500' : 'text-emerald-500';
             
-            dateList.innerHTML += `<div class="flex justify-between items-center text-xs font-bold border-b border-white/5 py-1 last:border-0">
+            dateList.innerHTML += `<div class="flex justify-between items-center text-xs font-bold border-b border-dynamic py-1 last:border-0">
                 <span>${niceDate}</span>
                 <span class="${color}">${t(info.status)}</span>
             </div>`;
@@ -189,9 +193,11 @@ function setBulkStatus(status) {
         if(btn.dataset.val === status) {
             btn.classList.add('bg-white', 'text-black');
             btn.classList.remove('text-white');
+            // Fix for bright mode button active state
+            btn.classList.add('border-black');
         } else {
-            btn.classList.remove('bg-white', 'text-black');
-            btn.classList.add('text-white');
+            btn.classList.remove('bg-white', 'text-black', 'border-black');
+            btn.classList.add('text-muted-dynamic');
         }
     });
 }
@@ -303,11 +309,11 @@ function setEditStatus(status) {
     currentEditStatus = status;
     document.querySelectorAll('.edit-status-btn').forEach(btn => {
         if(btn.dataset.val === status) {
-            btn.classList.add('bg-white', 'text-black');
-            btn.classList.remove('text-white');
+            btn.classList.add('bg-white', 'text-black', 'border-black');
+            btn.classList.remove('text-muted-dynamic');
         } else {
-            btn.classList.remove('bg-white', 'text-black');
-            btn.classList.add('text-white');
+            btn.classList.remove('bg-white', 'text-black', 'border-black');
+            btn.classList.add('text-muted-dynamic');
         }
     });
 }

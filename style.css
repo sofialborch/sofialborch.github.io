@@ -1,40 +1,72 @@
 :root {
-    /* HIGH CONTRAST DARK (Default) */
+    /* BRIGHT MODE (New Default) */
+    --bg-color: #f0f2f5;
+    --card-bg: #ffffff;
+    --card-bg-secondary: #f8fafc;
+    
+    /* Borders - Darker for visibility on light bg */
+    --border-color: #e2e8f0; 
+    --glass-border: rgba(0, 0, 0, 0.15); /* Increased contrast */
+    
+    /* Text */
+    --text-color: #1e293b;
+    --text-muted: rgba(30, 41, 59, 0.6);
+    --text-inverse: #ffffff;
+    
+    /* Interactive */
+    --button-bg: rgba(0, 0, 0, 0.06); /* Slightly darker for visibility */
+    --button-hover: rgba(0, 0, 0, 0.1);
+    
+    /* Accents */
+    --pink: #db2777; /* Darker pink for light mode */
+    
+    /* Status Colors */
+    --available: #15803d; 
+    --busy: #b91c1c;      
+    --partial: #b45309;
+    
+    --noronna: #9333ea;
+    --polar: #db2777;
+    --study: #dc2626;
+    
+    --panel-blur: 40px;
+    --panel-opacity: 0.95;
+    --shadow-style: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode {
+    /* DARK MODE (Legacy Default) */
     --bg-color: #0f0f12;
     --card-bg: #0f0f12;
-    --border-color: #2d2d35;
+    --card-bg-secondary: rgba(255, 255, 255, 0.05);
+    
+    /* Borders */
+    --border-color: #2d2d35; 
+    --glass-border: rgba(255, 255, 255, 0.08);
+    
+    /* Text */
     --text-color: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --text-inverse: #000000;
+    
+    /* Interactive */
+    --button-bg: rgba(255, 255, 255, 0.05);
+    --button-hover: rgba(255, 255, 255, 0.1);
+    
+    /* Accents */
     --pink: #f472b6;
     
-    /* MODIFIED: Brighter, clearer colors as requested */
-    --available: #22c55e; /* Green-500: Much clearer than Emerald */
-    --busy: #ef4444;      /* Red-500: Standard bright red */
+    /* Status Colors */
+    --available: #22c55e; 
+    --busy: #ef4444;      
     --partial: #fbbf24;
     
     --noronna: rgb(192, 132, 252);
     --polar: rgb(244, 114, 182);
     --study: rgb(248, 113, 113);
-    --panel-blur: 30px;
+    
     --panel-opacity: 0.8;
-    --glass-border: rgba(255, 255, 255, 0.08);
     --shadow-style: 0 4px 30px rgba(0, 0, 0, 0.15);
-}
-
-body.light-mode {
-    /* REFINED PINK LIGHT MODE */
-    --bg-color: #f5e9f3;
-    --card-bg: #ffffff;
-    --border-color: #c4b5c3; 
-    --text-color: #1a0f1d; 
-    
-    /* MODIFIED: Stronger colors for light mode visibility */
-    --available: #15803d; /* Green-700: Darker/Clearer on white */
-    --busy: #b91c1c;      /* Red-700: Darker/Clearer on white */
-    
-    --partial: #92400e;
-    --panel-opacity: 0.98;
-    --glass-border: rgba(139, 92, 246, 0.15);
-    --shadow-style: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 body { 
@@ -43,23 +75,56 @@ body {
     color: var(--text-color);
     overflow-x: hidden;
     font-size: 16px;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.5s ease, color 0.3s ease;
+    
+    /* Bright mode gradient */
+    background-image: linear-gradient(135deg, #f0f2f5 0%, #e2e8f0 100%);
+    background-attachment: fixed;
 }
 
-body.light-mode {
-    background-image: linear-gradient(135deg, #f5e9f3 0%, #ecd6ec 100%);
-    background-attachment: fixed;
+body.dark-mode {
+    background-image: none;
+    background-color: var(--bg-color);
+}
+
+/* PRELOADER - Smooth Z03Y Neutral */
+#preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #cbd5e1; /* Neutral Slate-300 - neither too bright nor dark */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+body.dark-mode #preloader {
+    background: #1a1a1c; /* Keep dark for dark mode users to prevent flash */
+}
+
+.preloader-logo {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    color: #475569; /* Slate-600 */
+    opacity: 0;
+    animation: fadeInOut 2s infinite alternate;
+}
+
+body.dark-mode .preloader-logo {
+    color: #fff;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0.3; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1.05); }
 }
 
 @media (min-width: 1024px) { body { font-size: 18px; } }
 
-.decor-blob { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.15; transition: opacity 0.5s; }
-
-/* MODIFIED: Restore pink/blue blobs in light mode by removing color override and adjusting opacity */
-body.light-mode .decor-blob { 
-    opacity: 0.25; 
-    /* background-color override removed to allow inline Tailwind classes to work */
-}
+.decor-blob { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.25; transition: opacity 0.5s; }
+body.dark-mode .decor-blob { opacity: 0.15; }
 
 .glass-panel { 
     background: var(--card-bg);
@@ -67,6 +132,12 @@ body.light-mode .decor-blob {
     border: 1px solid var(--glass-border); 
     box-shadow: var(--shadow-style);
 }
+
+/* Dynamic Helper Classes */
+.border-dynamic { border-color: var(--glass-border) !important; }
+.text-muted-dynamic { color: var(--text-muted) !important; }
+.bg-dynamic { background-color: var(--button-bg) !important; }
+.hover-bg-dynamic:hover { background-color: var(--button-hover) !important; }
 
 .calendar-grid { display: grid; grid-template-columns: 30px repeat(7, 1fr); gap: 4px; }
 @media (min-width: 640px) { .calendar-grid { grid-template-columns: 45px repeat(7, 1fr); gap: 10px; } }
@@ -80,16 +151,17 @@ body.light-mode .decor-blob {
     border-radius: 8px;
     transition: all 0.2s ease;
     cursor: pointer;
-    background: rgba(128, 128, 128, 0.08);
+    background: var(--card-bg-secondary);
     font-size: 14px;
+    border: 1px solid transparent;
 }
-
-body.light-mode .day-cell { background: rgba(0, 0, 0, 0.03); }
+/* Ensure days have a border in light mode for clarity */
+body:not(.dark-mode) .day-cell { border-color: var(--border-color); }
 
 @media (min-width: 640px) { .day-cell { border-radius: 12px; font-size: 17px; } }
 
-.day-cell:hover { transform: scale(1.05); background: rgba(128, 128, 128, 0.15); z-index: 10; }
-.week-num-cell { font-size: 14px; font-weight: 900; color: rgba(128, 128, 128, 0.35); display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.day-cell:hover { transform: scale(1.05); background: var(--button-hover); z-index: 10; border-color: var(--glass-border); }
+.week-num-cell { font-size: 14px; font-weight: 900; color: var(--text-muted); display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0.5; }
 
 @media (min-width: 640px) { .week-num-cell { font-size: 19px; } }
 .day-past { opacity: 0.1; filter: grayscale(1); pointer-events: none; }
@@ -101,10 +173,15 @@ body.light-mode .day-cell { background: rgba(0, 0, 0, 0.03); }
 .badge-pm { color: var(--polar); }
 .badge-st { color: var(--study); }
 
-/* UPDATED: Uses variables for consistent color */
-.status-available { border: 1px solid var(--available); color: var(--available); }
-.status-busy { border: 1px solid var(--busy); color: var(--busy); }
-.status-partial { border: 1px solid var(--partial); color: var(--partial); }
+.status-available { border: 1px solid var(--available); color: var(--available); background: rgba(21, 128, 61, 0.05) !important; }
+.status-busy { border: 1px solid var(--busy); color: var(--busy); background: rgba(185, 28, 28, 0.05) !important; }
+.status-partial { border: 1px solid var(--partial); color: var(--partial); background: rgba(180, 83, 9, 0.05) !important; }
+
+/* Keep dark mode cells simpler */
+body.dark-mode .status-available { background: var(--card-bg-secondary) !important; border: 1px solid var(--available); }
+body.dark-mode .status-busy { background: var(--card-bg-secondary) !important; border: 1px solid var(--busy); }
+body.dark-mode .status-partial { background: var(--card-bg-secondary) !important; border: 1px solid var(--partial); }
+
 
 .today-focus { background: var(--text-color) !important; color: var(--bg-color) !important; transform: scale(1.1); border: none !important; }
 
@@ -154,20 +231,18 @@ input[type="date"], input[type="month"], .week-select {
     font-weight: 700;
 }
 
-body:not(.light-mode) input, body:not(.light-mode) .week-select { color-scheme: dark; }
+body.dark-mode input, body.dark-mode .week-select { color-scheme: dark; }
 
 .week-select {
     padding-right: 2.5rem;
-    /* MODIFIED: Explicit White Stroke for Dark Mode */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff' stroke-width='4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231a0f1d' stroke-width='4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 0.8em;
 }
 
-/* MODIFIED: Explicit Dark Stroke for Light Mode */
-body.light-mode .week-select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231a0f1d' stroke-width='4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+body.dark-mode .week-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff' stroke-width='4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
 }
 
 .tooltip {
