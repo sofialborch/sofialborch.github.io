@@ -10,7 +10,11 @@ const TR = {
         noPlans: "Ingen planer registrert.", week: "Uke", monthLocale: 'nb-NO',
         days: ['M', 'T', 'O', 'T', 'F', 'L', 'S'],
         reqTitle: "Send Forespørsel",
-        requestsTitle: "Innboks", noReq: "Ingen nye forespørsler", delete: "Slett"
+        requestsTitle: "Innboks", noReq: "Ingen nye forespørsler", delete: "Slett",
+        // NEW KEYS
+        approve: "Behandle", conflictsFound: "Konflikt: Noen datoer er ikke ledige",
+        bulkEditTitle: "Behandle forespørsel", applyToDates: "Lagre for valgte datoer",
+        archive: "Arkiver forespørsel"
     },
     en: {
         title: "Availability", printBtn: "Print Schedule", today: "Today", quickOutlook: "Quick Outlook",
@@ -22,7 +26,11 @@ const TR = {
         noPlans: "No specific plans logged.", week: "Week", monthLocale: 'en-GB',
         days: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
         reqTitle: "Send Request",
-        requestsTitle: "Inbox", noReq: "No new requests", delete: "Delete"
+        requestsTitle: "Inbox", noReq: "No new requests", delete: "Delete",
+        // NEW KEYS
+        approve: "Process", conflictsFound: "Conflict: Dates not fully available",
+        bulkEditTitle: "Process Request", applyToDates: "Save for selected dates",
+        archive: "Archive Request"
     }
 };
 
@@ -39,3 +47,6 @@ let currentEditDate = null;
 let currentEditStatus = 'available';
 let currentBadge = null;
 let selectedRequestDates = new Set();
+// NEW: Store requests for admin lookup
+let loadedRequestsCache = {}; 
+let currentBulkRequest = null;

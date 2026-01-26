@@ -27,7 +27,13 @@ async function openAdminRequests() {
         }
 
         let reqs = [];
-        snapshot.forEach(doc => reqs.push({ id: doc.id, ...doc.data() }));
+        loadedRequestsCache = {}; // Reset cache
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            loadedRequestsCache[doc.id] = { id: doc.id, ...data };
+            reqs.push(loadedRequestsCache[doc.id]);
+        });
+        
         reqs.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
         renderAdminRequestList(reqs);
     } catch (e) {
@@ -42,25 +48,60 @@ function renderAdminRequestList(reqs) {
 
     reqs.forEach(req => {
         const dateStr = new Date(req.submittedAt).toLocaleDateString(t('monthLocale'), { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' });
+        
+        // Analyze Conflicts
+        let conflictCount = 0;
+        const datePills = (req.dates || []).map(d => {
+            const info = getInfo(d);
+            const dobj = new Date(d);
+            const niceDate = dobj.getDate() + '.' + (dobj.getMonth()+1);
+            
+            // Determine Status Color
+            let colorClass = "bg-white/10 text-white border-white/10"; // Default (unknown/past)
+            if (info.status === 'busy') {
+                colorClass = "bg-red-500/20 text-red-400 border-red-500/30 line-through opacity-75";
+                conflictCount++;
+            } else if (info.status === 'partial') {
+                colorClass = "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+                conflictCount++;
+            } else if (info.status === 'available' || info.status === 'weekend') {
+                colorClass = "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+            }
+            
+            return `<span class="px-2 py-1 rounded text-[10px] font-black border ${colorClass}" title="${t(info.status)}">${niceDate}</span>`;
+        }).join('');
+
         const el = document.createElement('div');
         el.className = "p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-pink-500/30 transition group relative";
+        
+        // Warning HTML if conflicts exist
+        const warningHTML = conflictCount > 0 
+            ? `<div class="mt-3 flex items-center gap-2 text-yellow-500 text-[10px] font-black uppercase tracking-widest bg-yellow-500/10 px-3 py-2 rounded-lg border border-yellow-500/20">
+                 <i class="fas fa-exclamation-triangle"></i> ${t('conflictsFound')} (${conflictCount})
+               </div>` 
+            : '';
+
         el.innerHTML = `
             <div class="flex justify-between items-start mb-3">
                 <div>
                     <h4 class="font-black text-sm uppercase tracking-wide text-white">${req.name}</h4>
                     <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">${dateStr}</span>
                 </div>
-                <button onclick="deleteRequest('${req.id}')" class="text-white/20 hover:text-red-400 transition p-2"><i class="fas fa-trash"></i></button>
+                <div class="flex gap-2">
+                    <button onclick="openBulkAction('${req.id}')" class="bg-pink-500 hover:bg-pink-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition shadow-lg shadow-pink-500/20">
+                        ${t('approve')}
+                    </button>
+                    <button onclick="deleteRequest('${req.id}')" class="bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-400 px-3 py-1.5 rounded-lg transition"><i class="fas fa-trash"></i></button>
+                </div>
             </div>
+            
             <div class="mb-4">
                 <p class="text-sm font-medium opacity-80 leading-relaxed bg-black/20 p-3 rounded-lg border border-white/5 italic">"${req.message}"</p>
+                ${warningHTML}
             </div>
+
             <div class="flex flex-wrap gap-2">
-                ${req.dates ? req.dates.map(d => {
-                    const dobj = new Date(d);
-                    const niceDate = dobj.getDate() + '.' + (dobj.getMonth()+1);
-                    return `<span class="px-2 py-1 rounded bg-pink-500/20 text-pink-300 text-[10px] font-black border border-pink-500/20">${niceDate}</span>`;
-                }).join('') : ''}
+                ${datePills}
             </div>
         `;
         list.appendChild(el);
@@ -75,13 +116,132 @@ async function deleteRequest(id) {
     } catch(e) { alert("Error: " + e.message); }
 }
 
+// --- BULK / APPROVE LOGIC ---
+
+function openBulkAction(reqId) {
+    const req = loadedRequestsCache[reqId];
+    if(!req) return;
+    
+    currentBulkRequest = req; // Store for saving
+    
+    // Populate Modal
+    document.getElementById('bulk-title').innerText = `${t('bulkEditTitle')}: ${req.name}`;
+    document.getElementById('bulk-subtitle').innerText = `${req.dates.length} dager`;
+    document.getElementById('bulk-note').value = `${req.name}: ${req.message}`; // Pre-fill note
+    
+    // Populate Date List in Modal for transparency
+    const dateList = document.getElementById('bulk-date-list');
+    dateList.innerHTML = '';
+    req.dates.forEach(d => {
+        const info = getInfo(d);
+        const dobj = new Date(d);
+        const niceDate = dobj.getDate() + '.' + (dobj.getMonth()+1);
+        
+        // Simple conflict check for the list
+        const isConflict = info.status !== 'available' && info.status !== 'weekend';
+        const color = isConflict ? 'text-red-400' : 'text-emerald-400';
+        
+        dateList.innerHTML += `<div class="flex justify-between items-center text-xs font-bold border-b border-white/5 py-1 last:border-0">
+            <span>${niceDate}</span>
+            <span class="${color}">${t(info.status)}</span>
+        </div>`;
+    });
+
+    document.getElementById('bulk-modal').classList.remove('hidden');
+    // Hide Inbox while editing
+    document.getElementById('admin-requests-modal').classList.add('hidden');
+    
+    // Reset buttons
+    setBulkStatus('busy'); // Default to marking as busy
+    toggleBulkBadge(null); // Reset badges
+}
+
+function setBulkStatus(status) {
+    currentEditStatus = status; // Re-using global var from admin.js logic
+    document.querySelectorAll('.bulk-status-btn').forEach(btn => {
+        if(btn.dataset.val === status) {
+            btn.classList.add('bg-white', 'text-black');
+            btn.classList.remove('text-white');
+        } else {
+            btn.classList.remove('bg-white', 'text-black');
+            btn.classList.add('text-white');
+        }
+    });
+}
+
+function toggleBulkBadge(badge) {
+    // Re-using simplified toggle logic
+    ['NR', 'PM', 'ST'].forEach(b => document.getElementById(`bulk-badge-${b.toLowerCase()}`).style.opacity = '0.5');
+    
+    if (currentBadge === badge) {
+        currentBadge = null;
+    } else {
+        currentBadge = badge;
+        if(badge) document.getElementById(`bulk-badge-${badge.toLowerCase()}`).style.opacity = '1';
+    }
+}
+
+async function saveBulkAction() {
+    if(!currentBulkRequest || !window.isAdmin) return;
+    
+    const note = document.getElementById('bulk-note').value;
+    const batch = window.dbFormat.writeBatch(window.db);
+    
+    // Prepare updates
+    currentBulkRequest.dates.forEach(dateStr => {
+        const ref = window.dbFormat.doc(window.db, "availability", dateStr);
+        const data = {
+            status: currentEditStatus, // from setBulkStatus
+            note: note,
+            badge: currentBadge || null
+        };
+        batch.set(ref, data);
+        
+        // Optimistic UI update
+        DATA_STORE.overrides[dateStr] = data;
+    });
+    
+    // Optional: Archive/Delete request logic could go here, but I'll leave it manual for safety unless requested
+    
+    try {
+        await batch.commit();
+        alert(`Oppdatert ${currentBulkRequest.dates.length} datoer!`);
+        
+        // Cleanup
+        closeBulkModal();
+        init(); // Refresh calendar
+        openAdminRequests(); // Re-open inbox
+    } catch(e) {
+        alert("Bulk update failed: " + e.message);
+    }
+}
+
+async function archiveBulkRequest() {
+    if(!currentBulkRequest) return;
+    await deleteRequest(currentBulkRequest.id); // Re-use delete logic
+    closeBulkModal();
+    openAdminRequests();
+}
+
+function closeBulkModal() {
+    document.getElementById('bulk-modal').classList.add('hidden');
+    document.getElementById('admin-requests-modal').classList.remove('hidden'); // Show inbox again
+}
+
+// Global Exports
 window.openAdminRequests = openAdminRequests;
 window.deleteRequest = deleteRequest;
 window.closeAdminRequests = function() {
     document.getElementById('admin-requests-modal').classList.add('hidden');
 }
+window.openBulkAction = openBulkAction;
+window.setBulkStatus = setBulkStatus;
+window.toggleBulkBadge = toggleBulkBadge;
+window.saveBulkAction = saveBulkAction;
+window.archiveBulkRequest = archiveBulkRequest;
+window.closeBulkModal = closeBulkModal;
 
-// Edit Modal Functions
+// Edit Modal Functions (Legacy Single Day)
 function openEditModal(dateStr, info) {
     currentEditDate = dateStr;
     const dateObj = new Date(dateStr + "T00:00:00");
