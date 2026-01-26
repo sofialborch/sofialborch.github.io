@@ -286,7 +286,7 @@ function toggleBadge(badge) {
         currentBadge = null;
         el.style.opacity = '0.5';
     } else {
-        ['NR', 'PM', 'ST'].forEach(b => document.getElementById(`badge-${b.toLowerCase()}`).style.opacity = '0.5';
+        ['NR', 'PM', 'ST'].forEach(b => document.getElementById(`badge-${b.toLowerCase()}`).style.opacity = '0.5');
         currentBadge = badge;
         el.style.opacity = '1';
     }
