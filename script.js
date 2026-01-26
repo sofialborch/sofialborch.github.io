@@ -8,7 +8,8 @@ const TR = {
         generatePdf: "Generer PDF", loading: "Laster...", online: "Tilkoblet", local: "Lokal økt",
         noPlans: "Ingen planer registrert.", week: "Uke", monthLocale: 'nb-NO',
         days: ['M', 'T', 'O', 'T', 'F', 'L', 'S'],
-        reqTitle: "Send Forespørsel"
+        reqTitle: "Send Forespørsel",
+        requestsTitle: "Innboks", noReq: "Ingen nye forespørsler", delete: "Slett"
     },
     en: {
         title: "Availability", printBtn: "Print Schedule", today: "Today", quickOutlook: "Quick Outlook",
@@ -19,7 +20,8 @@ const TR = {
         generatePdf: "Generate PDF", loading: "Loading...", online: "Online", local: "Local Session",
         noPlans: "No specific plans logged.", week: "Week", monthLocale: 'en-GB',
         days: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-        reqTitle: "Send Request"
+        reqTitle: "Send Request",
+        requestsTitle: "Inbox", noReq: "No new requests", delete: "Delete"
     }
 };
 
@@ -476,9 +478,87 @@ window.submitRequest = async function() {
     }
 }
 
-// Global exposure
-window.toggleRequestDate = toggleRequestDate;
-window.openRequestModal = openRequestModal;
+// --- ADMIN INBOX LOGIC ---
+
+async function openAdminRequests() {
+    if(!window.isAdmin) return;
+    const modal = document.getElementById('admin-requests-modal');
+    const list = document.getElementById('admin-requests-list');
+    
+    modal.classList.remove('hidden');
+    list.innerHTML = `<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-2xl text-pink-500"></i></div>`; // Loading
+
+    try {
+        const q = window.dbFormat.collection(window.db, "requests");
+        const snapshot = await window.dbFormat.getDocs(q);
+        
+        if (snapshot.empty) {
+            list.innerHTML = `<p class="text-center opacity-50 py-10 font-bold uppercase tracking-widest text-xs">${t('noReq')}</p>`;
+            return;
+        }
+
+        let reqs = [];
+        snapshot.forEach(doc => reqs.push({ id: doc.id, ...doc.data() }));
+        
+        // Sort by date desc (newest first) in JS since we avoid complex queries
+        reqs.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+
+        renderAdminRequestList(reqs);
+    } catch (e) {
+        console.error(e);
+        list.innerHTML = `<p class="text-center text-red-400 font-bold">Error loading requests</p>`;
+    }
+}
+
+function renderAdminRequestList(reqs) {
+    const list = document.getElementById('admin-requests-list');
+    list.innerHTML = '';
+
+    reqs.forEach(req => {
+        const dateStr = new Date(req.submittedAt).toLocaleDateString(t('monthLocale'), { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' });
+        
+        const el = document.createElement('div');
+        el.className = "p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-pink-500/30 transition group relative";
+        el.innerHTML = `
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <h4 class="font-black text-sm uppercase tracking-wide text-white">${req.name}</h4>
+                    <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">${dateStr}</span>
+                </div>
+                <button onclick="deleteRequest('${req.id}')" class="text-white/20 hover:text-red-400 transition p-2"><i class="fas fa-trash"></i></button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-sm font-medium opacity-80 leading-relaxed bg-black/20 p-3 rounded-lg border border-white/5 italic">"${req.message}"</p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                ${req.dates ? req.dates.map(d => {
+                    const dobj = new Date(d);
+                    const niceDate = dobj.getDate() + '.' + (dobj.getMonth()+1);
+                    return `<span class="px-2 py-1 rounded bg-pink-500/20 text-pink-300 text-[10px] font-black border border-pink-500/20">${niceDate}</span>`;
+                }).join('') : ''}
+            </div>
+        `;
+        list.appendChild(el);
+    });
+}
+
+async function deleteRequest(id) {
+    if(!confirm(t('delete') + "?")) return;
+    try {
+        await window.dbFormat.deleteDoc(window.dbFormat.doc(window.db, "requests", id));
+        openAdminRequests(); // Reload
+    } catch(e) {
+        alert("Error: " + e.message);
+    }
+}
+
+window.openAdminRequests = openAdminRequests;
+window.deleteRequest = deleteRequest;
+window.closeAdminRequests = function() {
+    document.getElementById('admin-requests-modal').classList.add('hidden');
+}
 
 
 function changeMonth(offset) { currentViewDate.setMonth(currentViewDate.getMonth() + offset); renderCalendar(getLocalDateString(new Date())); }

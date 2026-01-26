@@ -32,6 +32,11 @@
                 
                 <!-- Admin Tools Container -->
                 <div id="admin-tools" class="hidden flex items-center gap-2">
+                    <!-- NEW: Inbox Button -->
+                    <button onclick="openAdminRequests()" title="Inbox" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 hover:bg-pink-500/30 transition-all">
+                        <i class="fas fa-inbox text-xs"></i>
+                    </button>
+
                     <!-- Migration Button -->
                     <button onclick="triggerMigration()" title="Upload Local JSON to Cloud" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all">
                         <i class="fas fa-cloud-upload-alt text-xs"></i>
@@ -301,6 +306,25 @@
             </div>
         </div>
     </div>
+    
+    <!-- Admin Inbox Modal (NEW) -->
+    <div id="admin-requests-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeAdminRequests()"></div>
+        <div class="glass-panel relative w-full max-w-lg rounded-[2rem] p-8 border border-white/10 shadow-2xl transform transition-all flex flex-col max-h-[80vh]">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-black uppercase tracking-widest flex items-center gap-3">
+                    <i class="fas fa-inbox text-pink-500"></i>
+                    <span data-tr="requestsTitle">Innboks</span>
+                </h3>
+                <button onclick="closeAdminRequests()" class="text-white/50 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <div id="admin-requests-list" class="space-y-4 overflow-y-auto custom-scrollbar pr-2 flex-1">
+                <!-- Items injected here -->
+                <p class="text-center opacity-50 py-10 font-bold uppercase tracking-widest text-xs">Ingen forespørsler</p>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
       // Updated to stable versions
@@ -326,8 +350,9 @@
       const provider = new GoogleAuthProvider();
       const db = getFirestore(app);
 
-      // Expose Firestore to global window object for script.js
+      // Expose Firestore AND Auth to global window object for script.js
       window.db = db;
+      window.auth = auth;
       window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc };
 
       // --- Migration Utility ---
