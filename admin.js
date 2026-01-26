@@ -9,13 +9,11 @@ function triggerMigration() {
 window.triggerMigration = triggerMigration;
 
 // Inbox Logic
+let inboxUnsub = null;
+
 async function openAdminRequests() {
     if(!window.isAdmin) return;
     
-    // Hide notification dot when opening
-    const dot = document.getElementById('admin-inbox-dot');
-    if(dot) dot.classList.add('hidden');
-
     // Safety check for DB connection
     if (!window.dbFormat || !window.db) {
         alert("Database connection not ready. Please wait.");
@@ -67,22 +65,28 @@ async function openAdminRequests() {
     }
 }
 
-// Check for pending requests to show red dot
-async function checkInboxStatus() {
+// REAL-TIME LISTENER for Red Dot
+function subscribeToInbox() {
     if(!window.isAdmin || !window.dbFormat) return;
-    try {
-        const q = window.dbFormat.query(
-            window.dbFormat.collection(window.db, "requests"),
-            window.dbFormat.where("status", "==", "pending")
-        );
-        const snapshot = await window.dbFormat.getDocs(q);
+    
+    if (inboxUnsub) inboxUnsub(); // Clear existing
+
+    const q = window.dbFormat.query(
+        window.dbFormat.collection(window.db, "requests"),
+        window.dbFormat.where("status", "==", "pending")
+    );
+    
+    // onSnapshot fires immediately and on every change
+    inboxUnsub = window.dbFormat.onSnapshot(q, (snapshot) => {
         const dot = document.getElementById('admin-inbox-dot');
+        if(!dot) return;
+        
         if(!snapshot.empty) {
             dot.classList.remove('hidden');
         } else {
             dot.classList.add('hidden');
         }
-    } catch(e) { console.log("Inbox check failed", e); }
+    });
 }
 
 function renderAdminRequestList(reqs) {
@@ -277,7 +281,7 @@ async function saveBulkAction() {
         closeBulkModal();
         init(); 
         openAdminRequests(); 
-        checkInboxStatus(); // Update dot
+        // Note: subscribeToInbox handles the red dot update automatically now
     } catch(e) {
         alert("Bulk update failed: " + e.message);
     }
@@ -297,7 +301,6 @@ async function archiveBulkRequest() {
              });
              closeBulkModal();
              openAdminRequests();
-             checkInboxStatus(); // Update dot
         } catch(e) { alert(e.message); }
     }
 }
@@ -310,7 +313,7 @@ function closeBulkModal() {
 // Global Exports
 window.openAdminRequests = openAdminRequests;
 window.deleteRequest = deleteRequest;
-window.checkInboxStatus = checkInboxStatus; // Export
+window.subscribeToInbox = subscribeToInbox; // Export new listener
 window.closeAdminRequests = function() {
     document.getElementById('admin-requests-modal').classList.add('hidden');
 }

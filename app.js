@@ -447,113 +447,132 @@ window.closeRequestSentModal = function() {
     document.getElementById('request-sent-modal').classList.add('hidden');
 }
 
-// NEW: Tracker Logic with Cross-Device Sync
-window.checkRequestStatus = async function() {
-    const container = document.getElementById('my-requests-container');
-    if(!container) return; // Should be in index.html
+// ==========================================
+// NEW: HYBRID TRACKING (POLLING vs LISTENER)
+// ==========================================
 
-    let trackIds = new Set(JSON.parse(localStorage.getItem('my_requests') || '[]'));
-    
-    // NEW: If Logged In, Fetch from Firestore
+let userRequestsUnsub = null;
+
+// Called by checkRequestStatus (Polling for Guest) or onAuth (Listener for User)
+window.subscribeToMyRequests = function(user) {
+    if(userRequestsUnsub) userRequestsUnsub(); // Clear old listener
+
+    const container = document.getElementById('my-requests-container');
+    if(!container) return;
+
+    const q = window.dbFormat.query(
+        window.dbFormat.collection(window.db, "requests"),
+        window.dbFormat.where("uid", "==", user.uid)
+    );
+
+    userRequestsUnsub = window.dbFormat.onSnapshot(q, (snapshot) => {
+        let allRequests = [];
+        snapshot.forEach(doc => allRequests.push(doc.data()));
+        
+        // Sort and Render
+        allRequests.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+        renderRequestTracker(allRequests.slice(0, 5));
+    });
+}
+
+window.checkRequestStatus = async function() {
     const user = window.auth.currentUser;
-    if (user && !user.isAnonymous) {
-        try {
-            const q = window.dbFormat.query(
-                window.dbFormat.collection(window.db, "requests"),
-                window.dbFormat.where("uid", "==", user.uid)
-            );
-            const querySnapshot = await window.dbFormat.getDocs(q);
-            querySnapshot.forEach(doc => trackIds.add(doc.id));
-        } catch(e) {
-            console.log("Error fetching user requests:", e);
-        }
-    }
     
-    if (trackIds.size === 0) {
+    // If logged in real user, we rely on the LISTENER created in index.html -> subscribeToMyRequests
+    // So we just return here to stop the "Guest Polling" logic from overwriting it.
+    if(user && !user.isAnonymous) return; 
+
+    // GUEST / ANONYMOUS: Poll LocalStorage IDs
+    const container = document.getElementById('my-requests-container');
+    if(!container) return; 
+
+    let trackIds = JSON.parse(localStorage.getItem('my_requests') || '[]');
+    if (trackIds.length === 0) {
         container.classList.add('hidden');
         return;
     }
 
     try {
-        container.innerHTML = `<h4 class="text-[9px] font-black uppercase tracking-widest opacity-50 mb-2 pl-1 flex justify-between">
-            <span>${t('myRequests')}</span>
-            <span class="opacity-50 text-[8px] animate-pulse">LIVE</span>
-        </h4>`;
-        container.classList.remove('hidden');
+        // Limit to 5
+        const recentIds = trackIds.slice(-5).reverse();
+        let requests = [];
 
-        // Convert Set to Array and Sort by Timestamp (Desc) - Requires fetching first to sort accurately, 
-        // but for simplicity we'll just fetch all and render. 
-        // Note: For a real app with many requests, we'd query with orderBy, but here we do client-side sort.
-        
-        const allRequests = [];
-        for (const rid of trackIds) {
+        for (const rid of recentIds) {
             const docRef = await window.dbFormat.getDoc(window.dbFormat.doc(window.db, "requests", rid));
             if (docRef.exists()) {
-                allRequests.push(docRef.data());
+                requests.push(docRef.data());
             }
         }
+        renderRequestTracker(requests);
+
+    } catch(e) { console.log("Guest polling error", e); }
+}
+
+function renderRequestTracker(dataList) {
+    const container = document.getElementById('my-requests-container');
+    
+    if(!dataList || dataList.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+
+    container.innerHTML = `<h4 class="text-[9px] font-black uppercase tracking-widest opacity-50 mb-2 pl-1 flex justify-between">
+        <span>${t('myRequests')}</span>
+        <span class="opacity-50 text-[8px] animate-pulse">LIVE</span>
+    </h4>`;
+    container.classList.remove('hidden');
+
+    for (const data of dataList) {
+        // NOTIFICATION LOGIC
+        const seenKey = `req_status_${data.id}`;
+        const seenStatus = localStorage.getItem(seenKey);
         
-        // Sort by submittedAt descending
-        allRequests.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
-
-        // Limit to 5
-        const recentRequests = allRequests.slice(0, 5);
-
-        for (const data of recentRequests) {
-            const rid = data.id;
-            
-            // NOTIFICATION LOGIC
-            const seenKey = `req_status_${rid}`;
-            const seenStatus = localStorage.getItem(seenKey);
-            
-            if (data.status !== 'pending' && seenStatus !== data.status) {
-                openNotificationModal(data.status, data.adminResponse);
-                localStorage.setItem(seenKey, data.status); 
-            }
-
-            const statusColors = {
-                'pending': 'bg-yellow-500/20 text-yellow-500 border-yellow-500/20',
-                'approved': 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20',
-                'rejected': 'bg-red-500/20 text-red-500 border-red-500/20',
-                'archived': 'bg-gray-500/20 text-gray-500 border-gray-500/20'
-            };
-            
-            const statusTr = {
-                'pending': t('statusPending'), 'approved': t('statusApproved'),
-                'rejected': t('statusRejected'), 'archived': t('statusRejected')
-            };
-
-            const div = document.createElement('div');
-            div.className = "mb-2 p-3 rounded-lg bg-dynamic border border-dynamic";
-            
-            let responseHtml = '';
-            if(data.adminResponse) {
-                responseHtml = `
-                    <div class="mt-2 pt-2 border-t border-dynamic/50 text-xs">
-                        <span class="text-[9px] font-black uppercase tracking-widest opacity-50 block mb-1">${t('adminResponseTitle')}</span>
-                        <span class="opacity-90 italic">"${data.adminResponse}"</span>
-                    </div>
-                `;
-            }
-
-            div.innerHTML = `
-                <div class="flex justify-between items-center mb-1">
-                     <div class="flex flex-col">
-                        <span class="text-[10px] font-bold opacity-80">${data.dates.length} dager</span>
-                        <span class="text-[9px] opacity-50">${new Date(data.submittedAt).toLocaleDateString()}</span>
-                    </div>
-                    <span class="px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider border ${statusColors[data.status] || statusColors['pending']}">
-                        ${statusTr[data.status] || data.status}
-                    </span>
-                </div>
-                ${responseHtml}
-            `;
-            container.appendChild(div);
+        if (data.status !== 'pending' && seenStatus !== data.status) {
+            openNotificationModal(data.status, data.adminResponse);
+            localStorage.setItem(seenKey, data.status); 
         }
-    } catch(e) {
-        console.log("Could not fetch request status", e);
+
+        const statusColors = {
+            'pending': 'bg-yellow-500/20 text-yellow-500 border-yellow-500/20',
+            'approved': 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20',
+            'rejected': 'bg-red-500/20 text-red-500 border-red-500/20',
+            'archived': 'bg-gray-500/20 text-gray-500 border-gray-500/20'
+        };
+        
+        const statusTr = {
+            'pending': t('statusPending'), 'approved': t('statusApproved'),
+            'rejected': t('statusRejected'), 'archived': t('statusRejected')
+        };
+
+        const div = document.createElement('div');
+        div.className = "mb-2 p-3 rounded-lg bg-dynamic border border-dynamic";
+        
+        let responseHtml = '';
+        if(data.adminResponse) {
+            responseHtml = `
+                <div class="mt-2 pt-2 border-t border-dynamic/50 text-xs">
+                    <span class="text-[9px] font-black uppercase tracking-widest opacity-50 block mb-1">${t('adminResponseTitle')}</span>
+                    <span class="opacity-90 italic">"${data.adminResponse}"</span>
+                </div>
+            `;
+        }
+
+        div.innerHTML = `
+            <div class="flex justify-between items-center mb-1">
+                 <div class="flex flex-col">
+                    <span class="text-[10px] font-bold opacity-80">${data.dates.length} dager</span>
+                    <span class="text-[9px] opacity-50">${new Date(data.submittedAt).toLocaleDateString()}</span>
+                </div>
+                <span class="px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider border ${statusColors[data.status] || statusColors['pending']}">
+                    ${statusTr[data.status] || data.status}
+                </span>
+            </div>
+            ${responseHtml}
+        `;
+        container.appendChild(div);
     }
 }
+
 
 // Notification Modal Functions
 window.openNotificationModal = function(status, message) {
@@ -582,13 +601,11 @@ window.closeNotificationModal = function() {
     document.getElementById('notification-modal').classList.add('hidden');
 }
 
-// Auto-Refresh Logic
+// Auto-Refresh Logic (Only needed for Guests now)
 document.addEventListener("visibilitychange", () => {
    if (document.visibilityState === 'visible' && window.checkRequestStatus) {
-       console.log("App visible, refreshing statuses...");
+       // Only run polling check if not logged in (handled inside function)
        window.checkRequestStatus();
-       // Also check admin inbox dot if admin
-       if(window.isAdmin && window.checkInboxStatus) window.checkInboxStatus();
    }
 });
 

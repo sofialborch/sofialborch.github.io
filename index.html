@@ -203,7 +203,7 @@
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.5</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.6</p>
                 </div>
             </div>
             
@@ -534,7 +534,7 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
       import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc, updateDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc, updateDoc, getDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyC6wkHeUtbYdlYeZZA_4RDbjes7MuP-i4E",
@@ -554,7 +554,7 @@
 
       window.db = db;
       window.auth = auth;
-      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc, updateDoc, getDoc, query, where };
+      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc, updateDoc, getDoc, query, where, onSnapshot };
       
       window.uploadLocalDataToFirestore = async function(localOverrides) {
         if (!auth.currentUser) { alert("Please log in as admin first."); return; }
@@ -654,11 +654,19 @@
                   console.log("Admin Logged In");
                   adminTools.classList.remove('hidden'); 
                   window.isAdmin = true;
-                  if(window.checkInboxStatus) window.checkInboxStatus(); 
+                  
+                  // Start Realtime Inbox Listener
+                  if(window.subscribeToInbox) window.subscribeToInbox();
+
               } else {
                   console.log(isAnon ? "Guest (Anon) Logged In" : "User Logged In");
                   adminTools.classList.add('hidden');
                   window.isAdmin = false;
+              }
+              
+              if (!isAnon && window.subscribeToMyRequests) {
+                  // Start Realtime User Listener (Syncs across devices)
+                  window.subscribeToMyRequests(user);
               }
 
               // Update Header Icon
@@ -688,9 +696,11 @@
           // Run App Init Logic
           if(typeof window.init === 'function') {
             window.init();
+            // Fallback polling for guests (handled internally by checkRequestStatus)
             if(window.checkRequestStatus) {
                 window.checkRequestStatus();
-                // Polling for updates
+                // We keep interval for guests (localStorage polling)
+                // Logged in users return early from checkRequestStatus so it's safe to keep running
                 setInterval(window.checkRequestStatus, 60000); 
             }
           }
