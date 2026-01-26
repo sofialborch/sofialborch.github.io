@@ -172,7 +172,7 @@
                 <div class="h-8 w-px bg-white/10 hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.2 (Requests Enabled)</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.2.1 (Auth Fix)</p>
                 </div>
             </div>
             
@@ -306,7 +306,8 @@
       // Updated to stable versions
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-      import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+      // ADDED: signInAnonymously to imports
+      import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
       import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
       const firebaseConfig = {
@@ -403,13 +404,26 @@
 
       onAuthStateChanged(auth, (user) => {
           const adminTools = document.getElementById('admin-tools');
-          if (user && user.email === ADMIN_EMAIL) {
+          
+          if (!user) {
+              // GUEST: No user, so sign in anonymously to allow DB writes
+              console.log("No user, signing in anonymously...");
+              signInAnonymously(auth).catch((error) => {
+                  console.error("Anonymous auth failed", error);
+              });
+              return;
+          }
+
+          if (user.email === ADMIN_EMAIL) {
               console.log("Admin Mode Active: " + user.email);
               adminTools.classList.remove('hidden'); 
               window.isAdmin = true;
           } else {
-              if(user) console.log("Guest Logged in: " + user.email + " (Read-only)");
-              else console.log("Guest Mode");
+              if (user.isAnonymous) {
+                  console.log("Guest (Anonymous) Active");
+              } else {
+                  console.log("Guest Logged in: " + user.email + " (Read-only)");
+              }
               
               adminTools.classList.add('hidden');
               window.isAdmin = false;

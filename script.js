@@ -468,7 +468,11 @@ window.submitRequest = async function() {
         closeRequestModal();
         init(); // Resets UI
     } catch(e) {
-        alert("Kunne ikke sende: " + e.message);
+        if(e.code === 'permission-denied') {
+            alert("Kunne ikke sende: Mangler tillatelser (Prøv å laste siden på nytt)");
+        } else {
+            alert("Kunne ikke sende: " + e.message);
+        }
     }
 }
 
