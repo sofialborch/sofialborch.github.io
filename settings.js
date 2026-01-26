@@ -14,7 +14,7 @@ const TR = {
         approve: "Behandle", conflictsFound: "Konflikt: Noen datoer er ikke ledige",
         bulkEditTitle: "Behandle forespørsel", applyToDates: "Godkjenn & Lagre",
         archive: "Avvis / Arkiver",
-        // NEW KEYS
+        
         callMe: "Haster det? Ring meg på:",
         loginTip: "Tips: Logg inn for å spore forespørsler permanent.",
         myRequests: "Mine Forespørsler",
@@ -34,6 +34,14 @@ const TR = {
         adminResponseLabel: "Svar til bruker (Valgfritt)",
         adminPlaceholder: "Skriv en beskjed til brukeren...",
         adminResponseTitle: "Svar fra meg:",
+
+        // Auth / Profile
+        signInTitle: "Logg inn",
+        signInGoogle: "Logg inn med Google",
+        signOut: "Logg ut",
+        loggedInAs: "Logget inn som",
+        profileTitle: "Din Profil",
+        adminAccess: "Administrator-tilgang aktiv",
 
         // Tutorial
         tutHeader1: "Sjekk Status",
@@ -60,7 +68,7 @@ const TR = {
         approve: "Process", conflictsFound: "Conflict: Dates not fully available",
         bulkEditTitle: "Process Request", applyToDates: "Approve & Save",
         archive: "Reject / Archive",
-        // NEW KEYS
+        
         callMe: "Urgent? Call me at:",
         loginTip: "Tip: Log in to track requests permanently.",
         myRequests: "My Requests",
@@ -80,6 +88,14 @@ const TR = {
         adminResponseLabel: "Reply to User (Optional)",
         adminPlaceholder: "Write a message to the user...",
         adminResponseTitle: "Reply from me:",
+
+        // Auth / Profile
+        signInTitle: "Sign In",
+        signInGoogle: "Sign in with Google",
+        signOut: "Sign Out",
+        loggedInAs: "Logged in as",
+        profileTitle: "Your Profile",
+        adminAccess: "Administrator Access Active",
 
         // Tutorial
         tutHeader1: "Check Status",

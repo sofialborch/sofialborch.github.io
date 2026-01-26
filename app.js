@@ -32,6 +32,12 @@ function updateLanguageUI() {
     // Update inputs placeholders if needed
     const ph = document.getElementById('bulk-response');
     if(ph) ph.placeholder = t('adminPlaceholder');
+    
+    // Auth Modal Translations
+    const signTitle = document.querySelector('[data-tr="signInTitle"]');
+    if(signTitle) signTitle.innerText = t('signInTitle');
+    const signGoogle = document.querySelector('[data-tr="signInGoogle"]');
+    if(signGoogle) signGoogle.innerText = t('signInGoogle');
 }
 
 function getWeekNumber(d) {
@@ -366,6 +372,13 @@ function openRequestModal() {
     document.getElementById('req-subtitle').innerText = `For ${selectedRequestDates.size} dager`;
     document.getElementById('request-modal').classList.remove('hidden');
     
+    // NEW: Auto-fill Name if Logged In
+    const user = window.auth.currentUser;
+    if (user && !user.isAnonymous && user.displayName) {
+        const nameInput = document.getElementById('req-name');
+        nameInput.value = user.displayName;
+    }
+    
     // NEW: Inject Phone Number / Login Tip dynamically
     const footer = document.getElementById('req-modal-footer');
     if(footer) {
@@ -375,7 +388,7 @@ function openRequestModal() {
                 ${t('callMe')} <span class="text-[var(--text-color)] select-all">${DATA_STORE.settings.phone}</span>
              </p>`;
         }
-        if(!window.auth.currentUser || window.auth.currentUser.isAnonymous) {
+        if(!user || user.isAnonymous) {
              footerHtml += `<p class="text-[11px] font-medium text-pink-400/80 mt-2 text-center italic cursor-pointer hover:text-pink-400" onclick="toggleAuthModal()">
                 ${t('loginTip')}
              </p>`;
@@ -410,7 +423,7 @@ window.submitRequest = async function() {
     try {
         await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "requests", reqId), reqData); // Use setDoc with ID
         
-        // NEW: Local Storage Tracking (for everyone, but mostly Anons)
+        // NEW: Local Storage Tracking (Backup for everyone)
         let localTracks = JSON.parse(localStorage.getItem('my_requests') || '[]');
         localTracks.push(reqId);
         localStorage.setItem('my_requests', JSON.stringify(localTracks));
@@ -434,15 +447,29 @@ window.closeRequestSentModal = function() {
     document.getElementById('request-sent-modal').classList.add('hidden');
 }
 
-// NEW: Tracker Logic with Auto-Update & Notifications
+// NEW: Tracker Logic with Cross-Device Sync
 window.checkRequestStatus = async function() {
     const container = document.getElementById('my-requests-container');
     if(!container) return; // Should be in index.html
 
-    // Get IDs from LocalStorage
-    let trackIds = JSON.parse(localStorage.getItem('my_requests') || '[]');
+    let trackIds = new Set(JSON.parse(localStorage.getItem('my_requests') || '[]'));
     
-    if (trackIds.length === 0) {
+    // NEW: If Logged In, Fetch from Firestore
+    const user = window.auth.currentUser;
+    if (user && !user.isAnonymous) {
+        try {
+            const q = window.dbFormat.query(
+                window.dbFormat.collection(window.db, "requests"),
+                window.dbFormat.where("uid", "==", user.uid)
+            );
+            const querySnapshot = await window.dbFormat.getDocs(q);
+            querySnapshot.forEach(doc => trackIds.add(doc.id));
+        } catch(e) {
+            console.log("Error fetching user requests:", e);
+        }
+    }
+    
+    if (trackIds.size === 0) {
         container.classList.add('hidden');
         return;
     }
@@ -454,67 +481,77 @@ window.checkRequestStatus = async function() {
         </h4>`;
         container.classList.remove('hidden');
 
-        // Limit to last 5 to avoid spamming reads on every load
-        const recentIds = trackIds.slice(-5).reverse(); 
-
-        for (const rid of recentIds) {
+        // Convert Set to Array and Sort by Timestamp (Desc) - Requires fetching first to sort accurately, 
+        // but for simplicity we'll just fetch all and render. 
+        // Note: For a real app with many requests, we'd query with orderBy, but here we do client-side sort.
+        
+        const allRequests = [];
+        for (const rid of trackIds) {
             const docRef = await window.dbFormat.getDoc(window.dbFormat.doc(window.db, "requests", rid));
             if (docRef.exists()) {
-                const data = docRef.data();
-                
-                // NOTIFICATION LOGIC
-                // Check if status changed from pending -> approved/rejected since last seen
-                const seenKey = `req_status_${rid}`;
-                const seenStatus = localStorage.getItem(seenKey);
-                
-                // If we haven't seen this status yet, and it's not pending (so it's a decision)
-                if (data.status !== 'pending' && seenStatus !== data.status) {
-                    openNotificationModal(data.status, data.adminResponse);
-                    localStorage.setItem(seenKey, data.status); // Mark as seen
-                }
-
-                const statusColors = {
-                    'pending': 'bg-yellow-500/20 text-yellow-500 border-yellow-500/20',
-                    'approved': 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20',
-                    'rejected': 'bg-red-500/20 text-red-500 border-red-500/20',
-                    'archived': 'bg-gray-500/20 text-gray-500 border-gray-500/20'
-                };
-                
-                const statusTr = {
-                    'pending': t('statusPending'), 'approved': t('statusApproved'),
-                    'rejected': t('statusRejected'), 'archived': t('statusRejected')
-                };
-
-                const div = document.createElement('div');
-                div.className = "mb-2 p-3 rounded-lg bg-dynamic border border-dynamic";
-                
-                let responseHtml = '';
-                if(data.adminResponse) {
-                    responseHtml = `
-                        <div class="mt-2 pt-2 border-t border-dynamic/50 text-xs">
-                            <span class="text-[9px] font-black uppercase tracking-widest opacity-50 block mb-1">${t('adminResponseTitle')}</span>
-                            <span class="opacity-90 italic">"${data.adminResponse}"</span>
-                        </div>
-                    `;
-                }
-
-                div.innerHTML = `
-                    <div class="flex justify-between items-center mb-1">
-                         <div class="flex flex-col">
-                            <span class="text-[10px] font-bold opacity-80">${data.dates.length} dager</span>
-                            <span class="text-[9px] opacity-50">${new Date(data.submittedAt).toLocaleDateString()}</span>
-                        </div>
-                        <span class="px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider border ${statusColors[data.status] || statusColors['pending']}">
-                            ${statusTr[data.status] || data.status}
-                        </span>
-                    </div>
-                    ${responseHtml}
-                `;
-                container.appendChild(div);
+                allRequests.push(docRef.data());
             }
         }
+        
+        // Sort by submittedAt descending
+        allRequests.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+
+        // Limit to 5
+        const recentRequests = allRequests.slice(0, 5);
+
+        for (const data of recentRequests) {
+            const rid = data.id;
+            
+            // NOTIFICATION LOGIC
+            const seenKey = `req_status_${rid}`;
+            const seenStatus = localStorage.getItem(seenKey);
+            
+            if (data.status !== 'pending' && seenStatus !== data.status) {
+                openNotificationModal(data.status, data.adminResponse);
+                localStorage.setItem(seenKey, data.status); 
+            }
+
+            const statusColors = {
+                'pending': 'bg-yellow-500/20 text-yellow-500 border-yellow-500/20',
+                'approved': 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20',
+                'rejected': 'bg-red-500/20 text-red-500 border-red-500/20',
+                'archived': 'bg-gray-500/20 text-gray-500 border-gray-500/20'
+            };
+            
+            const statusTr = {
+                'pending': t('statusPending'), 'approved': t('statusApproved'),
+                'rejected': t('statusRejected'), 'archived': t('statusRejected')
+            };
+
+            const div = document.createElement('div');
+            div.className = "mb-2 p-3 rounded-lg bg-dynamic border border-dynamic";
+            
+            let responseHtml = '';
+            if(data.adminResponse) {
+                responseHtml = `
+                    <div class="mt-2 pt-2 border-t border-dynamic/50 text-xs">
+                        <span class="text-[9px] font-black uppercase tracking-widest opacity-50 block mb-1">${t('adminResponseTitle')}</span>
+                        <span class="opacity-90 italic">"${data.adminResponse}"</span>
+                    </div>
+                `;
+            }
+
+            div.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                     <div class="flex flex-col">
+                        <span class="text-[10px] font-bold opacity-80">${data.dates.length} dager</span>
+                        <span class="text-[9px] opacity-50">${new Date(data.submittedAt).toLocaleDateString()}</span>
+                    </div>
+                    <span class="px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider border ${statusColors[data.status] || statusColors['pending']}">
+                        ${statusTr[data.status] || data.status}
+                    </span>
+                </div>
+                ${responseHtml}
+            `;
+            container.appendChild(div);
+        }
     } catch(e) {
-        console.log("Could not fetch request status (Permissions?)", e);
+        console.log("Could not fetch request status", e);
     }
 }
 
