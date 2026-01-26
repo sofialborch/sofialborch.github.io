@@ -12,6 +12,10 @@ window.triggerMigration = triggerMigration;
 async function openAdminRequests() {
     if(!window.isAdmin) return;
     
+    // Hide notification dot when opening
+    const dot = document.getElementById('admin-inbox-dot');
+    if(dot) dot.classList.add('hidden');
+
     // Safety check for DB connection
     if (!window.dbFormat || !window.db) {
         alert("Database connection not ready. Please wait.");
@@ -61,6 +65,24 @@ async function openAdminRequests() {
         console.error("Error fetching requests:", e);
         list.innerHTML = `<p class="text-center text-red-400 font-bold text-xs mt-10">Feil ved lasting av forespørsler.<br>${e.message}</p>`;
     }
+}
+
+// Check for pending requests to show red dot
+async function checkInboxStatus() {
+    if(!window.isAdmin || !window.dbFormat) return;
+    try {
+        const q = window.dbFormat.query(
+            window.dbFormat.collection(window.db, "requests"),
+            window.dbFormat.where("status", "==", "pending")
+        );
+        const snapshot = await window.dbFormat.getDocs(q);
+        const dot = document.getElementById('admin-inbox-dot');
+        if(!snapshot.empty) {
+            dot.classList.remove('hidden');
+        } else {
+            dot.classList.add('hidden');
+        }
+    } catch(e) { console.log("Inbox check failed", e); }
 }
 
 function renderAdminRequestList(reqs) {
@@ -160,6 +182,7 @@ function openBulkAction(reqId) {
     document.getElementById('bulk-title').innerText = `${t('bulkEditTitle')}: ${req.name}`;
     document.getElementById('bulk-subtitle').innerText = `${req.dates ? req.dates.length : 0} dager`;
     document.getElementById('bulk-note').value = `${req.name}: ${req.message}`; 
+    document.getElementById('bulk-response').value = ''; // Reset response field
     
     // Populate Date List
     const dateList = document.getElementById('bulk-date-list');
@@ -223,6 +246,8 @@ async function saveBulkAction() {
     if(!currentBulkRequest || !window.isAdmin) return;
     
     const note = document.getElementById('bulk-note').value;
+    const responseMsg = document.getElementById('bulk-response').value; // Get response
+
     const batch = window.dbFormat.writeBatch(window.db);
     
     // 1. Update Calendar Dates
@@ -239,9 +264,12 @@ async function saveBulkAction() {
         });
     }
     
-    // 2. Mark Request as Approved
+    // 2. Mark Request as Approved & Add Response
     const reqRef = window.dbFormat.doc(window.db, "requests", currentBulkRequest.id);
-    batch.update(reqRef, { status: 'approved' });
+    batch.update(reqRef, { 
+        status: 'approved',
+        adminResponse: responseMsg
+    });
 
     try {
         await batch.commit();
@@ -249,6 +277,7 @@ async function saveBulkAction() {
         closeBulkModal();
         init(); 
         openAdminRequests(); 
+        checkInboxStatus(); // Update dot
     } catch(e) {
         alert("Bulk update failed: " + e.message);
     }
@@ -256,12 +285,19 @@ async function saveBulkAction() {
 
 async function archiveBulkRequest() {
     if(!currentBulkRequest) return;
+    
+    const responseMsg = document.getElementById('bulk-response').value; 
+
     // Just Mark as rejected/archived instead of deleting
     if(confirm("Avvis og arkiver denne forespørselen?")) {
         try {
-             await window.dbFormat.updateDoc(window.dbFormat.doc(window.db, "requests", currentBulkRequest.id), { status: 'rejected' });
+             await window.dbFormat.updateDoc(window.dbFormat.doc(window.db, "requests", currentBulkRequest.id), { 
+                 status: 'rejected',
+                 adminResponse: responseMsg 
+             });
              closeBulkModal();
              openAdminRequests();
+             checkInboxStatus(); // Update dot
         } catch(e) { alert(e.message); }
     }
 }
@@ -274,6 +310,7 @@ function closeBulkModal() {
 // Global Exports
 window.openAdminRequests = openAdminRequests;
 window.deleteRequest = deleteRequest;
+window.checkInboxStatus = checkInboxStatus; // Export
 window.closeAdminRequests = function() {
     document.getElementById('admin-requests-modal').classList.add('hidden');
 }

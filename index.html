@@ -44,6 +44,8 @@
                 <div id="admin-tools" class="hidden flex items-center gap-2">
                     <button onclick="openAdminRequests()" title="Inbox" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 hover:bg-pink-500/30 transition-all">
                         <i class="fas fa-inbox text-xs"></i>
+                        <!-- Notification Dot -->
+                        <span id="admin-inbox-dot" class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[var(--card-bg)] hidden animate-pulse"></span>
                     </button>
                     <button onclick="openAdminSettings()" title="Global Settings" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-gray-500/20 text-gray-500 border border-gray-500/30 hover:bg-gray-500/30 transition-all">
                         <i class="fas fa-cog text-xs"></i>
@@ -200,7 +202,7 @@
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.5</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.6</p>
                 </div>
             </div>
             
@@ -270,6 +272,23 @@
             </button>
             <button onclick="closeTutorial()" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition" data-tr="tutSkip">
                 Hopp over
+            </button>
+        </div>
+    </div>
+    
+    <!-- NEW: Request Confirmation Modal -->
+    <div id="request-sent-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeRequestSentModal()"></div>
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 lg:p-10 border border-dynamic shadow-2xl transform transition-all flex flex-col items-center text-center">
+            <div class="w-20 h-20 mb-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)] animate-pulse">
+                <i class="fas fa-paper-plane text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-black uppercase tracking-tight mb-3" data-tr="sentTitle">Forespørsel Sendt!</h3>
+            <p class="text-sm opacity-70 font-medium leading-relaxed mb-8" data-tr="sentBody">
+                Jeg sjekker den så fort jeg kan. Sjekk status her i appen senere.
+            </p>
+            <button onclick="closeRequestSentModal()" class="w-full bg-emerald-500 text-white font-black py-4 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20" data-tr="sentClose">
+                Den er grei
             </button>
         </div>
     </div>
@@ -402,8 +421,13 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Notat</label>
-                        <textarea id="bulk-note" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                        <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Intern Notat (Kalender)</label>
+                        <textarea id="bulk-note" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-20 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                    </div>
+                    <!-- NEW: Response Message -->
+                    <div>
+                        <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest" data-tr="adminResponseLabel">Svar til bruker (Valgfritt)</label>
+                        <textarea id="bulk-response" placeholder="Skriv en beskjed..." class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-20 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                     </div>
                 </div>
             </div>
@@ -461,10 +485,10 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
       import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc, updateDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
       const firebaseConfig = {
-        apiKey: "AIzaSyC6wkHeUtbYdlYeZZA_4RDbjes7MuP-i4E",
+        apiKey: "",
         authDomain: "availability-793c7.firebaseapp.com",
         projectId: "availability-793c7",
         storageBucket: "availability-793c7.firebasestorage.app",
@@ -481,7 +505,8 @@
 
       window.db = db;
       window.auth = auth;
-      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc, updateDoc, getDoc };
+      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc, updateDoc, getDoc, query, where };
+      
       window.uploadLocalDataToFirestore = async function(localOverrides) {
         if (!auth.currentUser) { alert("Please log in as admin first."); return; }
         const count = Object.keys(localOverrides).length;
@@ -541,6 +566,7 @@
               console.log("Admin Mode Active: " + user.email);
               adminTools.classList.remove('hidden'); 
               window.isAdmin = true;
+              if(window.checkInboxStatus) window.checkInboxStatus(); // Poll for red dot
           } else {
               console.log("Guest Logged in");
               adminTools.classList.add('hidden');
@@ -548,7 +574,11 @@
           }
           if(typeof window.init === 'function') {
             window.init();
-            if(window.checkRequestStatus) window.checkRequestStatus(); // Reload tracker logic
+            if(window.checkRequestStatus) {
+                window.checkRequestStatus();
+                // Polling for updates
+                setInterval(window.checkRequestStatus, 60000); 
+            }
           }
       });
     </script>

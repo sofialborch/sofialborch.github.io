@@ -29,6 +29,9 @@ function updateLanguageUI() {
     document.getElementById('lang-flag').innerText = CURRENT_LANG === 'nb' ? '🇳🇴' : '🇬🇧';
     document.getElementById('lang-label').innerText = CURRENT_LANG.toUpperCase();
     document.querySelectorAll('[data-tr]').forEach(el => el.innerText = t(el.dataset.tr));
+    // Update inputs placeholders if needed
+    const ph = document.getElementById('bulk-response');
+    if(ph) ph.placeholder = t('adminPlaceholder');
 }
 
 function getWeekNumber(d) {
@@ -107,7 +110,6 @@ async function loadData() {
         updateStatus(t('local'), "gray");
     }
     init();
-    if(window.checkRequestStatus) window.checkRequestStatus(); // NEW: Check for request updates
     
     // Smooth Preloader Exit
     const preloader = document.getElementById('preloader');
@@ -413,11 +415,14 @@ window.submitRequest = async function() {
         localTracks.push(reqId);
         localStorage.setItem('my_requests', JSON.stringify(localTracks));
         
-        alert("Forespørsel sendt!");
         selectedRequestDates.clear();
         document.getElementById('req-name').value = '';
         document.getElementById('req-msg').value = '';
         closeRequestModal();
+        
+        // Show New Confirmation Modal
+        document.getElementById('request-sent-modal').classList.remove('hidden');
+        
         init();
         if(window.checkRequestStatus) window.checkRequestStatus(); // Refresh tracker
     } catch(e) {
@@ -425,7 +430,11 @@ window.submitRequest = async function() {
     }
 }
 
-// NEW: Tracker Logic
+window.closeRequestSentModal = function() {
+    document.getElementById('request-sent-modal').classList.add('hidden');
+}
+
+// NEW: Tracker Logic with Auto-Update
 window.checkRequestStatus = async function() {
     const container = document.getElementById('my-requests-container');
     if(!container) return; // Should be in index.html
@@ -433,18 +442,16 @@ window.checkRequestStatus = async function() {
     // Get IDs from LocalStorage
     let trackIds = JSON.parse(localStorage.getItem('my_requests') || '[]');
     
-    // Logic: Guests use LocalStorage IDs. Logged-in users use UID query (More secure/persistent)
-    // For simplicity in this "App-lite" version, we'll just check the LocalStorage ones + simple UID check if easy
-    
     if (trackIds.length === 0) {
         container.classList.add('hidden');
         return;
     }
 
-    // Fetch statuses
-    // NOTE: This assumes security rules allow reading requests by ID.
     try {
-        container.innerHTML = `<h4 class="text-[9px] font-black uppercase tracking-widest opacity-50 mb-2 pl-1">${t('myRequests')}</h4>`;
+        container.innerHTML = `<h4 class="text-[9px] font-black uppercase tracking-widest opacity-50 mb-2 pl-1 flex justify-between">
+            <span>${t('myRequests')}</span>
+            <span class="opacity-50 text-[8px] animate-pulse">LIVE</span>
+        </h4>`;
         container.classList.remove('hidden');
 
         // Limit to last 5 to avoid spamming reads on every load
@@ -467,15 +474,29 @@ window.checkRequestStatus = async function() {
                 };
 
                 const div = document.createElement('div');
-                div.className = "mb-2 p-2 rounded-lg bg-dynamic border border-dynamic flex justify-between items-center";
+                div.className = "mb-2 p-3 rounded-lg bg-dynamic border border-dynamic";
+                
+                let responseHtml = '';
+                if(data.adminResponse) {
+                    responseHtml = `
+                        <div class="mt-2 pt-2 border-t border-dynamic/50 text-xs">
+                            <span class="text-[9px] font-black uppercase tracking-widest opacity-50 block mb-1">${t('adminResponseTitle')}</span>
+                            <span class="opacity-90 italic">"${data.adminResponse}"</span>
+                        </div>
+                    `;
+                }
+
                 div.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="text-[10px] font-bold opacity-80">${data.dates.length} dager</span>
-                        <span class="text-[9px] opacity-50">${new Date(data.submittedAt).toLocaleDateString()}</span>
+                    <div class="flex justify-between items-center mb-1">
+                         <div class="flex flex-col">
+                            <span class="text-[10px] font-bold opacity-80">${data.dates.length} dager</span>
+                            <span class="text-[9px] opacity-50">${new Date(data.submittedAt).toLocaleDateString()}</span>
+                        </div>
+                        <span class="px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider border ${statusColors[data.status] || statusColors['pending']}">
+                            ${statusTr[data.status] || data.status}
+                        </span>
                     </div>
-                    <span class="px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider border ${statusColors[data.status] || statusColors['pending']}">
-                        ${statusTr[data.status] || data.status}
-                    </span>
+                    ${responseHtml}
                 `;
                 container.appendChild(div);
             }
@@ -484,6 +505,16 @@ window.checkRequestStatus = async function() {
         console.log("Could not fetch request status (Permissions?)", e);
     }
 }
+
+// Auto-Refresh Logic
+document.addEventListener("visibilitychange", () => {
+   if (document.visibilityState === 'visible' && window.checkRequestStatus) {
+       console.log("App visible, refreshing statuses...");
+       window.checkRequestStatus();
+       // Also check admin inbox dot if admin
+       if(window.isAdmin && window.checkInboxStatus) window.checkInboxStatus();
+   }
+});
 
 function changeMonth(offset) { currentViewDate.setMonth(currentViewDate.getMonth() + offset); renderCalendar(getLocalDateString(new Date())); }
 

@@ -20,6 +20,14 @@ const TR = {
         myRequests: "Mine Forespørsler",
         statusPending: "Venter", statusApproved: "Godkjent", statusRejected: "Avvist",
         
+        // Response Modal & Msg
+        sentTitle: "Forespørsel Sendt!",
+        sentBody: "Jeg sjekker den så fort jeg kan. Sjekk status her i appen senere.",
+        sentClose: "Den er grei",
+        adminResponseLabel: "Svar til bruker (Valgfritt)",
+        adminPlaceholder: "Skriv en beskjed til brukeren...",
+        adminResponseTitle: "Svar fra meg:",
+
         // Tutorial
         tutHeader1: "Sjekk Status",
         tutBody1: "Grønn betyr ledig. Rød betyr opptatt. Gul betyr delvis tilgjengelig - ta kontakt.",
@@ -50,6 +58,14 @@ const TR = {
         loginTip: "Tip: Log in to track requests permanently.",
         myRequests: "My Requests",
         statusPending: "Pending", statusApproved: "Approved", statusRejected: "Rejected",
+        
+        // Response Modal & Msg
+        sentTitle: "Request Sent!",
+        sentBody: "I'll check it as soon as possible. Check back here for status updates.",
+        sentClose: "Sounds good",
+        adminResponseLabel: "Reply to User (Optional)",
+        adminPlaceholder: "Write a message to the user...",
+        adminResponseTitle: "Reply from me:",
 
         // Tutorial
         tutHeader1: "Check Status",
