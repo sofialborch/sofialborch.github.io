@@ -153,6 +153,10 @@
                 <div class="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 text-center sm:text-left">
                     &copy; 2026 PROJECT BY Z03Y
                 </div>
+                <!-- Admin Button -->
+                <button onclick="toggleAuthModal()" class="px-2 py-2 text-[10px] font-black uppercase tracking-widest opacity-20 hover:opacity-100 transition-opacity">
+                    <i class="fas fa-lock"></i>
+                </button>
             </div>
         </div>
     </footer>
@@ -190,27 +194,26 @@
         </div>
     </div>
 
-    <!-- Hidden Auth Modal -->
+    <!-- Hidden Auth Modal with Google Sign-In -->
     <div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity" onclick="toggleAuthModal()"></div>
-        <div class="glass-panel relative w-full max-w-sm rounded-3xl p-8 border border-white/10 shadow-2xl transform transition-all scale-100">
+        <div class="glass-panel relative w-full max-w-sm rounded-3xl p-8 border border-white/10 shadow-2xl transform transition-all scale-100 flex flex-col items-center">
             <h3 class="text-xl font-black uppercase tracking-widest mb-6 text-center text-white">System Access</h3>
-            <form id="login-form" class="space-y-4">
-                <input type="email" id="auth-email" placeholder="Email" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500 focus:bg-white/10 transition placeholder-white/30">
-                <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500 focus:bg-white/10 transition placeholder-white/30">
-                <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-black py-3 rounded-xl uppercase tracking-widest text-xs transition shadow-lg shadow-pink-500/20 active:scale-95">
-                    Unlock
-                </button>
-            </form>
-            <p id="auth-error" class="text-red-400 text-xs mt-4 text-center font-bold hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20"></p>
+            
+            <button id="google-login-btn" class="w-full bg-white text-gray-900 font-bold py-3 rounded-xl uppercase tracking-widest text-xs transition shadow-lg shadow-white/10 active:scale-95 flex items-center justify-center gap-3 hover:bg-gray-100">
+                <i class="fab fa-google text-lg text-red-500"></i>
+                <span>Sign in with Google</span>
+            </button>
+            
+            <p id="auth-error" class="text-red-400 text-xs mt-4 text-center font-bold hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20 w-full"></p>
         </div>
     </div>
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
-      // Added Authentication Imports
-      import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+      // Added Google Provider and signInWithPopup
+      import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyC6wkHeUtbYdlYeZZA_4RDbjes7MuP-i4E",
@@ -225,6 +228,7 @@
       const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
       const auth = getAuth(app);
+      const provider = new GoogleAuthProvider();
 
       // --- Hidden Login Logic ---
 
@@ -232,36 +236,27 @@
       window.toggleAuthModal = function() {
           const modal = document.getElementById('auth-modal');
           modal.classList.toggle('hidden');
-          if(!modal.classList.contains('hidden')) {
-              document.getElementById('auth-email').focus();
-          }
       };
 
       // SECRET TRIGGER: Ctrl + Shift + L
       document.addEventListener('keydown', (e) => {
-          if (e.ctrlKey && e.shiftKey && (e.key === 's' || e.key === 'S')) {
+          if (e.ctrlKey && e.shiftKey && (e.key === 'l' || e.key === 'L')) {
               e.preventDefault();
               toggleAuthModal();
           }
       });
 
-      // Handle Login
-      document.getElementById('login-form').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const email = document.getElementById('auth-email').value;
-          const pass = document.getElementById('auth-pass').value;
+      // Handle Google Login
+      document.getElementById('google-login-btn').addEventListener('click', async () => {
           const errorMsg = document.getElementById('auth-error');
-          
           errorMsg.classList.add('hidden');
           
           try {
-              await signInWithEmailAndPassword(auth, email, pass);
+              await signInWithPopup(auth, provider);
               toggleAuthModal(); // Close modal on success
-              // Optional: clear form
-              document.getElementById('auth-email').value = '';
-              document.getElementById('auth-pass').value = '';
           } catch (error) {
-              errorMsg.textContent = "Access Denied: " + error.message;
+              console.error("Login Error:", error);
+              errorMsg.textContent = "Auth Failed: " + error.message;
               errorMsg.classList.remove('hidden');
           }
       });
@@ -277,11 +272,9 @@
       onAuthStateChanged(auth, (user) => {
           const adminIndicator = document.getElementById('admin-indicator');
           if (user) {
-              // User is signed in
-              console.log("Admin Access Granted");
-              adminIndicator.classList.remove('hidden'); // Show small shield icon in header
+              console.log("Admin Access Granted via Google");
+              adminIndicator.classList.remove('hidden'); 
           } else {
-              // User is signed out
               console.log("Guest Mode");
               adminIndicator.classList.add('hidden');
           }
