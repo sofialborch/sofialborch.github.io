@@ -105,7 +105,7 @@ async function loadData() {
         updateStatus(t('local'), "gray");
     }
     init();
-    checkRequestStatus(); // NEW: Check for request updates
+    if(window.checkRequestStatus) window.checkRequestStatus(); // NEW: Check for request updates
 }
 
 function updateStatus(text, color) {
@@ -183,7 +183,13 @@ function init() {
     if(!document.getElementById('print-start-month').value) {
         document.getElementById('print-start-month').value = today.toISOString().slice(0, 7);
     }
-    updateRequestSidebar(); 
+    updateRequestSidebar();
+    
+    // Tutorial Check
+    const tutorialSeen = localStorage.getItem('tutorial_seen');
+    if (!tutorialSeen) {
+        setTimeout(openTutorial, 1000); // Slight delay for nice entry
+    }
 }
 
 function populateWeekDropdown(currentWeek) {
@@ -398,14 +404,14 @@ window.submitRequest = async function() {
         document.getElementById('req-msg').value = '';
         closeRequestModal();
         init();
-        checkRequestStatus(); // Refresh tracker
+        if(window.checkRequestStatus) window.checkRequestStatus(); // Refresh tracker
     } catch(e) {
         alert("Kunne ikke sende: " + e.message);
     }
 }
 
 // NEW: Tracker Logic
-async function checkRequestStatus() {
+window.checkRequestStatus = async function() {
     const container = document.getElementById('my-requests-container');
     if(!container) return; // Should be in index.html
 
@@ -507,4 +513,60 @@ function runLookup() {
 }
 
 function togglePrintModal() { document.getElementById('print-modal').classList.toggle('hidden'); }
+
+// --- TUTORIAL LOGIC ---
+function openTutorial() {
+    currentTutorialStep = 0;
+    document.getElementById('tutorial-modal').classList.remove('hidden');
+    updateTutorialUI();
+}
+
+function closeTutorial() {
+    document.getElementById('tutorial-modal').classList.add('hidden');
+    localStorage.setItem('tutorial_seen', 'true');
+}
+
+function nextTutorialStep() {
+    if (currentTutorialStep < 2) {
+        currentTutorialStep++;
+        updateTutorialUI();
+    } else {
+        closeTutorial();
+    }
+}
+
+function updateTutorialUI() {
+    // 1. Manage Slides
+    for (let i = 0; i < 3; i++) {
+        const slide = document.getElementById(`tut-slide-${i}`);
+        if (i === currentTutorialStep) {
+            slide.classList.remove('hidden');
+        } else {
+            slide.classList.add('hidden');
+        }
+        
+        // 2. Manage Dots
+        const dot = document.getElementById(`tut-dot-${i}`);
+        if (i === currentTutorialStep) {
+            dot.classList.remove('opacity-20');
+            dot.classList.add('opacity-100', 'scale-110');
+        } else {
+            dot.classList.add('opacity-20');
+            dot.classList.remove('opacity-100', 'scale-110');
+        }
+    }
+    
+    // 3. Update Button Text
+    const btn = document.getElementById('tut-next-btn');
+    if (currentTutorialStep === 2) {
+        btn.innerText = t('tutGotIt');
+    } else {
+        btn.innerText = t('tutNext');
+    }
+}
+
+window.openTutorial = openTutorial;
+window.closeTutorial = closeTutorial;
+window.nextTutorialStep = nextTutorialStep;
+
 window.onload = loadData;

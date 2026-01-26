@@ -18,7 +18,18 @@ const TR = {
         callMe: "Haster det? Ring meg på:",
         loginTip: "Tips: Logg inn for å spore forespørsler permanent.",
         myRequests: "Mine Forespørsler",
-        statusPending: "Venter", statusApproved: "Godkjent", statusRejected: "Avvist"
+        statusPending: "Venter", statusApproved: "Godkjent", statusRejected: "Avvist",
+        
+        // Tutorial
+        tutHeader1: "Sjekk Status",
+        tutBody1: "Grønn betyr ledig. Rød betyr opptatt. Gul betyr delvis tilgjengelig - ta kontakt.",
+        tutHeader2: "Velg Datoer",
+        tutBody2: "Trykk på dager i kalenderen for å markere dem. Du kan velge flere dager samtidig.",
+        tutHeader3: "Send Forespørsel",
+        tutBody3: "Fyll ut navn og melding i menyen som dukker opp for å sende en forespørsel.",
+        tutNext: "Neste",
+        tutGotIt: "Forstått",
+        tutSkip: "Hopp over"
     },
     en: {
         title: "Availability", printBtn: "Print Schedule", today: "Today", quickOutlook: "Quick Outlook",
@@ -38,7 +49,18 @@ const TR = {
         callMe: "Urgent? Call me at:",
         loginTip: "Tip: Log in to track requests permanently.",
         myRequests: "My Requests",
-        statusPending: "Pending", statusApproved: "Approved", statusRejected: "Rejected"
+        statusPending: "Pending", statusApproved: "Approved", statusRejected: "Rejected",
+
+        // Tutorial
+        tutHeader1: "Check Status",
+        tutBody1: "Green means available. Red means busy. Yellow means partially available - contact me.",
+        tutHeader2: "Select Dates",
+        tutBody2: "Tap days in the calendar to mark them. You can select multiple days.",
+        tutHeader3: "Send Request",
+        tutBody3: "Fill out your name and message in the menu that appears to send a request.",
+        tutNext: "Next",
+        tutGotIt: "Got it",
+        tutSkip: "Skip"
     }
 };
 
@@ -57,3 +79,4 @@ let currentBadge = null;
 let selectedRequestDates = new Set();
 let loadedRequestsCache = {}; 
 let currentBulkRequest = null;
+let currentTutorialStep = 0;

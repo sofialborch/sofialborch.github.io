@@ -43,6 +43,11 @@
                     </button>
                 </div>
 
+                <!-- Tutorial Trigger -->
+                <button onclick="openTutorial()" class="w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition" title="Help">
+                    <i class="fas fa-question text-[10px] lg:text-xs"></i>
+                </button>
+
                 <button onclick="togglePrintModal()" 
                         class="pulse-pink group relative flex items-center gap-2 px-3 py-2 lg:px-5 lg:py-2.5 rounded-full bg-pink-500 text-white text-[10px] lg:text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-pink-500/20">
                     <i class="fas fa-print"></i>
@@ -176,7 +181,7 @@
                 <div class="h-8 w-px bg-white/10 hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.4</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.5</p>
                 </div>
             </div>
             
@@ -191,6 +196,64 @@
             </div>
         </div>
     </footer>
+
+    <!-- Tutorial Modal (The Glass Guide) -->
+    <div id="tutorial-modal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeTutorial()"></div>
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 lg:p-10 border border-white/10 shadow-2xl transform transition-all flex flex-col items-center text-center">
+            
+            <!-- Slide 1: Status -->
+            <div id="tut-slide-0" class="flex flex-col items-center animate-fade-in">
+                <div class="flex gap-4 mb-6">
+                    <div class="w-8 h-8 rounded-full border border-green-500/30 bg-green-500/20 text-green-500 flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.3)]"><i class="fas fa-check"></i></div>
+                    <div class="w-8 h-8 rounded-full border border-red-500/30 bg-red-500/20 text-red-500 flex items-center justify-center"><i class="fas fa-times"></i></div>
+                    <div class="w-8 h-8 rounded-full border border-yellow-500/30 bg-yellow-500/20 text-yellow-500 flex items-center justify-center"><i class="fas fa-question"></i></div>
+                </div>
+                <h3 class="text-xl font-black uppercase tracking-widest mb-3" data-tr="tutHeader1">Sjekk Status</h3>
+                <p class="text-sm opacity-70 font-medium leading-relaxed" data-tr="tutBody1">
+                    Grønn betyr ledig. Rød betyr opptatt. Gul betyr delvis tilgjengelig - ta kontakt.
+                </p>
+            </div>
+
+            <!-- Slide 2: Selection -->
+            <div id="tut-slide-1" class="hidden flex flex-col items-center animate-fade-in">
+                <div class="w-16 h-16 mb-6 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center relative">
+                    <i class="fas fa-calendar text-2xl opacity-50"></i>
+                    <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-hand-pointer text-white text-xs"></i></div>
+                </div>
+                <h3 class="text-xl font-black uppercase tracking-widest mb-3" data-tr="tutHeader2">Velg Datoer</h3>
+                <p class="text-sm opacity-70 font-medium leading-relaxed" data-tr="tutBody2">
+                    Trykk på dager i kalenderen for å markere dem. Du kan velge flere dager samtidig.
+                </p>
+            </div>
+
+            <!-- Slide 3: Request -->
+            <div id="tut-slide-2" class="hidden flex flex-col items-center animate-fade-in">
+                <div class="w-16 h-16 mb-6 rounded-full bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-500 shadow-[0_0_20px_rgba(244,114,182,0.2)]">
+                    <i class="fas fa-heart text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-black uppercase tracking-widest mb-3" data-tr="tutHeader3">Send Forespørsel</h3>
+                <p class="text-sm opacity-70 font-medium leading-relaxed" data-tr="tutBody3">
+                    Fyll ut navn og melding i menyen som dukker opp for å sende en forespørsel.
+                </p>
+            </div>
+
+            <!-- Dots -->
+            <div class="flex gap-2 mt-8 mb-8">
+                <div id="tut-dot-0" class="w-2 h-2 rounded-full bg-white transition-all duration-300"></div>
+                <div id="tut-dot-1" class="w-2 h-2 rounded-full bg-white opacity-20 transition-all duration-300"></div>
+                <div id="tut-dot-2" class="w-2 h-2 rounded-full bg-white opacity-20 transition-all duration-300"></div>
+            </div>
+
+            <!-- Actions -->
+            <button onclick="nextTutorialStep()" id="tut-next-btn" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20 mb-3" data-tr="tutNext">
+                Neste
+            </button>
+            <button onclick="closeTutorial()" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition" data-tr="tutSkip">
+                Hopp over
+            </button>
+        </div>
+    </div>
 
     <!-- Print Modal -->
     <div id="print-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-6">
