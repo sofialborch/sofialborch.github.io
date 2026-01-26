@@ -434,7 +434,7 @@ window.closeRequestSentModal = function() {
     document.getElementById('request-sent-modal').classList.add('hidden');
 }
 
-// NEW: Tracker Logic with Auto-Update
+// NEW: Tracker Logic with Auto-Update & Notifications
 window.checkRequestStatus = async function() {
     const container = document.getElementById('my-requests-container');
     if(!container) return; // Should be in index.html
@@ -461,6 +461,18 @@ window.checkRequestStatus = async function() {
             const docRef = await window.dbFormat.getDoc(window.dbFormat.doc(window.db, "requests", rid));
             if (docRef.exists()) {
                 const data = docRef.data();
+                
+                // NOTIFICATION LOGIC
+                // Check if status changed from pending -> approved/rejected since last seen
+                const seenKey = `req_status_${rid}`;
+                const seenStatus = localStorage.getItem(seenKey);
+                
+                // If we haven't seen this status yet, and it's not pending (so it's a decision)
+                if (data.status !== 'pending' && seenStatus !== data.status) {
+                    openNotificationModal(data.status, data.adminResponse);
+                    localStorage.setItem(seenKey, data.status); // Mark as seen
+                }
+
                 const statusColors = {
                     'pending': 'bg-yellow-500/20 text-yellow-500 border-yellow-500/20',
                     'approved': 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20',
@@ -504,6 +516,33 @@ window.checkRequestStatus = async function() {
     } catch(e) {
         console.log("Could not fetch request status (Permissions?)", e);
     }
+}
+
+// Notification Modal Functions
+window.openNotificationModal = function(status, message) {
+    const modal = document.getElementById('notification-modal');
+    if(!modal) return;
+    
+    // Set Text based on status
+    const textEl = document.getElementById('notification-text');
+    if(status === 'approved') textEl.innerText = t('updateApproved');
+    else if(status === 'rejected') textEl.innerText = t('updateRejected');
+    else textEl.innerText = t('updateCheck');
+    
+    // Show Admin Message if exists
+    const msgEl = document.getElementById('notification-message');
+    if(message) {
+        msgEl.innerText = `"${message}"`;
+        msgEl.classList.remove('hidden');
+    } else {
+        msgEl.classList.add('hidden');
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+window.closeNotificationModal = function() {
+    document.getElementById('notification-modal').classList.add('hidden');
 }
 
 // Auto-Refresh Logic

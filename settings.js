@@ -24,6 +24,13 @@ const TR = {
         sentTitle: "Forespørsel Sendt!",
         sentBody: "Jeg sjekker den så fort jeg kan. Sjekk status her i appen senere.",
         sentClose: "Den er grei",
+        
+        // Status Update Modal
+        updateTitle: "Oppdatering!",
+        updateApproved: "Hurra! Din forespørsel er godkjent.",
+        updateRejected: "Beklager, din forespørsel ble ikke godkjent.",
+        updateCheck: "Sjekk listen for detaljer.",
+        
         adminResponseLabel: "Svar til bruker (Valgfritt)",
         adminPlaceholder: "Skriv en beskjed til brukeren...",
         adminResponseTitle: "Svar fra meg:",
@@ -63,6 +70,13 @@ const TR = {
         sentTitle: "Request Sent!",
         sentBody: "I'll check it as soon as possible. Check back here for status updates.",
         sentClose: "Sounds good",
+
+        // Status Update Modal
+        updateTitle: "Update!",
+        updateApproved: "Hooray! Your request was approved.",
+        updateRejected: "Sorry, your request was not approved.",
+        updateCheck: "Check the list for details.",
+
         adminResponseLabel: "Reply to User (Optional)",
         adminPlaceholder: "Write a message to the user...",
         adminResponseTitle: "Reply from me:",
