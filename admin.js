@@ -11,6 +11,13 @@ window.triggerMigration = triggerMigration;
 // Inbox Logic
 async function openAdminRequests() {
     if(!window.isAdmin) return;
+    
+    // Safety check for DB connection
+    if (!window.dbFormat || !window.db) {
+        alert("Database connection not ready. Please wait.");
+        return;
+    }
+
     const modal = document.getElementById('admin-requests-modal');
     const list = document.getElementById('admin-requests-list');
     
@@ -28,16 +35,22 @@ async function openAdminRequests() {
 
         let reqs = [];
         loadedRequestsCache = {}; // Reset cache
+        
         snapshot.forEach(doc => {
             const data = doc.data();
-            // Filter out archived unless we add an "Archived" tab later
+            // Filter out archived/rejected unless needed
             if (data.status !== 'archived' && data.status !== 'rejected') { 
                 loadedRequestsCache[doc.id] = { id: doc.id, ...data };
                 reqs.push(loadedRequestsCache[doc.id]);
             }
         });
         
-        reqs.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+        // Robust sort handling invalid dates
+        reqs.sort((a, b) => {
+            const dateA = a.submittedAt ? new Date(a.submittedAt) : new Date(0);
+            const dateB = b.submittedAt ? new Date(b.submittedAt) : new Date(0);
+            return dateB - dateA;
+        });
         
         if(reqs.length === 0) {
              list.innerHTML = `<p class="text-center opacity-50 py-10 font-bold uppercase tracking-widest text-xs">Ingen aktive forespørsler</p>`;
@@ -45,8 +58,8 @@ async function openAdminRequests() {
             renderAdminRequestList(reqs);
         }
     } catch (e) {
-        console.error(e);
-        list.innerHTML = `<p class="text-center text-red-400 font-bold">Error loading requests</p>`;
+        console.error("Error fetching requests:", e);
+        list.innerHTML = `<p class="text-center text-red-400 font-bold text-xs mt-10">Feil ved lasting av forespørsler.<br>${e.message}</p>`;
     }
 }
 
@@ -55,11 +68,15 @@ function renderAdminRequestList(reqs) {
     list.innerHTML = '';
 
     reqs.forEach(req => {
-        const dateStr = new Date(req.submittedAt).toLocaleDateString(t('monthLocale'), { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' });
+        const dateStr = req.submittedAt 
+            ? new Date(req.submittedAt).toLocaleDateString(t('monthLocale'), { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' })
+            : 'Ukjent dato';
         
         // Analyze Conflicts
         let conflictCount = 0;
-        const datePills = (req.dates || []).map(d => {
+        const datesToRender = req.dates || [];
+        
+        const datePills = datesToRender.map(d => {
             const info = getInfo(d);
             const dobj = new Date(d);
             const niceDate = dobj.getDate() + '.' + (dobj.getMonth()+1);
@@ -93,7 +110,7 @@ function renderAdminRequestList(reqs) {
             <div class="flex justify-between items-start mb-3">
                 <div>
                     <h4 class="font-black text-sm uppercase tracking-wide text-white flex items-center gap-2">
-                        ${req.name}
+                        ${req.name || 'Ukjent Navn'}
                         ${req.uid ? '<i class="fas fa-user-check text-blue-400 text-xs" title="Registered User"></i>' : ''}
                     </h4>
                     <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">${dateStr}</span>
@@ -107,7 +124,7 @@ function renderAdminRequestList(reqs) {
             </div>
             
             <div class="mb-4">
-                <p class="text-sm font-medium opacity-80 leading-relaxed bg-black/20 p-3 rounded-lg border border-white/5 italic">"${req.message}"</p>
+                <p class="text-sm font-medium opacity-80 leading-relaxed bg-black/20 p-3 rounded-lg border border-white/5 italic">"${req.message || ''}"</p>
                 ${warningHTML}
             </div>
 
@@ -137,24 +154,27 @@ function openBulkAction(reqId) {
     
     // Populate Modal
     document.getElementById('bulk-title').innerText = `${t('bulkEditTitle')}: ${req.name}`;
-    document.getElementById('bulk-subtitle').innerText = `${req.dates.length} dager`;
+    document.getElementById('bulk-subtitle').innerText = `${req.dates ? req.dates.length : 0} dager`;
     document.getElementById('bulk-note').value = `${req.name}: ${req.message}`; 
     
     // Populate Date List
     const dateList = document.getElementById('bulk-date-list');
     dateList.innerHTML = '';
-    req.dates.forEach(d => {
-        const info = getInfo(d);
-        const dobj = new Date(d);
-        const niceDate = dobj.getDate() + '.' + (dobj.getMonth()+1);
-        const isConflict = info.status !== 'available' && info.status !== 'weekend';
-        const color = isConflict ? 'text-red-400' : 'text-emerald-400';
-        
-        dateList.innerHTML += `<div class="flex justify-between items-center text-xs font-bold border-b border-white/5 py-1 last:border-0">
-            <span>${niceDate}</span>
-            <span class="${color}">${t(info.status)}</span>
-        </div>`;
-    });
+    
+    if (req.dates) {
+        req.dates.forEach(d => {
+            const info = getInfo(d);
+            const dobj = new Date(d);
+            const niceDate = dobj.getDate() + '.' + (dobj.getMonth()+1);
+            const isConflict = info.status !== 'available' && info.status !== 'weekend';
+            const color = isConflict ? 'text-red-400' : 'text-emerald-400';
+            
+            dateList.innerHTML += `<div class="flex justify-between items-center text-xs font-bold border-b border-white/5 py-1 last:border-0">
+                <span>${niceDate}</span>
+                <span class="${color}">${t(info.status)}</span>
+            </div>`;
+        });
+    }
 
     document.getElementById('bulk-modal').classList.remove('hidden');
     document.getElementById('admin-requests-modal').classList.add('hidden');
@@ -177,13 +197,19 @@ function setBulkStatus(status) {
 }
 
 function toggleBulkBadge(badge) {
-    ['NR', 'PM', 'ST'].forEach(b => document.getElementById(`bulk-badge-${b.toLowerCase()}`).style.opacity = '0.5');
+    ['NR', 'PM', 'ST'].forEach(b => {
+        const el = document.getElementById(`bulk-badge-${b.toLowerCase()}`);
+        if(el) el.style.opacity = '0.5';
+    });
     
     if (currentBadge === badge) {
         currentBadge = null;
     } else {
         currentBadge = badge;
-        if(badge) document.getElementById(`bulk-badge-${badge.toLowerCase()}`).style.opacity = '1';
+        if(badge) {
+            const el = document.getElementById(`bulk-badge-${badge.toLowerCase()}`);
+            if(el) el.style.opacity = '1';
+        }
     }
 }
 
@@ -194,16 +220,18 @@ async function saveBulkAction() {
     const batch = window.dbFormat.writeBatch(window.db);
     
     // 1. Update Calendar Dates
-    currentBulkRequest.dates.forEach(dateStr => {
-        const ref = window.dbFormat.doc(window.db, "availability", dateStr);
-        const data = {
-            status: currentEditStatus, 
-            note: note,
-            badge: currentBadge || null
-        };
-        batch.set(ref, data);
-        DATA_STORE.overrides[dateStr] = data; // Optimistic
-    });
+    if(currentBulkRequest.dates) {
+        currentBulkRequest.dates.forEach(dateStr => {
+            const ref = window.dbFormat.doc(window.db, "availability", dateStr);
+            const data = {
+                status: currentEditStatus, 
+                note: note,
+                badge: currentBadge || null
+            };
+            batch.set(ref, data);
+            DATA_STORE.overrides[dateStr] = data; // Optimistic
+        });
+    }
     
     // 2. Mark Request as Approved
     const reqRef = window.dbFormat.doc(window.db, "requests", currentBulkRequest.id);
@@ -260,7 +288,11 @@ function openEditModal(dateStr, info) {
     setEditStatus(info.status === 'weekend' ? 'available' : info.status);
     document.getElementById('edit-note').value = info.note || '';
     
-    ['NR', 'PM', 'ST'].forEach(b => document.getElementById(`badge-${b.toLowerCase()}`).style.opacity = '0.5');
+    ['NR', 'PM', 'ST'].forEach(b => {
+        const el = document.getElementById(`badge-${b.toLowerCase()}`);
+        if(el) el.style.opacity = '0.5';
+    });
+    
     currentBadge = null;
     if (info.badge) toggleBadge(info.badge);
 }
@@ -282,11 +314,16 @@ function setEditStatus(status) {
 
 function toggleBadge(badge) {
     const el = document.getElementById(`badge-${badge.toLowerCase()}`);
+    if(!el) return;
+
     if (currentBadge === badge) {
         currentBadge = null;
         el.style.opacity = '0.5';
     } else {
-        ['NR', 'PM', 'ST'].forEach(b => document.getElementById(`badge-${b.toLowerCase()}`).style.opacity = '0.5');
+        ['NR', 'PM', 'ST'].forEach(b => {
+            const e = document.getElementById(`badge-${b.toLowerCase()}`);
+            if(e) e.style.opacity = '0.5';
+        });
         currentBadge = badge;
         el.style.opacity = '1';
     }
