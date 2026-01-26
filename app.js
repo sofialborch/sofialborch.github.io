@@ -368,12 +368,12 @@ function openRequestModal() {
     if(footer) {
         let footerHtml = '';
         if(DATA_STORE.settings.phone) {
-             footerHtml += `<p class="text-[10px] font-black uppercase tracking-widest opacity-60 mt-4 text-center">
+             footerHtml += `<p class="text-[11px] font-black uppercase tracking-widest opacity-60 mt-4 text-center">
                 ${t('callMe')} <span class="text-[var(--text-color)] select-all">${DATA_STORE.settings.phone}</span>
              </p>`;
         }
         if(!window.auth.currentUser || window.auth.currentUser.isAnonymous) {
-             footerHtml += `<p class="text-[9px] font-medium text-pink-400/80 mt-2 text-center italic cursor-pointer hover:text-pink-400" onclick="toggleAuthModal()">
+             footerHtml += `<p class="text-[11px] font-medium text-pink-400/80 mt-2 text-center italic cursor-pointer hover:text-pink-400" onclick="toggleAuthModal()">
                 ${t('loginTip')}
              </p>`;
         }
