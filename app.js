@@ -153,6 +153,7 @@ function getInfo(dateStr) {
         if (ln.includes('norønna')) badge = 'NR';
         else if (ln.includes('polarmåsen')) badge = 'PM';
         else if (ln.includes('studer')) badge = 'ST';
+        else if (ln.includes('studying')) badge = 'ST';
     }
     return { status, note, badge };
 }
