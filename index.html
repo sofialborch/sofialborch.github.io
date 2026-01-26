@@ -30,17 +30,26 @@
                 </button>
                 <div class="h-6 w-px bg-white/10 hidden xs:block"></div>
                 
-                <!-- Admin Indicator (Hidden by default) -->
-                <button id="admin-indicator" onclick="signOutUser()" class="hidden group relative flex items-center gap-2 px-3 py-2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all">
-                    <i class="fas fa-user-shield text-xs"></i>
-                </button>
+                <!-- Admin Tools Container -->
+                <div id="admin-tools" class="hidden flex items-center gap-2">
+                    <!-- Migration Button -->
+                    <button onclick="triggerMigration()" title="Upload Local JSON to Cloud" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all">
+                        <i class="fas fa-cloud-upload-alt text-xs"></i>
+                    </button>
+                    
+                    <!-- Admin Indicator/Logout -->
+                    <button onclick="signOutUser()" title="Sign Out Admin" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all">
+                        <i class="fas fa-user-shield text-xs"></i>
+                    </button>
+                </div>
 
                 <button onclick="togglePrintModal()" 
                         class="pulse-pink group relative flex items-center gap-2 px-3 py-2 lg:px-5 lg:py-2.5 rounded-full bg-pink-500 text-white text-[10px] lg:text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-pink-500/20">
                     <i class="fas fa-print"></i>
                     <span class="hidden sm:inline" data-tr="printBtn">Skriv ut</span>
                 </button>
-                <!-- Manual Upload is kept as a backup -->
+                
+                <!-- Manual Upload -->
                 <input type="file" id="manual-upload" class="hidden" accept=".json" onchange="handleManualUpload(event)">
                 <span id="sync-status" 
                       onclick="document.getElementById('manual-upload').click()"
@@ -145,7 +154,7 @@
                 <div class="h-8 w-px bg-white/10 hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.0 (Cloud)</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.1 (Cloud Migrated)</p>
                 </div>
             </div>
             
@@ -252,11 +261,11 @@
     </div>
     
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
-      import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-      // Added Firestore imports
-      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+      // Updated to stable versions
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+      import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyC6wkHeUtbYdlYeZZA_4RDbjes7MuP-i4E",
@@ -276,7 +285,40 @@
 
       // Expose Firestore to global window object for script.js
       window.db = db;
-      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc };
+      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch };
+
+      // --- Migration Utility ---
+      window.uploadLocalDataToFirestore = async function(localOverrides) {
+        if (!auth.currentUser) {
+            alert("Please log in as admin first.");
+            return;
+        }
+        
+        const count = Object.keys(localOverrides).length;
+        if(count === 0) {
+            alert("No local data to migrate.");
+            return;
+        }
+
+        if(!confirm(`Migrate ${count} entries from local JSON to Cloud Firestore? This will overwrite cloud data for these dates.`)) return;
+
+        updateStatus("Migrating...", "blue");
+
+        try {
+            // Simple iteration for migration
+            let successCount = 0;
+            for (const [date, data] of Object.entries(localOverrides)) {
+                await setDoc(doc(db, "availability", date), data);
+                successCount++;
+            }
+            alert(`Migration Complete! ${successCount} entries uploaded.`);
+            window.location.reload(); // Reload to fetch from cloud
+        } catch (e) {
+            console.error(e);
+            alert("Migration failed: " + e.message);
+            updateStatus("Error", "busy");
+        }
+      }
 
       // --- Hidden Login Logic ---
 
@@ -318,16 +360,16 @@
       const ADMIN_EMAIL = "sofia.l.borch@gmail.com"; 
 
       onAuthStateChanged(auth, (user) => {
-          const adminIndicator = document.getElementById('admin-indicator');
+          const adminTools = document.getElementById('admin-tools');
           if (user && user.email === ADMIN_EMAIL) {
               console.log("Admin Mode Active: " + user.email);
-              adminIndicator.classList.remove('hidden'); 
+              adminTools.classList.remove('hidden'); 
               window.isAdmin = true;
           } else {
               if(user) console.log("Guest Logged in: " + user.email + " (Read-only)");
               else console.log("Guest Mode");
               
-              adminIndicator.classList.add('hidden');
+              adminTools.classList.add('hidden');
               window.isAdmin = false;
           }
           // Re-render calendar if data is loaded to update click listeners

@@ -122,14 +122,20 @@ async function loadData() {
         if (window.dbFormat) {
             const querySnapshot = await window.dbFormat.getDocs(window.dbFormat.collection(window.db, "availability"));
             
-            DATA_STORE.overrides = {};
-            querySnapshot.forEach((doc) => {
-                DATA_STORE.overrides[doc.id] = doc.data();
-            });
+            // Only overwrite if we actually got data, otherwise keep empty to allow manual upload
+            if(!querySnapshot.empty) {
+                DATA_STORE.overrides = {};
+                querySnapshot.forEach((doc) => {
+                    DATA_STORE.overrides[doc.id] = doc.data();
+                });
+                updateStatus(t('online'), "emerald");
+            } else {
+                console.log("Firestore empty, ready for migration.");
+                updateStatus("Waiting for Data", "gray");
+            }
             
             // Using placeholder settings for now
             DATA_STORE.settings = { certainUntil: '', phone: '' };
-            updateStatus(t('online'), "emerald");
         } else {
             throw new Error("Firestore not initialized");
         }
@@ -149,6 +155,16 @@ async function loadData() {
     init();
 }
 
+// Function to trigger migration from script.js
+function triggerMigration() {
+    if(window.uploadLocalDataToFirestore && DATA_STORE.overrides) {
+        window.uploadLocalDataToFirestore(DATA_STORE.overrides);
+    } else {
+        alert("Migration tool not ready or no data loaded.");
+    }
+}
+window.triggerMigration = triggerMigration;
+
 function updateStatus(text, color) {
     const el = document.getElementById('sync-status');
     if(!el) return;
@@ -157,11 +173,12 @@ function updateStatus(text, color) {
     const safeColors = {
         emerald: 'text-emerald-500',
         gray: 'text-gray-500',
-        blue: 'text-blue-500'
+        blue: 'text-blue-500',
+        busy: 'text-red-500'
     };
     
     // Remove old colors
-    el.classList.remove('text-emerald-500', 'text-gray-500', 'text-blue-500');
+    el.classList.remove('text-emerald-500', 'text-gray-500', 'text-blue-500', 'text-red-500');
     
     // Add new color and text
     if (safeColors[color]) el.classList.add(safeColors[color]);
@@ -173,12 +190,14 @@ function updateStatus(text, color) {
 function handleManualUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
+    updateStatus("Reading...", "blue");
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
             const json = JSON.parse(e.target.result);
             DATA_STORE.overrides = json.overrides || json;
             DATA_STORE.settings = json.settings || { certainUntil: '', phone: '' };
+            updateStatus("Ready to Sync", "emerald");
             init();
         } catch (err) { alert("Invalid JSON file."); }
     };
