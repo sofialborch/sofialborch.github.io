@@ -29,6 +29,12 @@
                     <span id="lang-label" class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest">NO</span>
                 </button>
                 <div class="h-6 w-px bg-white/10 hidden xs:block"></div>
+                
+                <!-- Admin Indicator (Hidden by default) -->
+                <button id="admin-indicator" onclick="signOutUser()" class="hidden group relative flex items-center gap-2 px-3 py-2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all">
+                    <i class="fas fa-user-shield text-xs"></i>
+                </button>
+
                 <button onclick="togglePrintModal()" 
                         class="pulse-pink group relative flex items-center gap-2 px-3 py-2 lg:px-5 lg:py-2.5 rounded-full bg-pink-500 text-white text-[10px] lg:text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-pink-500/20">
                     <i class="fas fa-print"></i>
@@ -83,7 +89,6 @@
                             <button onclick="changeMonth(1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover:bg-white/10 rounded-xl lg:rounded-2xl transition border border-white/5"><i class="fas fa-chevron-right text-sm lg:text-lg"></i></button>
                         </div>
                     </div>
-                    <!-- Added ID to header to allow JS population -->
                     <div id="calendar-header" class="calendar-grid text-center mb-4 lg:mb-8 text-[10px] lg:text-s font-black uppercase tracking-widest opacity-80">
                         <!-- Populated by JS -->
                     </div>
@@ -152,6 +157,7 @@
         </div>
     </footer>
 
+    <!-- Print Modal -->
     <div id="print-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-6">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="togglePrintModal()"></div>
         <div class="glass-panel relative w-full max-w-md rounded-[2rem] lg:rounded-[2.5rem] p-8 lg:p-10 overflow-hidden shadow-2xl">
@@ -183,16 +189,29 @@
             </div>
         </div>
     </div>
+
+    <!-- Hidden Auth Modal -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity" onclick="toggleAuthModal()"></div>
+        <div class="glass-panel relative w-full max-w-sm rounded-3xl p-8 border border-white/10 shadow-2xl transform transition-all scale-100">
+            <h3 class="text-xl font-black uppercase tracking-widest mb-6 text-center text-white">System Access</h3>
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="auth-email" placeholder="Email" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500 focus:bg-white/10 transition placeholder-white/30">
+                <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500 focus:bg-white/10 transition placeholder-white/30">
+                <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-black py-3 rounded-xl uppercase tracking-widest text-xs transition shadow-lg shadow-pink-500/20 active:scale-95">
+                    Unlock
+                </button>
+            </form>
+            <p id="auth-error" class="text-red-400 text-xs mt-4 text-center font-bold hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20"></p>
+        </div>
+    </div>
     
     <script type="module">
-      // Import the functions you need from the SDKs you need
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
-      // TODO: Add SDKs for Firebase products that you want to use
-      // https://firebase.google.com/docs/web/setup#available-libraries
+      // Added Authentication Imports
+      import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
-      // Your web app's Firebase configuration
-      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
       const firebaseConfig = {
         apiKey: "AIzaSyC6wkHeUtbYdlYeZZA_4RDbjes7MuP-i4E",
         authDomain: "availability-793c7.firebaseapp.com",
@@ -203,9 +222,70 @@
         measurementId: "G-6QR4CTJCXD"
       };
 
-      // Initialize Firebase
       const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+
+      // --- Hidden Login Logic ---
+
+      // Toggle Modal
+      window.toggleAuthModal = function() {
+          const modal = document.getElementById('auth-modal');
+          modal.classList.toggle('hidden');
+          if(!modal.classList.contains('hidden')) {
+              document.getElementById('auth-email').focus();
+          }
+      };
+
+      // SECRET TRIGGER: Ctrl + Shift + L
+      document.addEventListener('keydown', (e) => {
+          if (e.ctrlKey && e.shiftKey && (e.key === 'l' || e.key === 'L')) {
+              e.preventDefault();
+              toggleAuthModal();
+          }
+      });
+
+      // Handle Login
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = document.getElementById('auth-email').value;
+          const pass = document.getElementById('auth-pass').value;
+          const errorMsg = document.getElementById('auth-error');
+          
+          errorMsg.classList.add('hidden');
+          
+          try {
+              await signInWithEmailAndPassword(auth, email, pass);
+              toggleAuthModal(); // Close modal on success
+              // Optional: clear form
+              document.getElementById('auth-email').value = '';
+              document.getElementById('auth-pass').value = '';
+          } catch (error) {
+              errorMsg.textContent = "Access Denied: " + error.message;
+              errorMsg.classList.remove('hidden');
+          }
+      });
+
+      // Handle Logout
+      window.signOutUser = async function() {
+          if(confirm("Log out of admin mode?")) {
+            await signOut(auth);
+          }
+      }
+
+      // Auth State Listener
+      onAuthStateChanged(auth, (user) => {
+          const adminIndicator = document.getElementById('admin-indicator');
+          if (user) {
+              // User is signed in
+              console.log("Admin Access Granted");
+              adminIndicator.classList.remove('hidden'); // Show small shield icon in header
+          } else {
+              // User is signed out
+              console.log("Guest Mode");
+              adminIndicator.classList.add('hidden');
+          }
+      });
     </script>
     <script src="script.js"></script>
 </body>
