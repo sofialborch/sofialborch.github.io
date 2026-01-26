@@ -40,6 +40,10 @@
                     <button onclick="openAdminRequests()" title="Inbox" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 hover:bg-pink-500/30 transition-all">
                         <i class="fas fa-inbox text-xs"></i>
                     </button>
+                    <!-- NEW: Settings Button -->
+                    <button onclick="openAdminSettings()" title="Global Settings" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-gray-500/20 text-gray-500 border border-gray-500/30 hover:bg-gray-500/30 transition-all">
+                        <i class="fas fa-cog text-xs"></i>
+                    </button>
                     <button onclick="triggerMigration()" title="Upload Local JSON to Cloud" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all">
                         <i class="fas fa-cloud-upload-alt text-xs"></i>
                     </button>
@@ -308,6 +312,29 @@
                 <span>Sign in with Google</span>
             </button>
             <p id="auth-error" class="text-red-400 text-xs mt-4 text-center font-bold hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20 w-full"></p>
+        </div>
+    </div>
+    
+    <!-- NEW: Admin Settings Modal -->
+    <div id="admin-settings-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeAdminSettings()"></div>
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all">
+            <h3 class="text-xl font-black uppercase tracking-widest mb-6 flex items-center gap-3">
+                <i class="fas fa-cog text-gray-500"></i>
+                <span>Innstillinger</span>
+            </h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Sikker til dato</label>
+                    <input type="date" id="admin-certain-date" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition">
+                    <p class="text-[9px] opacity-50 mt-1 ml-1">Datoen hvor vaktlisten er "låst" / ferdig.</p>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Telefonnummer</label>
+                    <input type="text" id="admin-phone" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition">
+                </div>
+                <button onclick="saveAdminSettings()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Lagre</button>
+            </div>
         </div>
     </div>
 

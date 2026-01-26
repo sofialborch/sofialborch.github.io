@@ -365,6 +365,33 @@ window.toggleBadge = toggleBadge;
 window.saveDay = saveDay;
 window.deleteDay = deleteDay;
 
+// NEW: Admin Settings Modal
+function openAdminSettings() {
+    document.getElementById('admin-settings-modal').classList.remove('hidden');
+    document.getElementById('admin-certain-date').value = DATA_STORE.settings.certainUntil || '';
+    document.getElementById('admin-phone').value = DATA_STORE.settings.phone || '';
+}
+
+async function saveAdminSettings() {
+    if(!window.isAdmin) return;
+    const date = document.getElementById('admin-certain-date').value;
+    const phone = document.getElementById('admin-phone').value;
+    const newSettings = { ...DATA_STORE.settings, certainUntil: date, phone: phone };
+    
+    try {
+        await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "config", "main"), newSettings);
+        DATA_STORE.settings = newSettings;
+        alert("Innstillinger lagret!");
+        document.getElementById('admin-settings-modal').classList.add('hidden');
+        init(); // Refresh UI
+    } catch(e) { alert("Feil ved lagring: " + e.message); }
+}
+
+window.openAdminSettings = openAdminSettings;
+window.closeAdminSettings = () => document.getElementById('admin-settings-modal').classList.add('hidden');
+window.saveAdminSettings = saveAdminSettings;
+
+
 // Printing Logic
 function executePrint() {
     const sm = document.getElementById('print-start-month').value;
@@ -378,6 +405,8 @@ function executePrint() {
 function generatePrintSummary(start, end) {
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent("sofialborch.github.io")}`;
     const printWindow = window.open('', '_blank');
+    const genDate = new Date().toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+
     let html = `<html><head><title>${t('title')}</title><style>
         @page { margin: 0.5cm; size: A4; }
         body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; color: #000; -webkit-print-color-adjust: exact; }
@@ -393,9 +422,10 @@ function generatePrintSummary(start, end) {
         .status-badge { font-size: 7.5px; font-weight: 900; text-transform: uppercase; background: #000; color: #fff; padding: 2px 6px; border-radius: 99px; white-space: nowrap; }
         .note-text { font-size: 10px; line-height: 1.1; color: #000; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .busy-cell { background: #fee2e2 !important; } .available-cell { background: #f0fdf4 !important; } .partial-cell { background: #fef3c7 !important; } .weekend-cell { background: #f8fafc !important; }
-        .footer { display: flex; justify-content: space-between; align-items: flex-end; page-break-inside: avoid; }
+        .footer { display: flex; justify-content: space-between; align-items: flex-end; page-break-inside: avoid; padding-top: 10px; }
         .qr-box img { width: 80px; height: 80px; border: 1px solid #000; }
         .trademark { font-weight: 900; font-size: 11px; letter-spacing: 2px; }
+        .footer-text { font-size: 10px; font-weight: 600; line-height: 1.3; text-align: right; }
         @media print { .no-print { display: none; } }
     </style></head><body>
     <div class="no-print" style=\"padding: 10px; text-align: center; background: #eee; position: sticky; top: 0;\"><button onclick=\"window.print()\" style=\"padding: 10px 40px; font-weight: 900; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 6px;\">PRINT PDF</button></div>
@@ -427,6 +457,25 @@ function generatePrintSummary(start, end) {
         }
         iter = next;
     }
-    html += `</div><div class=\"footer\"><div><div class=\"trademark\">PROJECT BY Z03Y</div>${DATA_STORE.settings.phone ? `<div style=\"font-size: 14px; font-weight: 900; margin-top: 8px; background: #000; color: #fff; padding: 4px 12px; border-radius: 6px; display: inline-block;\">${DATA_STORE.settings.phone}</div>` : ''}</div><div class=\"qr-box\"><img src=\"${qrUrl}\"><div style=\"font-size: 8px; font-weight: 900; margin-top: 5px; text-align: center;\">LIVE UPDATES</div></div></div></div></body></html>`;
+    
+    // NEW FOOTER
+    html += `</div>
+    <div class="footer">
+        <div>
+            <div class="trademark">PROJECT BY Z03Y</div>
+            ${DATA_STORE.settings.phone ? `<div style="font-size: 14px; font-weight: 900; margin-top: 8px; background: #000; color: #fff; padding: 4px 12px; border-radius: 6px; display: inline-block;">${DATA_STORE.settings.phone}</div>` : ''}
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+             <div class="footer-text">
+                Denne PDF-en ble laget ${genDate}.<br>
+                For oppdatert informasjon, og hvis du enkelt<br>vil be om dager, sjekk nettsiden!
+            </div>
+            <div class="qr-box">
+                <img src="${qrUrl}">
+            </div>
+        </div>
+    </div>
+    </div></body></html>`;
+    
     printWindow.document.write(html); printWindow.document.close();
 }
