@@ -81,7 +81,14 @@ async function loadData() {
             } else {
                 updateStatus("Waiting for Data", "gray");
             }
-            DATA_STORE.settings = { certainUntil: '', phone: '' };
+            
+            // Fetch Global Settings (Phone etc) if stored in a 'config' doc, else defaults
+            DATA_STORE.settings = { certainUntil: '', phone: '' }; 
+            try {
+                 const settingsDoc = await window.dbFormat.getDoc(window.dbFormat.doc(window.db, "config", "main"));
+                 if(settingsDoc.exists()) DATA_STORE.settings = { ...DATA_STORE.settings, ...settingsDoc.data() };
+            } catch(e) { console.log("No config doc found, using defaults"); }
+
         } else {
             throw new Error("Firestore not initialized");
         }
@@ -98,6 +105,7 @@ async function loadData() {
         updateStatus(t('local'), "gray");
     }
     init();
+    checkRequestStatus(); // NEW: Check for request updates
 }
 
 function updateStatus(text, color) {
@@ -334,6 +342,23 @@ function updateRequestSidebar() {
 function openRequestModal() {
     document.getElementById('req-subtitle').innerText = `For ${selectedRequestDates.size} dager`;
     document.getElementById('request-modal').classList.remove('hidden');
+    
+    // NEW: Inject Phone Number / Login Tip dynamically
+    const footer = document.getElementById('req-modal-footer');
+    if(footer) {
+        let footerHtml = '';
+        if(DATA_STORE.settings.phone) {
+             footerHtml += `<p class="text-[10px] font-black uppercase tracking-widest opacity-60 mt-4 text-center">
+                ${t('callMe')} <span class="text-white select-all">${DATA_STORE.settings.phone}</span>
+             </p>`;
+        }
+        if(!window.auth.currentUser || window.auth.currentUser.isAnonymous) {
+             footerHtml += `<p class="text-[9px] font-medium text-pink-400/80 mt-2 text-center italic cursor-pointer hover:text-pink-400" onclick="toggleAuthModal()">
+                ${t('loginTip')}
+             </p>`;
+        }
+        footer.innerHTML = footerHtml;
+    }
 }
 
 window.closeRequestModal = function() {
@@ -345,20 +370,97 @@ window.submitRequest = async function() {
     const msg = document.getElementById('req-msg').value;
     if(!name) { alert("Vennligst skriv inn navn"); return; }
     
+    // NEW: ID Generation & UID linking
+    const reqId = "req_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+    const user = window.auth.currentUser;
+    const isAnon = !user || user.isAnonymous;
+    
     const reqData = {
-        name, message: msg, dates: Array.from(selectedRequestDates), submittedAt: new Date().toISOString()
+        id: reqId,
+        name, message: msg, 
+        dates: Array.from(selectedRequestDates), 
+        submittedAt: new Date().toISOString(),
+        status: 'pending', // pending, approved, rejected
+        uid: !isAnon ? user.uid : null // Link to user if logged in
     };
     
     try {
-        await window.dbFormat.addDoc(window.dbFormat.collection(window.db, "requests"), reqData);
+        await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "requests", reqId), reqData); // Use setDoc with ID
+        
+        // NEW: Local Storage Tracking (for everyone, but mostly Anons)
+        let localTracks = JSON.parse(localStorage.getItem('my_requests') || '[]');
+        localTracks.push(reqId);
+        localStorage.setItem('my_requests', JSON.stringify(localTracks));
+        
         alert("Forespørsel sendt!");
         selectedRequestDates.clear();
         document.getElementById('req-name').value = '';
         document.getElementById('req-msg').value = '';
         closeRequestModal();
         init();
+        checkRequestStatus(); // Refresh tracker
     } catch(e) {
         alert("Kunne ikke sende: " + e.message);
+    }
+}
+
+// NEW: Tracker Logic
+async function checkRequestStatus() {
+    const container = document.getElementById('my-requests-container');
+    if(!container) return; // Should be in index.html
+
+    // Get IDs from LocalStorage
+    let trackIds = JSON.parse(localStorage.getItem('my_requests') || '[]');
+    
+    // Logic: Guests use LocalStorage IDs. Logged-in users use UID query (More secure/persistent)
+    // For simplicity in this "App-lite" version, we'll just check the LocalStorage ones + simple UID check if easy
+    
+    if (trackIds.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+
+    // Fetch statuses
+    // NOTE: This assumes security rules allow reading requests by ID.
+    try {
+        container.innerHTML = `<h4 class="text-[9px] font-black uppercase tracking-widest opacity-50 mb-2 pl-1">${t('myRequests')}</h4>`;
+        container.classList.remove('hidden');
+
+        // Limit to last 5 to avoid spamming reads on every load
+        const recentIds = trackIds.slice(-5).reverse(); 
+
+        for (const rid of recentIds) {
+            const docRef = await window.dbFormat.getDoc(window.dbFormat.doc(window.db, "requests", rid));
+            if (docRef.exists()) {
+                const data = docRef.data();
+                const statusColors = {
+                    'pending': 'bg-yellow-500/20 text-yellow-500 border-yellow-500/20',
+                    'approved': 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20',
+                    'rejected': 'bg-red-500/20 text-red-500 border-red-500/20',
+                    'archived': 'bg-gray-500/20 text-gray-500 border-gray-500/20'
+                };
+                
+                const statusTr = {
+                    'pending': t('statusPending'), 'approved': t('statusApproved'),
+                    'rejected': t('statusRejected'), 'archived': t('statusRejected')
+                };
+
+                const div = document.createElement('div');
+                div.className = "mb-2 p-2 rounded-lg bg-white/5 border border-white/5 flex justify-between items-center";
+                div.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-white/80">${data.dates.length} dager</span>
+                        <span class="text-[9px] opacity-50">${new Date(data.submittedAt).toLocaleDateString()}</span>
+                    </div>
+                    <span class="px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider border ${statusColors[data.status] || statusColors['pending']}">
+                        ${statusTr[data.status] || data.status}
+                    </span>
+                `;
+                container.appendChild(div);
+            }
+        }
+    } catch(e) {
+        console.log("Could not fetch request status (Permissions?)", e);
     }
 }
 

@@ -11,10 +11,14 @@ const TR = {
         days: ['M', 'T', 'O', 'T', 'F', 'L', 'S'],
         reqTitle: "Send Forespørsel",
         requestsTitle: "Innboks", noReq: "Ingen nye forespørsler", delete: "Slett",
-        // NEW KEYS
         approve: "Behandle", conflictsFound: "Konflikt: Noen datoer er ikke ledige",
-        bulkEditTitle: "Behandle forespørsel", applyToDates: "Lagre for valgte datoer",
-        archive: "Arkiver forespørsel"
+        bulkEditTitle: "Behandle forespørsel", applyToDates: "Godkjenn & Lagre",
+        archive: "Avvis / Arkiver",
+        // NEW KEYS
+        callMe: "Haster det? Ring meg på:",
+        loginTip: "Tips: Logg inn for å spore forespørsler permanent.",
+        myRequests: "Mine Forespørsler",
+        statusPending: "Venter", statusApproved: "Godkjent", statusRejected: "Avvist"
     },
     en: {
         title: "Availability", printBtn: "Print Schedule", today: "Today", quickOutlook: "Quick Outlook",
@@ -27,10 +31,14 @@ const TR = {
         days: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
         reqTitle: "Send Request",
         requestsTitle: "Inbox", noReq: "No new requests", delete: "Delete",
-        // NEW KEYS
         approve: "Process", conflictsFound: "Conflict: Dates not fully available",
-        bulkEditTitle: "Process Request", applyToDates: "Save for selected dates",
-        archive: "Archive Request"
+        bulkEditTitle: "Process Request", applyToDates: "Approve & Save",
+        archive: "Reject / Archive",
+        // NEW KEYS
+        callMe: "Urgent? Call me at:",
+        loginTip: "Tip: Log in to track requests permanently.",
+        myRequests: "My Requests",
+        statusPending: "Pending", statusApproved: "Approved", statusRejected: "Rejected"
     }
 };
 
@@ -47,6 +55,5 @@ let currentEditDate = null;
 let currentEditStatus = 'available';
 let currentBadge = null;
 let selectedRequestDates = new Set();
-// NEW: Store requests for admin lookup
 let loadedRequestsCache = {}; 
 let currentBulkRequest = null;

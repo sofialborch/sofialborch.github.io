@@ -30,12 +30,20 @@ async function openAdminRequests() {
         loadedRequestsCache = {}; // Reset cache
         snapshot.forEach(doc => {
             const data = doc.data();
-            loadedRequestsCache[doc.id] = { id: doc.id, ...data };
-            reqs.push(loadedRequestsCache[doc.id]);
+            // Filter out archived unless we add an "Archived" tab later
+            if (data.status !== 'archived' && data.status !== 'rejected') { 
+                loadedRequestsCache[doc.id] = { id: doc.id, ...data };
+                reqs.push(loadedRequestsCache[doc.id]);
+            }
         });
         
         reqs.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
-        renderAdminRequestList(reqs);
+        
+        if(reqs.length === 0) {
+             list.innerHTML = `<p class="text-center opacity-50 py-10 font-bold uppercase tracking-widest text-xs">Ingen aktive forespørsler</p>`;
+        } else {
+            renderAdminRequestList(reqs);
+        }
     } catch (e) {
         console.error(e);
         list.innerHTML = `<p class="text-center text-red-400 font-bold">Error loading requests</p>`;
@@ -84,7 +92,10 @@ function renderAdminRequestList(reqs) {
         el.innerHTML = `
             <div class="flex justify-between items-start mb-3">
                 <div>
-                    <h4 class="font-black text-sm uppercase tracking-wide text-white">${req.name}</h4>
+                    <h4 class="font-black text-sm uppercase tracking-wide text-white flex items-center gap-2">
+                        ${req.name}
+                        ${req.uid ? '<i class="fas fa-user-check text-blue-400 text-xs" title="Registered User"></i>' : ''}
+                    </h4>
                     <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">${dateStr}</span>
                 </div>
                 <div class="flex gap-2">
@@ -122,22 +133,20 @@ function openBulkAction(reqId) {
     const req = loadedRequestsCache[reqId];
     if(!req) return;
     
-    currentBulkRequest = req; // Store for saving
+    currentBulkRequest = req; 
     
     // Populate Modal
     document.getElementById('bulk-title').innerText = `${t('bulkEditTitle')}: ${req.name}`;
     document.getElementById('bulk-subtitle').innerText = `${req.dates.length} dager`;
-    document.getElementById('bulk-note').value = `${req.name}: ${req.message}`; // Pre-fill note
+    document.getElementById('bulk-note').value = `${req.name}: ${req.message}`; 
     
-    // Populate Date List in Modal for transparency
+    // Populate Date List
     const dateList = document.getElementById('bulk-date-list');
     dateList.innerHTML = '';
     req.dates.forEach(d => {
         const info = getInfo(d);
         const dobj = new Date(d);
         const niceDate = dobj.getDate() + '.' + (dobj.getMonth()+1);
-        
-        // Simple conflict check for the list
         const isConflict = info.status !== 'available' && info.status !== 'weekend';
         const color = isConflict ? 'text-red-400' : 'text-emerald-400';
         
@@ -148,16 +157,14 @@ function openBulkAction(reqId) {
     });
 
     document.getElementById('bulk-modal').classList.remove('hidden');
-    // Hide Inbox while editing
     document.getElementById('admin-requests-modal').classList.add('hidden');
     
-    // Reset buttons
-    setBulkStatus('busy'); // Default to marking as busy
-    toggleBulkBadge(null); // Reset badges
+    setBulkStatus('busy'); 
+    toggleBulkBadge(null);
 }
 
 function setBulkStatus(status) {
-    currentEditStatus = status; // Re-using global var from admin.js logic
+    currentEditStatus = status;
     document.querySelectorAll('.bulk-status-btn').forEach(btn => {
         if(btn.dataset.val === status) {
             btn.classList.add('bg-white', 'text-black');
@@ -170,7 +177,6 @@ function setBulkStatus(status) {
 }
 
 function toggleBulkBadge(badge) {
-    // Re-using simplified toggle logic
     ['NR', 'PM', 'ST'].forEach(b => document.getElementById(`bulk-badge-${b.toLowerCase()}`).style.opacity = '0.5');
     
     if (currentBadge === badge) {
@@ -187,30 +193,28 @@ async function saveBulkAction() {
     const note = document.getElementById('bulk-note').value;
     const batch = window.dbFormat.writeBatch(window.db);
     
-    // Prepare updates
+    // 1. Update Calendar Dates
     currentBulkRequest.dates.forEach(dateStr => {
         const ref = window.dbFormat.doc(window.db, "availability", dateStr);
         const data = {
-            status: currentEditStatus, // from setBulkStatus
+            status: currentEditStatus, 
             note: note,
             badge: currentBadge || null
         };
         batch.set(ref, data);
-        
-        // Optimistic UI update
-        DATA_STORE.overrides[dateStr] = data;
+        DATA_STORE.overrides[dateStr] = data; // Optimistic
     });
     
-    // Optional: Archive/Delete request logic could go here, but I'll leave it manual for safety unless requested
-    
+    // 2. Mark Request as Approved
+    const reqRef = window.dbFormat.doc(window.db, "requests", currentBulkRequest.id);
+    batch.update(reqRef, { status: 'approved' });
+
     try {
         await batch.commit();
-        alert(`Oppdatert ${currentBulkRequest.dates.length} datoer!`);
-        
-        // Cleanup
+        alert(`Oppdatert og godkjent!`);
         closeBulkModal();
-        init(); // Refresh calendar
-        openAdminRequests(); // Re-open inbox
+        init(); 
+        openAdminRequests(); 
     } catch(e) {
         alert("Bulk update failed: " + e.message);
     }
@@ -218,14 +222,19 @@ async function saveBulkAction() {
 
 async function archiveBulkRequest() {
     if(!currentBulkRequest) return;
-    await deleteRequest(currentBulkRequest.id); // Re-use delete logic
-    closeBulkModal();
-    openAdminRequests();
+    // Just Mark as rejected/archived instead of deleting
+    if(confirm("Avvis og arkiver denne forespørselen?")) {
+        try {
+             await window.dbFormat.updateDoc(window.dbFormat.doc(window.db, "requests", currentBulkRequest.id), { status: 'rejected' });
+             closeBulkModal();
+             openAdminRequests();
+        } catch(e) { alert(e.message); }
+    }
 }
 
 function closeBulkModal() {
     document.getElementById('bulk-modal').classList.add('hidden');
-    document.getElementById('admin-requests-modal').classList.remove('hidden'); // Show inbox again
+    document.getElementById('admin-requests-modal').classList.remove('hidden'); 
 }
 
 // Global Exports
@@ -277,7 +286,7 @@ function toggleBadge(badge) {
         currentBadge = null;
         el.style.opacity = '0.5';
     } else {
-        ['NR', 'PM', 'ST'].forEach(b => document.getElementById(`badge-${b.toLowerCase()}`).style.opacity = '0.5');
+        ['NR', 'PM', 'ST'].forEach(b => document.getElementById(`badge-${b.toLowerCase()}`).style.opacity = '0.5';
         currentBadge = badge;
         el.style.opacity = '1';
     }

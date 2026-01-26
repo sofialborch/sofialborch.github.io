@@ -133,6 +133,11 @@
                         Send Forespørsel
                     </button>
                 </div>
+                
+                <!-- NEW: My Requests (Tracker) -->
+                <div id="my-requests-container" class="hidden glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-emerald-500/30">
+                    <!-- Populated by JS -->
+                </div>
 
                 <!-- Lookup Panel -->
                 <div id="lookup-panel" class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-white/10 lg:sticky lg:top-24">
@@ -325,6 +330,7 @@
                     <textarea id="req-msg" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                 </div>
                 <button onclick="submitRequest()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Send</button>
+                <div id="req-modal-footer"></div> <!-- Placeholder for Phone/Auth tip -->
             </div>
         </div>
     </div>
@@ -350,7 +356,7 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
       import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyC6wkHeUtbYdlYeZZA_4RDbjes7MuP-i4E",
@@ -370,7 +376,7 @@
 
       window.db = db;
       window.auth = auth;
-      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc };
+      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc, updateDoc, getDoc };
       window.uploadLocalDataToFirestore = async function(localOverrides) {
         if (!auth.currentUser) { alert("Please log in as admin first."); return; }
         const count = Object.keys(localOverrides).length;
@@ -435,7 +441,10 @@
               adminTools.classList.add('hidden');
               window.isAdmin = false;
           }
-          if(typeof window.init === 'function') window.init();
+          if(typeof window.init === 'function') {
+            window.init();
+            if(window.checkRequestStatus) window.checkRequestStatus(); // Reload tracker logic
+          }
       });
     </script>
     
