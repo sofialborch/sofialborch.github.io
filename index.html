@@ -40,6 +40,7 @@
                     <i class="fas fa-print"></i>
                     <span class="hidden sm:inline" data-tr="printBtn">Skriv ut</span>
                 </button>
+                <!-- Manual Upload is kept as a backup -->
                 <input type="file" id="manual-upload" class="hidden" accept=".json" onchange="handleManualUpload(event)">
                 <span id="sync-status" 
                       onclick="document.getElementById('manual-upload').click()"
@@ -144,7 +145,7 @@
                 <div class="h-8 w-px bg-white/10 hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v2.7</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.0 (Cloud)</p>
                 </div>
             </div>
             
@@ -194,7 +195,7 @@
         </div>
     </div>
 
-    <!-- Hidden Auth Modal with Google Sign-In -->
+    <!-- Hidden Auth Modal -->
     <div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity" onclick="toggleAuthModal()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-3xl p-8 border border-white/10 shadow-2xl transform transition-all scale-100 flex flex-col items-center">
@@ -208,12 +209,54 @@
             <p id="auth-error" class="text-red-400 text-xs mt-4 text-center font-bold hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20 w-full"></p>
         </div>
     </div>
+
+    <!-- Edit Modal (For Admin) -->
+    <div id="edit-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeEditModal()"></div>
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-white/10 shadow-2xl transform transition-all">
+            <h3 class="text-xl font-black uppercase tracking-widest mb-6" id="edit-date-display">...</h3>
+            
+            <div class="space-y-4">
+                <!-- Status Buttons -->
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setEditStatus('available')" class="edit-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
+                    <button onclick="setEditStatus('busy')" class="edit-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
+                    <button onclick="setEditStatus('partial')" class="edit-status-btn p-3 rounded-xl border border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
+                </div>
+
+                <!-- Badges -->
+                 <div>
+                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Badge (Valgfritt)</label>
+                    <div class="flex gap-2">
+                        <button onclick="toggleBadge('NR')" id="badge-nr" class="badge-btn flex-1 py-2 rounded-lg border border-white/10 text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
+                        <button onclick="toggleBadge('PM')" id="badge-pm" class="badge-btn flex-1 py-2 rounded-lg border border-white/10 text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
+                        <button onclick="toggleBadge('ST')" id="badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-white/10 text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
+                    </div>
+                </div>
+
+                <!-- Note Input -->
+                <div>
+                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Notat</label>
+                    <textarea id="edit-note" class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                </div>
+
+                <!-- Save / Delete -->
+                <div class="flex gap-3 mt-4">
+                    <button onclick="deleteDay()" class="px-4 py-3 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 font-black text-xs uppercase tracking-widest"><i class="fas fa-trash"></i></button>
+                    <button onclick="saveDay()" class="flex-1 bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
+                        Lagre
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
-      // Added Google Provider and signInWithPopup
       import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+      // Added Firestore imports
+      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyC6wkHeUtbYdlYeZZA_4RDbjes7MuP-i4E",
@@ -229,10 +272,14 @@
       const analytics = getAnalytics(app);
       const auth = getAuth(app);
       const provider = new GoogleAuthProvider();
+      const db = getFirestore(app);
+
+      // Expose Firestore to global window object for script.js
+      window.db = db;
+      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc };
 
       // --- Hidden Login Logic ---
 
-      // Toggle Modal
       window.toggleAuthModal = function() {
           const modal = document.getElementById('auth-modal');
           modal.classList.toggle('hidden');
@@ -246,14 +293,13 @@
           }
       });
 
-      // Handle Google Login
       document.getElementById('google-login-btn').addEventListener('click', async () => {
           const errorMsg = document.getElementById('auth-error');
           errorMsg.classList.add('hidden');
           
           try {
               await signInWithPopup(auth, provider);
-              toggleAuthModal(); // Close modal on success
+              toggleAuthModal();
           } catch (error) {
               console.error("Login Error:", error);
               errorMsg.textContent = "Auth Failed: " + error.message;
@@ -261,23 +307,31 @@
           }
       });
 
-      // Handle Logout
       window.signOutUser = async function() {
           if(confirm("Log out of admin mode?")) {
             await signOut(auth);
           }
       }
 
-      // Auth State Listener
+      // --- AUTH STATE LISTENER (UPDATED) ---
+      // IMPORTANT: REPLACE THE EMAIL BELOW WITH YOURS!
+      const ADMIN_EMAIL = "sofia.l.borch@gmail.com"; 
+
       onAuthStateChanged(auth, (user) => {
           const adminIndicator = document.getElementById('admin-indicator');
-          if (user) {
-              console.log("Admin Access Granted via Google");
+          if (user && user.email === ADMIN_EMAIL) {
+              console.log("Admin Mode Active: " + user.email);
               adminIndicator.classList.remove('hidden'); 
+              window.isAdmin = true;
           } else {
-              console.log("Guest Mode");
+              if(user) console.log("Guest Logged in: " + user.email + " (Read-only)");
+              else console.log("Guest Mode");
+              
               adminIndicator.classList.add('hidden');
+              window.isAdmin = false;
           }
+          // Re-render calendar if data is loaded to update click listeners
+          if(typeof window.init === 'function') window.init();
       });
     </script>
     <script src="script.js"></script>

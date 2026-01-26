@@ -37,6 +37,11 @@ let CURRENT_LANG = 'nb';
 let DATA_STORE = { overrides: {}, settings: { certainUntil: '', phone: '' } };
 let currentViewDate = new Date();
 
+// Edit State Variables
+let currentEditDate = null;
+let currentEditStatus = 'available';
+let currentBadge = null;
+
 const getLocalDateString = (date) => date.toLocaleDateString('en-CA');
 const t = (key) => TR[CURRENT_LANG][key] || key;
 
@@ -84,16 +89,14 @@ function getDateFromWeek(week, year) {
     return d;
 }
 
+// MODIFIED: Fetches from Firestore
 async function loadData() {
     // Explicitly handle Theme Loading
     const savedTheme = localStorage.getItem('theme');
-    
-    // Default is dark (no class). If saved is 'light', add the class.
     if (savedTheme === 'light') {
         document.body.classList.add('light-mode');
         document.getElementById('theme-icon').className = 'fas fa-sun text-base lg:text-lg';
     } else {
-        // Ensure dark mode (remove class) if saved is 'dark' or null
         document.body.classList.remove('light-mode');
         document.getElementById('theme-icon').className = 'fas fa-moon text-base lg:text-lg';
     }
@@ -105,23 +108,66 @@ async function loadData() {
         updateLanguageUI();
     }
 
+    // Database Fetch
     try {
-        const response = await fetch('availability.json');
-        if (response.ok) {
-            const data = await response.json();
-            DATA_STORE.overrides = data.overrides || data;
-            DATA_STORE.settings = data.settings || { certainUntil: '', phone: '' };
+        updateStatus(t('loading'), "blue");
+        
+        // Wait for Firestore to be ready in window
+        let attempts = 0;
+        while (!window.dbFormat && attempts < 10) {
+            await new Promise(r => setTimeout(r, 200));
+            attempts++;
+        }
+
+        if (window.dbFormat) {
+            const querySnapshot = await window.dbFormat.getDocs(window.dbFormat.collection(window.db, "availability"));
+            
+            DATA_STORE.overrides = {};
+            querySnapshot.forEach((doc) => {
+                DATA_STORE.overrides[doc.id] = doc.data();
+            });
+            
+            // Using placeholder settings for now
+            DATA_STORE.settings = { certainUntil: '', phone: '' };
             updateStatus(t('online'), "emerald");
-        } else { updateStatus(t('local'), "gray"); }
-    } catch (e) { updateStatus(t('local'), "gray"); }
+        } else {
+            throw new Error("Firestore not initialized");
+        }
+    } catch (e) {
+        console.error("Cloud fetch failed, using fallback:", e);
+        // Fallback to local JSON
+        try {
+            const response = await fetch('availability.json');
+            if (response.ok) {
+                const data = await response.json();
+                DATA_STORE.overrides = data.overrides || data;
+                DATA_STORE.settings = data.settings || { certainUntil: '', phone: '' };
+            }
+        } catch(err) {}
+        updateStatus(t('local'), "gray");
+    }
     init();
 }
 
 function updateStatus(text, color) {
     const el = document.getElementById('sync-status');
     if(!el) return;
+    
+    // Safety check for Tailwind colors to prevent breaking classes if "blue" isn't standard
+    const safeColors = {
+        emerald: 'text-emerald-500',
+        gray: 'text-gray-500',
+        blue: 'text-blue-500'
+    };
+    
+    // Remove old colors
+    el.classList.remove('text-emerald-500', 'text-gray-500', 'text-blue-500');
+    
+    // Add new color and text
+    if (safeColors[color]) el.classList.add(safeColors[color]);
     el.innerText = text;
-    el.className = `hidden md:inline-block text-xs font-bold text-${color}-500 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5 cursor-pointer hover:bg-white/10 transition-all`;
+    el.classList.remove('hidden');
+    el.classList.add('inline-block'); // Ensure it shows
 }
 
 function handleManualUpload(event) {
@@ -148,11 +194,16 @@ function getInfo(dateStr) {
     if (typeof entry === 'object' && entry !== null) {
         status = entry.status || 'available';
         note = translateNote(entry.note) || '';
+        badge = entry.badge || '';
     } else if (entry) { status = entry; }
-    const ln = note.toLowerCase();
-    if (ln.includes('norønna')) badge = 'NR';
-    else if (ln.includes('polarmåsen')) badge = 'PM';
-    else if (ln.includes('studer')) badge = 'ST';
+    
+    // Auto-detect legacy badges if not explicitly set in DB
+    if (!badge) {
+        const ln = note.toLowerCase();
+        if (ln.includes('norønna')) badge = 'NR';
+        else if (ln.includes('polarmåsen')) badge = 'PM';
+        else if (ln.includes('studer')) badge = 'ST';
+    }
     return { status, note, badge };
 }
 
@@ -222,7 +273,17 @@ function renderWeekSummary(weekNumber) {
         const ds = getLocalDateString(curr); const info = getInfo(ds);
         const div = document.createElement('div');
         div.className = `summary-card status-${info.status}-card cursor-pointer ${ds === todayStr ? 'is-today' : ''}`;
-        div.onclick = () => { document.getElementById('lookup-start').value = ds; runLookup(); };
+        
+        // Logic split for Admin vs Guest
+        div.onclick = () => { 
+            if (window.isAdmin) {
+                openEditModal(ds, info);
+            } else {
+                document.getElementById('lookup-start').value = ds; 
+                runLookup(); 
+            }
+        };
+
         div.innerHTML = `
             <div class="flex flex-col gap-0.5 mb-1 lg:mb-2">
                 <span class="text-[14px] lg:text-[16px] font-black opacity-90 tracking-tighter">${String(curr.getDate()).padStart(2, '0')}.${String(curr.getMonth() + 1).padStart(2, '0')}</span>
@@ -275,7 +336,17 @@ function renderCalendar(todayStr) {
                 const date = new Date(year, month, currentDay); const ds = getLocalDateString(date); const info = getInfo(ds);
                 const div = document.createElement('div');
                 div.className = `day-cell status-${info.status} ${date < todayObj ? 'day-past' : ''} ${ds === todayStr ? 'today-focus' : ''}`;
-                div.onclick = () => { document.getElementById('lookup-start').value = ds; runLookup(); };
+                
+                // --- ADMIN CLICK LOGIC ---
+                div.onclick = () => { 
+                    if (window.isAdmin) {
+                        openEditModal(ds, info);
+                    } else {
+                        document.getElementById('lookup-start').value = ds; 
+                        runLookup(); 
+                    }
+                };
+
                 div.innerHTML = info.badge ? `<span class=\"badge badge-${info.badge.toLowerCase()}\">${info.badge}</span>` : `<span class=\"font-bold\">${currentDay}</span>`;
                 if (info.note) {
                     const tip = document.createElement('span'); tip.className = 'tooltip'; tip.innerText = info.note; div.appendChild(tip);
@@ -327,6 +398,99 @@ function runLookup() {
 }
 
 function togglePrintModal() { document.getElementById('print-modal').classList.toggle('hidden'); }
+
+// --- ADMIN FUNCTIONS ---
+
+function openEditModal(dateStr, info) {
+    currentEditDate = dateStr;
+    const dateObj = new Date(dateStr + "T00:00:00");
+    document.getElementById('edit-date-display').innerText = dateObj.toLocaleDateString(t('monthLocale'), { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('edit-modal').classList.remove('hidden');
+    
+    // Set current values
+    setEditStatus(info.status === 'weekend' ? 'available' : info.status);
+    document.getElementById('edit-note').value = info.note || '';
+    
+    // Reset badges
+    ['NR', 'PM', 'ST'].forEach(b => document.getElementById(`badge-${b.toLowerCase()}`).style.opacity = '0.5');
+    currentBadge = null;
+    
+    if (info.badge) toggleBadge(info.badge);
+}
+
+function closeEditModal() {
+    document.getElementById('edit-modal').classList.add('hidden');
+}
+
+function setEditStatus(status) {
+    currentEditStatus = status;
+    document.querySelectorAll('.edit-status-btn').forEach(btn => {
+        if(btn.dataset.val === status) {
+            btn.classList.add('bg-white', 'text-black');
+            btn.classList.remove('text-white');
+        } else {
+            btn.classList.remove('bg-white', 'text-black');
+            btn.classList.add('text-white');
+        }
+    });
+}
+
+function toggleBadge(badge) {
+    const el = document.getElementById(`badge-${badge.toLowerCase()}`);
+    if (currentBadge === badge) {
+        // Toggle off
+        currentBadge = null;
+        el.style.opacity = '0.5';
+    } else {
+        // Toggle on (and others off)
+        ['NR', 'PM', 'ST'].forEach(b => document.getElementById(`badge-${b.toLowerCase()}`).style.opacity = '0.5');
+        currentBadge = badge;
+        el.style.opacity = '1';
+    }
+}
+
+async function saveDay() {
+    if (!currentEditDate || !window.isAdmin) return;
+    
+    const note = document.getElementById('edit-note').value;
+    const data = {
+        status: currentEditStatus,
+        note: note,
+        badge: currentBadge || null
+    };
+
+    try {
+        await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "availability", currentEditDate), data);
+        
+        // Optimistic UI Update (Update local store instantly)
+        DATA_STORE.overrides[currentEditDate] = data;
+        init(); // Re-render calendar
+        closeEditModal();
+    } catch (e) {
+        alert("Save failed: " + e.message);
+    }
+}
+
+async function deleteDay() {
+    if (!currentEditDate || !confirm("Clear this day?")) return;
+    try {
+        await window.dbFormat.deleteDoc(window.dbFormat.doc(window.db, "availability", currentEditDate));
+        delete DATA_STORE.overrides[currentEditDate];
+        init();
+        closeEditModal();
+    } catch(e) {
+        alert("Delete failed: " + e.message);
+    }
+}
+
+// Expose functions globally for HTML
+window.openEditModal = openEditModal;
+window.closeEditModal = closeEditModal;
+window.setEditStatus = setEditStatus;
+window.toggleBadge = toggleBadge;
+window.saveDay = saveDay;
+window.deleteDay = deleteDay;
+
 
 function executePrint() {
     const sm = document.getElementById('print-start-month').value;
