@@ -88,7 +88,7 @@ async function loadData() {
                 querySnapshot.forEach((doc) => {
                     DATA_STORE.overrides[doc.id] = doc.data();
                 });
-                updateStatus(t('online'), "emerald");
+                updateStatus(t('online'), "emerald", true);
             } else {
                 updateStatus("Waiting for Data", "gray");
             }
@@ -127,15 +127,29 @@ async function loadData() {
     }
 }
 
-function updateStatus(text, color) {
+function updateStatus(text, color, onlineStatusIndicatorSuccess = false) {
     const el = document.getElementById('sync-status');
-    if(!el) return;
-    const safeColors = { emerald: 'text-emerald-500', gray: 'text-gray-500', blue: 'text-blue-500', busy: 'text-red-500' };
-    el.classList.remove('text-emerald-500', 'text-gray-500', 'text-blue-500', 'text-red-500');
-    if (safeColors[color]) el.classList.add(safeColors[color]);
-    el.innerText = text;
-    el.classList.remove('hidden');
-    el.classList.add('inline-block');
+    if (!el) return;
+
+    // Configuration for different states
+    // Icons: Loading (spin), Success (globe), Local/Offline (database), Error (exclamation)
+    const states = {
+        blue:    { icon: 'fa-circle-notch fa-spin', color: 'text-blue-500' },
+        emerald: { icon: 'fa-globe',                color: 'text-emerald-500' },
+        gray:    { icon: 'fa-database',             color: 'text-gray-500' },
+        busy:    { icon: 'fa-exclamation-circle',   color: 'text-red-500' }
+    };
+
+    const state = states[color] || states.gray;
+
+    // Reset and apply base classes + color
+    el.className = `inline-flex items-center gap-2 ${state.color}`;
+    
+    // Render: Icon always visible, text hidden on small screens (like print button)
+    el.innerHTML = `
+        <i class="fas ${state.icon} text-lg lg:text-base"></i>
+        <span class="hidden sm:inline text-[10px] lg:text-xs font-black uppercase tracking-widest pt-0.5">${text}</span>
+    `;
 }
 
 function handleManualUpload(event) {
