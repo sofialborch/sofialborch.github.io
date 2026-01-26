@@ -179,7 +179,7 @@ body:not(.dark-mode) .day-cell { border-color: var(--border-color); }
 
 /* Keep dark mode cells simpler */
 body.dark-mode .status-available { background: var(--card-bg-secondary) !important; border: 1px solid var(--available); }
-body.dark-mode .status-busy { background: var(--card-bg-secondary) !important; border: 1px solid var(--busy); }
+body.dark-mode .status-busy { background: var(--card-bg-secondary); border: 1px solid var(--busy); }
 body.dark-mode .status-partial { background: var(--card-bg-secondary) !important; border: 1px solid var(--partial); }
 
 
