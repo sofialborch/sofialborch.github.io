@@ -110,19 +110,22 @@ function renderAdminRequestList(reqs) {
         }).join('');
 
         const isRejected = req.status === 'rejected';
+        const isApproved = req.status === 'approved';
+        
         const el = document.createElement('div');
-        el.className = isRejected 
-            ? "p-5 rounded-2xl bg-red-500/5 border border-red-500/20 transition group relative opacity-75"
+        // Visually fade processed requests
+        el.className = (isRejected || isApproved)
+            ? "p-5 rounded-2xl bg-dynamic border border-dynamic transition group relative opacity-60 hover:opacity-100"
             : "p-5 rounded-2xl bg-dynamic border border-dynamic hover:border-pink-500/30 transition group relative";
         
-        const warningHTML = (conflictCount > 0 && !isRejected)
+        const warningHTML = (conflictCount > 0 && !isRejected && !isApproved)
             ? `<div class="mt-3 flex items-center gap-2 text-yellow-500 text-[10px] font-black uppercase tracking-widest bg-yellow-500/10 px-3 py-2 rounded-lg border border-yellow-500/20">
                  <i class="fas fa-exclamation-triangle"></i> ${t('conflictsFound')} (${conflictCount})
                </div>` : '';
         
-        const statusBadge = isRejected 
-            ? `<span class="px-2 py-1 bg-red-500 text-white text-[9px] font-black uppercase tracking-widest rounded ml-2">AVVIST</span>` 
-            : '';
+        let statusBadge = '';
+        if(isRejected) statusBadge = `<span class="px-2 py-1 bg-red-500 text-white text-[9px] font-black uppercase tracking-widest rounded ml-2">AVVIST</span>`;
+        if(isApproved) statusBadge = `<span class="px-2 py-1 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest rounded ml-2">GODKJENT</span>`;
 
         let displayMsg = req.message || '';
         displayMsg = displayMsg.replace('Detaljer:', '<strong>Detaljer:</strong>');
@@ -139,7 +142,7 @@ function renderAdminRequestList(reqs) {
                 </div>
                 <div class="flex gap-2">
                     <button onclick="openBulkAction('${req.id}')" class="bg-pink-500 hover:bg-pink-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition shadow-lg shadow-pink-500/20">
-                        ${isRejected ? 'Åpne' : t('approve')}
+                        ${isApproved || isRejected ? 'Rediger' : t('approve')}
                     </button>
                     <button onclick="deleteRequest('${req.id}')" class="bg-dynamic hover:bg-red-500/20 text-muted-dynamic hover:text-red-400 px-3 py-1.5 rounded-lg transition"><i class="fas fa-trash"></i></button>
                 </div>
@@ -148,6 +151,7 @@ function renderAdminRequestList(reqs) {
             <div class="mb-4">
                 <div class="text-sm font-medium opacity-80 leading-relaxed bg-black/5 dark:bg-black/20 p-3 rounded-lg border border-dynamic whitespace-pre-wrap">${displayMsg}</div>
                 ${warningHTML}
+                ${req.adminResponse ? `<div class="mt-2 pl-3 border-l-2 border-pink-500 text-xs text-pink-500 font-bold italic">"${req.adminResponse}"</div>` : ''}
             </div>
             <div class="flex flex-wrap gap-2">${datePills}</div>
         `;
@@ -156,7 +160,7 @@ function renderAdminRequestList(reqs) {
 }
 
 // ----------------------------------------------------
-// NEW WIZARD LOGIC
+// NEW WIZARD LOGIC (Multi-step + Summary)
 // ----------------------------------------------------
 
 function openBulkAction(reqId) {
@@ -181,15 +185,14 @@ function openBulkAction(reqId) {
         req.dates.forEach(d => {
             const existing = DATA_STORE.overrides[d];
             // Default logic: If user asks for a day, they probably want it to be 'busy' (shift assigned)
-            // But if it's already set, keep existing.
-            // If they wrote a specific note, use it.
+            // unless it's already set.
             
             let initialStatus = 'busy'; 
             if(existing && existing.status) initialStatus = existing.status;
             
+            // Note logic: Prefer existing DB note, otherwise use user's request note
             let initialNote = notesMap[d] || '';
-            if(existing && existing.note) initialNote = existing.note; // Override with DB if exists? Or append? Let's just use existing if avail.
-            if(!existing && notesMap[d]) initialNote = notesMap[d];
+            if(existing && existing.note) initialNote = existing.note; 
 
             let initialBadge = null;
             if(existing && existing.badge) initialBadge = existing.badge;
@@ -206,6 +209,9 @@ function openBulkAction(reqId) {
     bulkWizardData.sort((a,b) => new Date(a.date) - new Date(b.date));
     bulkWizardIndex = 0;
     
+    // Clear previous summary input
+    document.getElementById('bulk-response-text').value = req.adminResponse || '';
+    
     renderBulkStep();
     
     document.getElementById('bulk-modal').classList.remove('hidden');
@@ -213,48 +219,76 @@ function openBulkAction(reqId) {
 }
 
 function renderBulkStep() {
-    if(bulkWizardData.length === 0) return;
-    const data = bulkWizardData[bulkWizardIndex];
-    const dobj = new Date(data.date);
+    // Logic: 
+    // If index < length: Show Date Editor
+    // If index == length: Show Summary/Response Editor
     
-    // Header
-    document.getElementById('bulk-step-indicator').innerText = `${bulkWizardIndex + 1} / ${bulkWizardData.length}`;
+    const isSummaryStep = bulkWizardIndex === bulkWizardData.length;
     
-    // Content
-    document.getElementById('bulk-current-date').innerText = dobj.getDate();
-    document.getElementById('bulk-current-day').innerText = dobj.toLocaleDateString(t('monthLocale'), { weekday: 'long', month: 'long' });
-    
-    // Controls State
-    // Status
-    document.querySelectorAll('.bulk-step-btn').forEach(btn => {
-        if(btn.dataset.val === data.status) {
-            btn.classList.add('bg-white', 'text-black', 'border-black');
-            btn.classList.remove('text-muted-dynamic');
-        } else {
-            btn.classList.remove('bg-white', 'text-black', 'border-black');
-            btn.classList.add('text-muted-dynamic');
-        }
-    });
-
-    // Badges
-    ['NR', 'PM', 'ST'].forEach(b => {
-        const el = document.getElementById(`bulk-step-badge-${b.toLowerCase()}`);
-        if(el) el.style.opacity = (data.badge === b) ? '1' : '0.5';
-    });
-    
-    // Note
-    document.getElementById('bulk-step-note').value = data.note || '';
-
-    // Navigation Buttons
+    const dateView = document.getElementById('bulk-date-view');
+    const summaryView = document.getElementById('bulk-summary-view');
     const prevBtn = document.getElementById('bulk-prev-btn');
     const nextBtn = document.getElementById('bulk-next-btn');
-    
-    prevBtn.style.visibility = bulkWizardIndex > 0 ? 'visible' : 'hidden';
-    nextBtn.style.visibility = bulkWizardIndex < bulkWizardData.length - 1 ? 'visible' : 'hidden';
+    const indicator = document.getElementById('bulk-step-indicator');
+
+    if (isSummaryStep) {
+        // SUMMARY VIEW
+        dateView.classList.add('hidden');
+        summaryView.classList.remove('hidden');
+        
+        indicator.innerText = "Final Review";
+        nextBtn.style.visibility = 'hidden'; 
+        prevBtn.style.visibility = 'visible';
+        
+        // Update summary text
+        const total = bulkWizardData.length;
+        const busyCount = bulkWizardData.filter(d => d.status === 'busy').length;
+        const availCount = bulkWizardData.filter(d => d.status === 'available').length;
+        
+        document.getElementById('bulk-summary-stats').innerHTML = `
+            <span class="text-emerald-500">${availCount} Ledige</span> / 
+            <span class="text-red-500">${busyCount} Opptatt</span>
+        `;
+        
+    } else {
+        // DATE VIEW
+        dateView.classList.remove('hidden');
+        summaryView.classList.add('hidden');
+        
+        const data = bulkWizardData[bulkWizardIndex];
+        const dobj = new Date(data.date);
+        
+        indicator.innerText = `${bulkWizardIndex + 1} / ${bulkWizardData.length}`;
+        
+        document.getElementById('bulk-current-date').innerText = dobj.getDate();
+        document.getElementById('bulk-current-day').innerText = dobj.toLocaleDateString(t('monthLocale'), { weekday: 'long', month: 'long' });
+        
+        // Buttons
+        document.querySelectorAll('.bulk-step-btn').forEach(btn => {
+            if(btn.dataset.val === data.status) {
+                btn.classList.add('bg-white', 'text-black', 'border-black');
+                btn.classList.remove('text-muted-dynamic');
+            } else {
+                btn.classList.remove('bg-white', 'text-black', 'border-black');
+                btn.classList.add('text-muted-dynamic');
+            }
+        });
+
+        // Badges
+        ['NR', 'PM', 'ST'].forEach(b => {
+            const el = document.getElementById(`bulk-step-badge-${b.toLowerCase()}`);
+            if(el) el.style.opacity = (data.badge === b) ? '1' : '0.5';
+        });
+        
+        document.getElementById('bulk-step-note').value = data.note || '';
+        
+        prevBtn.style.visibility = bulkWizardIndex > 0 ? 'visible' : 'hidden';
+        nextBtn.style.visibility = 'visible';
+    }
 }
 
 window.nextBulkStep = function() {
-    if(bulkWizardIndex < bulkWizardData.length - 1) {
+    if(bulkWizardIndex < bulkWizardData.length) {
         bulkWizardIndex++;
         renderBulkStep();
     }
@@ -288,26 +322,49 @@ window.updateBulkStepNote = function(val) {
 window.saveBulkWizard = async function() {
     if(!currentBulkRequest || !window.isAdmin) return;
     
+    // Disable button to prevent double click
+    const saveBtn = document.getElementById('bulk-save-btn');
+    const originalText = saveBtn.innerText;
+    saveBtn.innerText = "Lagrer...";
+    saveBtn.disabled = true;
+
+    const responseMsg = document.getElementById('bulk-response-text').value;
+
     const batch = window.dbFormat.writeBatch(window.db);
     
-    // Commit all pages of the wizard
+    // 1. Commit Calendar Changes
     bulkWizardData.forEach(item => {
         const ref = window.dbFormat.doc(window.db, "availability", item.date);
         const data = { status: item.status, note: item.note, badge: item.badge || null };
         batch.set(ref, data);
-        DATA_STORE.overrides[item.date] = data;
+        DATA_STORE.overrides[item.date] = data; // Optimistic update
     });
 
+    // 2. Update Request Status & Response
     const reqRef = window.dbFormat.doc(window.db, "requests", currentBulkRequest.id);
-    batch.update(reqRef, { status: 'approved', adminResponse: "Approved via Wizard" }); // Could add prompt for this
+    batch.update(reqRef, { 
+        status: 'approved', // "Approved" implies processed/handled in this context
+        adminResponse: responseMsg 
+    });
 
     try {
         await batch.commit();
-        alert("Alle endringer lagret!");
+        
+        // UI Updates
+        alert("Kalender oppdatert og svar sendt!");
         window.closeBulkModal();
+        
+        // Immediate Re-render of Calendar
         window.initApp(); 
+        
+        // Re-open list to show updated status
         openAdminRequests(); 
-    } catch(e) { alert("Bulk update failed: " + e.message); }
+
+    } catch(e) { 
+        alert("Save failed: " + e.message); 
+        saveBtn.innerText = originalText;
+        saveBtn.disabled = false;
+    }
 }
 
 // ----------------------------------------------------
@@ -319,12 +376,6 @@ window.deleteRequest = async function(id) {
         await window.dbFormat.deleteDoc(window.dbFormat.doc(window.db, "requests", id));
         openAdminRequests(); 
     } catch(e) { alert("Error: " + e.message); }
-}
-
-window.archiveBulkRequest = async function() {
-    // This function might be deprecated by wizard logic or we can add an archive button to the wizard too?
-    // For now, removing it from wizard UI to keep it simple as user requested "Edit pages".
-    // Can still add rejection logic if needed later.
 }
 
 // Single Day Edit (Legacy / Calendar Direct Click)

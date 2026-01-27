@@ -214,7 +214,7 @@
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.1</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.2</p>
                 </div>
             </div>
             
@@ -438,8 +438,8 @@
                 </div>
             </div>
 
-            <!-- Wizard Content -->
-            <div id="bulk-wizard-content" class="flex-1 space-y-6">
+            <!-- Wizard Content (Date View) -->
+            <div id="bulk-date-view" class="flex-1 space-y-6">
                 <!-- Date Display -->
                 <div class="text-center">
                     <h2 id="bulk-current-date" class="text-3xl font-black mb-1">...</h2>
@@ -467,14 +467,28 @@
                 </div>
             </div>
 
+            <!-- Wizard Content (Summary View) -->
+            <div id="bulk-summary-view" class="hidden flex-1 space-y-6 text-center">
+                <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 text-2xl animate-pulse">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-black uppercase tracking-tight mb-2">Klar til lagring?</h3>
+                    <p id="bulk-summary-stats" class="text-xs font-black uppercase tracking-widest opacity-60 mb-6">... Dager</p>
+                    
+                    <div class="text-left">
+                         <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Svar til bruker (Valgfritt)</label>
+                         <textarea id="bulk-response-text" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition" placeholder="F.eks: Jeg tok mandagen, men tirsdag passet ikke..."></textarea>
+                    </div>
+                </div>
+                <button id="bulk-save-btn" onclick="window.saveBulkWizard()" class="w-full bg-pink-500 text-white font-black py-4 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
+                    Oppdater & Svar
+                </button>
+            </div>
+
             <!-- Navigation -->
             <div class="flex items-center justify-between mt-8 pt-4 border-t border-dynamic">
                 <button onclick="window.prevBulkStep()" id="bulk-prev-btn" class="w-10 h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover:text-white transition"><i class="fas fa-arrow-left"></i></button>
-                
-                <button onclick="window.saveBulkWizard()" class="bg-pink-500 text-white font-black px-8 py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
-                    Lagre Alt
-                </button>
-
                 <button onclick="window.nextBulkStep()" id="bulk-next-btn" class="w-10 h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover:text-white transition"><i class="fas fa-arrow-right"></i></button>
             </div>
             
