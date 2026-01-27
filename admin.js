@@ -1,22 +1,20 @@
-// Migration Utility
+// admin.js - Admin Tools & Logic
+
 function triggerMigration() {
     if(window.uploadLocalDataToFirestore && DATA_STORE.overrides) {
         window.uploadLocalDataToFirestore(DATA_STORE.overrides);
     } else {
-        alert("Migration tool not ready or no data loaded.");
+        alert("Migration tool not ready.");
     }
 }
 window.triggerMigration = triggerMigration;
 
-// Inbox Logic
 let inboxUnsub = null;
 
 async function openAdminRequests() {
     if(!window.isAdmin) return;
-    
-    // Safety check for DB connection
     if (!window.dbFormat || !window.db) {
-        alert("Database connection not ready. Please wait.");
+        alert("Database connection not ready.");
         return;
     }
 
@@ -36,58 +34,47 @@ async function openAdminRequests() {
         }
 
         let reqs = [];
-        loadedRequestsCache = {}; // Reset cache
+        loadedRequestsCache = {}; 
         
         snapshot.forEach(doc => {
             const data = doc.data();
-            // Filter out archived/rejected unless needed
             if (data.status !== 'archived' && data.status !== 'rejected') { 
                 loadedRequestsCache[doc.id] = { id: doc.id, ...data };
                 reqs.push(loadedRequestsCache[doc.id]);
             }
         });
         
-        // Robust sort handling invalid dates
         reqs.sort((a, b) => {
             const dateA = a.submittedAt ? new Date(a.submittedAt) : new Date(0);
             const dateB = b.submittedAt ? new Date(b.submittedAt) : new Date(0);
             return dateB - dateA;
         });
         
-        if(reqs.length === 0) {
-             list.innerHTML = `<p class="text-center opacity-50 py-10 font-bold uppercase tracking-widest text-xs">Ingen aktive forespørsler</p>`;
-        } else {
-            renderAdminRequestList(reqs);
-        }
+        if(reqs.length === 0) list.innerHTML = `<p class="text-center opacity-50 py-10 font-bold uppercase tracking-widest text-xs">Ingen aktive forespørsler</p>`;
+        else renderAdminRequestList(reqs);
+        
     } catch (e) {
-        console.error("Error fetching requests:", e);
-        list.innerHTML = `<p class="text-center text-red-400 font-bold text-xs mt-10">Feil ved lasting av forespørsler.<br>${e.message}</p>`;
+        list.innerHTML = `<p class="text-center text-red-400 font-bold text-xs mt-10">Feil.<br>${e.message}</p>`;
     }
 }
 
-// REAL-TIME LISTENER for Red Dot
 function subscribeToInbox() {
     if(!window.isAdmin || !window.dbFormat) return;
-    
-    if (inboxUnsub) inboxUnsub(); // Clear existing
+    if (inboxUnsub) inboxUnsub(); 
 
     const q = window.dbFormat.query(
         window.dbFormat.collection(window.db, "requests"),
         window.dbFormat.where("status", "==", "pending")
     );
     
-    // onSnapshot fires immediately and on every change
     inboxUnsub = window.dbFormat.onSnapshot(q, (snapshot) => {
         const dot = document.getElementById('admin-inbox-dot');
         if(!dot) return;
-        
-        if(!snapshot.empty) {
-            dot.classList.remove('hidden');
-        } else {
-            dot.classList.add('hidden');
-        }
+        if(!snapshot.empty) dot.classList.remove('hidden');
+        else dot.classList.add('hidden');
     });
 }
+window.subscribeToInbox = subscribeToInbox;
 
 function renderAdminRequestList(reqs) {
     const list = document.getElementById('admin-requests-list');
@@ -98,7 +85,6 @@ function renderAdminRequestList(reqs) {
             ? new Date(req.submittedAt).toLocaleDateString(t('monthLocale'), { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' })
             : 'Ukjent dato';
         
-        // Analyze Conflicts
         let conflictCount = 0;
         const datesToRender = req.dates || [];
         
@@ -107,8 +93,7 @@ function renderAdminRequestList(reqs) {
             const dobj = new Date(d);
             const niceDate = dobj.getDate() + '.' + (dobj.getMonth()+1);
             
-            // Determine Status Color
-            let colorClass = "bg-white/10 text-white border-white/10"; // Default (unknown/past)
+            let colorClass = "bg-white/10 text-white border-white/10";
             if (info.status === 'busy') {
                 colorClass = "bg-red-500/20 text-red-400 border-red-500/30 line-through opacity-75";
                 conflictCount++;
@@ -118,23 +103,23 @@ function renderAdminRequestList(reqs) {
             } else if (info.status === 'available' || info.status === 'weekend') {
                 colorClass = "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
             } else {
-                // Fallback for bright mode visibility on 'other'
                 colorClass = "bg-dynamic text-muted-dynamic border-dynamic"; 
             }
-            
             return `<span class="px-2 py-1 rounded text-[10px] font-black border ${colorClass}" title="${t(info.status)}">${niceDate}</span>`;
         }).join('');
 
         const el = document.createElement('div');
-        // Updated styling to use dynamic classes for bright mode compatibility
         el.className = "p-5 rounded-2xl bg-dynamic border border-dynamic hover:border-pink-500/30 transition group relative";
         
-        // Warning HTML if conflicts exist
         const warningHTML = conflictCount > 0 
             ? `<div class="mt-3 flex items-center gap-2 text-yellow-500 text-[10px] font-black uppercase tracking-widest bg-yellow-500/10 px-3 py-2 rounded-lg border border-yellow-500/20">
                  <i class="fas fa-exclamation-triangle"></i> ${t('conflictsFound')} (${conflictCount})
-               </div>` 
-            : '';
+               </div>` : '';
+
+        // Handle detailed messages nicely
+        let displayMsg = req.message || '';
+        // Bold the "Details:" header if present
+        displayMsg = displayMsg.replace('Detaljer:', '<strong>Detaljer:</strong>');
 
         el.innerHTML = `
             <div class="flex justify-between items-start mb-3">
@@ -154,41 +139,26 @@ function renderAdminRequestList(reqs) {
             </div>
             
             <div class="mb-4">
-                <p class="text-sm font-medium opacity-80 leading-relaxed bg-black/5 dark:bg-black/20 p-3 rounded-lg border border-dynamic italic whitespace-pre-wrap">"${req.message || ''}"</p>
+                <div class="text-sm font-medium opacity-80 leading-relaxed bg-black/5 dark:bg-black/20 p-3 rounded-lg border border-dynamic whitespace-pre-wrap">${displayMsg}</div>
                 ${warningHTML}
             </div>
-
-            <div class="flex flex-wrap gap-2">
-                ${datePills}
-            </div>
+            <div class="flex flex-wrap gap-2">${datePills}</div>
         `;
         list.appendChild(el);
     });
 }
 
-async function deleteRequest(id) {
-    if(!confirm(t('delete') + "?")) return;
-    try {
-        await window.dbFormat.deleteDoc(window.dbFormat.doc(window.db, "requests", id));
-        openAdminRequests(); 
-    } catch(e) { alert("Error: " + e.message); }
-}
-
-// --- BULK / APPROVE LOGIC ---
-
+// Bulk Actions
 function openBulkAction(reqId) {
     const req = loadedRequestsCache[reqId];
     if(!req) return;
-    
     currentBulkRequest = req; 
     
-    // Populate Modal
     document.getElementById('bulk-title').innerText = `${t('bulkEditTitle')}: ${req.name}`;
     document.getElementById('bulk-subtitle').innerText = `${req.dates ? req.dates.length : 0} dager`;
     document.getElementById('bulk-note').value = `${req.name}: ${req.message}`; 
-    document.getElementById('bulk-response').value = ''; // Reset response field
+    document.getElementById('bulk-response').value = ''; 
     
-    // Populate Date List
     const dateList = document.getElementById('bulk-date-list');
     dateList.innerHTML = '';
     
@@ -199,7 +169,6 @@ function openBulkAction(reqId) {
             const niceDate = dobj.getDate() + '.' + (dobj.getMonth()+1);
             const isConflict = info.status !== 'available' && info.status !== 'weekend';
             const color = isConflict ? 'text-red-500' : 'text-emerald-500';
-            
             dateList.innerHTML += `<div class="flex justify-between items-center text-xs font-bold border-b border-dynamic py-1 last:border-0">
                 <span>${niceDate}</span>
                 <span class="${color}">${t(info.status)}</span>
@@ -209,143 +178,97 @@ function openBulkAction(reqId) {
 
     document.getElementById('bulk-modal').classList.remove('hidden');
     document.getElementById('admin-requests-modal').classList.add('hidden');
-    
-    setBulkStatus('busy'); 
-    toggleBulkBadge(null);
+    window.setBulkStatus('busy'); 
+    window.toggleBulkBadge(null);
 }
 
-function setBulkStatus(status) {
-    currentEditStatus = status;
-    document.querySelectorAll('.bulk-status-btn').forEach(btn => {
-        if(btn.dataset.val === status) {
-            btn.classList.add('bg-white', 'text-black');
-            btn.classList.remove('text-white');
-            // Fix for bright mode button active state
-            btn.classList.add('border-black');
-        } else {
-            btn.classList.remove('bg-white', 'text-black', 'border-black');
-            btn.classList.add('text-muted-dynamic');
-        }
-    });
+// Common Admin Functions
+window.deleteRequest = async function(id) {
+    if(!confirm(t('delete') + "?")) return;
+    try {
+        await window.dbFormat.deleteDoc(window.dbFormat.doc(window.db, "requests", id));
+        openAdminRequests(); 
+    } catch(e) { alert("Error: " + e.message); }
 }
 
-function toggleBulkBadge(badge) {
-    ['NR', 'PM', 'ST'].forEach(b => {
-        const el = document.getElementById(`bulk-badge-${b.toLowerCase()}`);
-        if(el) el.style.opacity = '0.5';
-    });
-    
-    if (currentBadge === badge) {
-        currentBadge = null;
-    } else {
-        currentBadge = badge;
-        if(badge) {
-            const el = document.getElementById(`bulk-badge-${badge.toLowerCase()}`);
-            if(el) el.style.opacity = '1';
-        }
-    }
-}
-
-async function saveBulkAction() {
+window.saveBulkAction = async function() {
     if(!currentBulkRequest || !window.isAdmin) return;
-    
     const note = document.getElementById('bulk-note').value;
-    const responseMsg = document.getElementById('bulk-response').value; // Get response
-
+    const responseMsg = document.getElementById('bulk-response').value;
     const batch = window.dbFormat.writeBatch(window.db);
     
-    // 1. Update Calendar Dates
     if(currentBulkRequest.dates) {
         currentBulkRequest.dates.forEach(dateStr => {
             const ref = window.dbFormat.doc(window.db, "availability", dateStr);
-            const data = {
-                status: currentEditStatus, 
-                note: note,
-                badge: currentBadge || null
-            };
+            const data = { status: currentEditStatus, note: note, badge: currentBadge || null };
             batch.set(ref, data);
-            DATA_STORE.overrides[dateStr] = data; // Optimistic
+            DATA_STORE.overrides[dateStr] = data;
         });
     }
-    
-    // 2. Mark Request as Approved & Add Response
     const reqRef = window.dbFormat.doc(window.db, "requests", currentBulkRequest.id);
-    batch.update(reqRef, { 
-        status: 'approved',
-        adminResponse: responseMsg
-    });
+    batch.update(reqRef, { status: 'approved', adminResponse: responseMsg });
 
     try {
         await batch.commit();
         alert(`Oppdatert og godkjent!`);
-        closeBulkModal();
-        init(); 
+        window.closeBulkModal();
+        window.initApp(); 
         openAdminRequests(); 
-        // Note: subscribeToInbox handles the red dot update automatically now
-    } catch(e) {
-        alert("Bulk update failed: " + e.message);
-    }
+    } catch(e) { alert("Bulk update failed: " + e.message); }
 }
 
-async function archiveBulkRequest() {
+window.archiveBulkRequest = async function() {
     if(!currentBulkRequest) return;
-    
     const responseMsg = document.getElementById('bulk-response').value; 
-
-    // Just Mark as rejected/archived instead of deleting
     if(confirm("Avvis og arkiver denne forespørselen?")) {
         try {
-             await window.dbFormat.updateDoc(window.dbFormat.doc(window.db, "requests", currentBulkRequest.id), { 
-                 status: 'rejected',
-                 adminResponse: responseMsg 
-             });
-             closeBulkModal();
+             await window.dbFormat.updateDoc(window.dbFormat.doc(window.db, "requests", currentBulkRequest.id), { status: 'rejected', adminResponse: responseMsg });
+             window.closeBulkModal();
              openAdminRequests();
         } catch(e) { alert(e.message); }
     }
 }
 
-function closeBulkModal() {
-    document.getElementById('bulk-modal').classList.add('hidden');
-    document.getElementById('admin-requests-modal').classList.remove('hidden'); 
-}
-
-// Global Exports
-window.openAdminRequests = openAdminRequests;
-window.deleteRequest = deleteRequest;
-window.subscribeToInbox = subscribeToInbox; // Export new listener
-window.closeAdminRequests = function() {
-    document.getElementById('admin-requests-modal').classList.add('hidden');
-}
-window.openBulkAction = openBulkAction;
-window.setBulkStatus = setBulkStatus;
-window.toggleBulkBadge = toggleBulkBadge;
-window.saveBulkAction = saveBulkAction;
-window.archiveBulkRequest = archiveBulkRequest;
-window.closeBulkModal = closeBulkModal;
-
-// Edit Modal Functions (Legacy Single Day)
-function openEditModal(dateStr, info) {
+// Single Day Edit
+window.openEditModal = function(dateStr, info) {
     currentEditDate = dateStr;
     const dateObj = new Date(dateStr + "T00:00:00");
     document.getElementById('edit-date-display').innerText = dateObj.toLocaleDateString(t('monthLocale'), { weekday: 'long', day: 'numeric', month: 'long' });
     document.getElementById('edit-modal').classList.remove('hidden');
-    
-    setEditStatus(info.status === 'weekend' ? 'available' : info.status);
+    window.setEditStatus(info.status === 'weekend' ? 'available' : info.status);
     document.getElementById('edit-note').value = info.note || '';
-    
     ['NR', 'PM', 'ST'].forEach(b => {
         const el = document.getElementById(`badge-${b.toLowerCase()}`);
         if(el) el.style.opacity = '0.5';
     });
-    
     currentBadge = null;
-    if (info.badge) toggleBadge(info.badge);
+    if (info.badge) window.toggleBadge(info.badge);
 }
 
-function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+window.saveDay = async function() {
+    if (!currentEditDate || !window.isAdmin) return;
+    const note = document.getElementById('edit-note').value;
+    const data = { status: currentEditStatus, note: note, badge: currentBadge || null };
+    try {
+        await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "availability", currentEditDate), data);
+        DATA_STORE.overrides[currentEditDate] = data;
+        window.initApp(); 
+        window.closeEditModal();
+    } catch (e) { alert("Save failed: " + e.message); }
+}
 
-function setEditStatus(status) {
+window.deleteDay = async function() {
+    if (!currentEditDate || !confirm("Clear this day?")) return;
+    try {
+        await window.dbFormat.deleteDoc(window.dbFormat.doc(window.db, "availability", currentEditDate));
+        delete DATA_STORE.overrides[currentEditDate];
+        window.initApp();
+        window.closeEditModal();
+    } catch(e) { alert("Delete failed: " + e.message); }
+}
+
+// Helpers
+window.setEditStatus = function(status) {
     currentEditStatus = status;
     document.querySelectorAll('.edit-status-btn').forEach(btn => {
         if(btn.dataset.val === status) {
@@ -357,11 +280,22 @@ function setEditStatus(status) {
         }
     });
 }
-
-function toggleBadge(badge) {
+window.setBulkStatus = function(status) {
+    currentEditStatus = status;
+    document.querySelectorAll('.bulk-status-btn').forEach(btn => {
+        if(btn.dataset.val === status) {
+            btn.classList.add('bg-white', 'text-black', 'border-black');
+            btn.classList.remove('text-white', 'text-muted-dynamic');
+            btn.classList.add('border-black');
+        } else {
+            btn.classList.remove('bg-white', 'text-black', 'border-black');
+            btn.classList.add('text-muted-dynamic');
+        }
+    });
+}
+window.toggleBadge = function(badge) {
     const el = document.getElementById(`badge-${badge.toLowerCase()}`);
     if(!el) return;
-
     if (currentBadge === badge) {
         currentBadge = null;
         el.style.opacity = '0.5';
@@ -374,75 +308,31 @@ function toggleBadge(badge) {
         el.style.opacity = '1';
     }
 }
-
-async function saveDay() {
-    if (!currentEditDate || !window.isAdmin) return;
-    const note = document.getElementById('edit-note').value;
-    const data = { status: currentEditStatus, note: note, badge: currentBadge || null };
-
-    try {
-        await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "availability", currentEditDate), data);
-        DATA_STORE.overrides[currentEditDate] = data;
-        init(); 
-        closeEditModal();
-    } catch (e) { alert("Save failed: " + e.message); }
+window.toggleBulkBadge = function(badge) {
+    ['NR', 'PM', 'ST'].forEach(b => {
+        const el = document.getElementById(`bulk-badge-${b.toLowerCase()}`);
+        if(el) el.style.opacity = '0.5';
+    });
+    if (currentBadge === badge) {
+        currentBadge = null;
+    } else {
+        currentBadge = badge;
+        if(badge) {
+            const el = document.getElementById(`bulk-badge-${badge.toLowerCase()}`);
+            if(el) el.style.opacity = '1';
+        }
+    }
 }
-
-async function deleteDay() {
-    if (!currentEditDate || !confirm("Clear this day?")) return;
-    try {
-        await window.dbFormat.deleteDoc(window.dbFormat.doc(window.db, "availability", currentEditDate));
-        delete DATA_STORE.overrides[currentEditDate];
-        init();
-        closeEditModal();
-    } catch(e) { alert("Delete failed: " + e.message); }
+window.closeAdminRequests = () => document.getElementById('admin-requests-modal').classList.add('hidden');
+window.closeBulkModal = () => {
+    document.getElementById('bulk-modal').classList.add('hidden');
+    document.getElementById('admin-requests-modal').classList.remove('hidden'); 
 }
+window.closeEditModal = () => document.getElementById('edit-modal').classList.add('hidden');
+window.openAdminRequests = openAdminRequests;
 
-window.openEditModal = openEditModal;
-window.closeEditModal = closeEditModal;
-window.setEditStatus = setEditStatus;
-window.toggleBadge = toggleBadge;
-window.saveDay = saveDay;
-window.deleteDay = deleteDay;
-
-// NEW: Admin Settings Modal
-function openAdminSettings() {
-    document.getElementById('admin-settings-modal').classList.remove('hidden');
-    document.getElementById('admin-certain-date').value = DATA_STORE.settings.certainUntil || '';
-    document.getElementById('admin-phone').value = DATA_STORE.settings.phone || '';
-}
-
-async function saveAdminSettings() {
-    if(!window.isAdmin) return;
-    const date = document.getElementById('admin-certain-date').value;
-    const phone = document.getElementById('admin-phone').value;
-    const newSettings = { ...DATA_STORE.settings, certainUntil: date, phone: phone };
-    
-    try {
-        await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "config", "main"), newSettings);
-        DATA_STORE.settings = newSettings;
-        alert("Innstillinger lagret!");
-        document.getElementById('admin-settings-modal').classList.add('hidden');
-        init(); // Refresh UI
-    } catch(e) { alert("Feil ved lagring: " + e.message); }
-}
-
-window.openAdminSettings = openAdminSettings;
-window.closeAdminSettings = () => document.getElementById('admin-settings-modal').classList.add('hidden');
-window.saveAdminSettings = saveAdminSettings;
-
-
-// Printing Logic
-function executePrint() {
-    const sm = document.getElementById('print-start-month').value;
-    const em = document.getElementById('print-end-month').value;
-    if(!sm || !em) return;
-    const start = new Date(sm + "-01T00:00:00"); const end = new Date(em + "-01T00:00:00");
-    end.setMonth(end.getMonth() + 1); end.setDate(0);
-    generatePrintSummary(start, end); togglePrintModal();
-}
-
-function generatePrintSummary(start, end) {
+// Print Logic (Moved here as it's often admin-triggered)
+window.generatePrintSummary = function(start, end) {
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent("sofialborch.github.io")}`;
     const printWindow = window.open('', '_blank');
     const genDate = new Date().toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -498,7 +388,6 @@ function generatePrintSummary(start, end) {
         iter = next;
     }
     
-    // NEW FOOTER
     html += `</div>
     <div class="footer">
         <div>

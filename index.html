@@ -23,17 +23,14 @@
     <div class="decor-blob bg-blue-600 w-[300px] h-[300px] lg:w-[400px] lg:h-[400px] bottom-0 -right-20 lg:-right-40"></div>
 
     <header class="bg-[var(--card-bg)] backdrop-blur-xl sticky top-0 z-40 border-b border-dynamic shadow-sm transition-colors duration-300">
-        <!-- Added flex-nowrap to prevent wrapping on tiny screens -->
         <nav class="container mx-auto px-4 lg:px-6 flex items-center justify-between h-16 lg:h-20 flex-nowrap">
-            <!-- Adjusted font size: text-xs on mobile, sm:text-lg on tablet, 2xl on desktop -->
             <span class="text-xs sm:text-lg lg:text-2xl font-black uppercase tracking-[0.15em] lg:tracking-[0.2em] truncate mr-2" data-tr="title">Tilgjengelighet</span>
             
-            <!-- Added flex-shrink-0 so buttons never squash -->
             <div class="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-                <button onclick="toggleTheme()" class="w-8 h-8 lg:w-11 lg:h-11 flex items-center justify-center rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
+                <button onclick="window.ui.toggleTheme()" class="w-8 h-8 lg:w-11 lg:h-11 flex items-center justify-center rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
                     <i id="theme-icon" class="fas fa-sun text-xs lg:text-lg"></i>
                 </button>
-                <button onclick="toggleLanguage()" class="flex items-center gap-2 px-2 py-1.5 lg:px-3 lg:py-2 rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
+                <button onclick="window.ui.toggleLanguage()" class="flex items-center gap-2 px-2 py-1.5 lg:px-3 lg:py-2 rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
                     <span id="lang-flag" class="text-sm lg:text-xl">🇳🇴</span>
                     <span id="lang-label" class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest">NO</span>
                 </button>
@@ -44,7 +41,6 @@
                 <div id="admin-tools" class="hidden flex items-center gap-2">
                     <button onclick="openAdminRequests()" title="Inbox" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 hover:bg-pink-500/30 transition-all">
                         <i class="fas fa-inbox text-xs"></i>
-                        <!-- Notification Dot -->
                         <span id="admin-inbox-dot" class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[var(--card-bg)] hidden animate-pulse"></span>
                     </button>
                     <button onclick="openAdminSettings()" title="Global Settings" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-gray-500/20 text-gray-500 border border-gray-500/30 hover:bg-gray-500/30 transition-all">
@@ -56,26 +52,24 @@
                 </div>
 
                 <!-- Tutorial Trigger -->
-                <button onclick="openTutorial()" class="w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Help">
+                <button onclick="window.ui.openTutorial()" class="w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Help">
                     <i class="fas fa-question text-[10px] lg:text-xs"></i>
                 </button>
 
-                <!-- Auth Trigger (Changes based on state) -->
-                <button id="auth-trigger-btn" onclick="toggleAuthModal()" class="group relative w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Sign In">
-                    <!-- Default: Lock -->
+                <!-- Auth Trigger -->
+                <button id="auth-trigger-btn" onclick="window.authModule.toggleAuthModal()" class="group relative w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Sign In">
                     <i id="auth-icon" class="fas fa-lock text-[10px] lg:text-xs"></i>
-                    <!-- Logged In: Avatar (hidden by default) -->
                     <img id="auth-avatar" src="" alt="User" class="hidden w-full h-full rounded-full object-cover border-2 border-emerald-500/50">
                 </button>
 
-                <!-- Print Button (Fixed Visibility) -->
-                <button onclick="togglePrintModal()" 
+                <!-- Print Button -->
+                <button onclick="window.ui.togglePrintModal()" 
                         class="flex pulse-pink group relative items-center gap-2 px-3 py-2 lg:px-5 lg:py-2.5 rounded-full bg-pink-500 text-white text-[10px] lg:text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-pink-500/20">
                     <i class="fas fa-print"></i>
                     <span class="hidden sm:inline" data-tr="printBtn">Skriv ut</span>
                 </button>
                 
-                <input type="file" id="manual-upload" class="hidden" accept=".json" onchange="handleManualUpload(event)">
+                <input type="file" id="manual-upload" class="hidden" accept=".json" onchange="window.handleManualUpload(event)">
                 <span id="sync-status" 
                       onclick="document.getElementById('manual-upload').click()"
                       class="hidden md:inline-block text-xs font-bold text-gray-500 uppercase tracking-widest bg-dynamic px-4 py-2 rounded-full border border-dynamic cursor-pointer hover-bg-dynamic transition-all">
@@ -106,7 +100,7 @@
                         </div>
                         <div class="flex items-center gap-3 lg:gap-4 w-full sm:w-auto">
                             <label class="text-[13px] lg:text-[16px] font-black opacity-60 uppercase tracking-widest whitespace-nowrap" data-tr="selectWeek">Velg uke</label>
-                            <select id="week-selector" class="week-select flex-grow sm:flex-grow-0" onchange="onWeekChange(this.value)"></select>
+                            <select id="week-selector" class="week-select flex-grow sm:flex-grow-0" onchange="window.ui.onWeekChange(this.value)"></select>
                         </div>
                     </div>
                     <div id="week-summary-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 lg:gap-5"></div>
@@ -120,13 +114,11 @@
                     <div class="flex items-center justify-between mb-8 lg:mb-12">
                         <h2 id="calendar-month" class="text-2xl lg:text-4xl font-black tracking-tighter uppercase">...</h2>
                         <div class="flex gap-2 lg:gap-4">
-                            <button onclick="changeMonth(-1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-left text-sm lg:text-lg"></i></button>
-                            <button onclick="changeMonth(1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-right text-sm lg:text-lg"></i></button>
+                            <button onclick="window.ui.changeMonth(-1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-left text-sm lg:text-lg"></i></button>
+                            <button onclick="window.ui.changeMonth(1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-right text-sm lg:text-lg"></i></button>
                         </div>
                     </div>
-                    <div id="calendar-header" class="calendar-grid text-center mb-4 lg:mb-8 text-[10px] lg:text-s font-black uppercase tracking-widest opacity-80">
-                        <!-- Populated by JS -->
-                    </div>
+                    <div id="calendar-header" class="calendar-grid text-center mb-4 lg:mb-8 text-[10px] lg:text-s font-black uppercase tracking-widest opacity-80"></div>
                     <div id="calendar-days" class="calendar-grid"></div>
                     <div class="mt-8 lg:mt-14 flex flex-col sm:flex-row flex-wrap gap-4 lg:gap-10 text-[10px] lg:text-s font-black uppercase tracking-widest border-t border-dynamic pt-8 lg:pt-12">
                         <div class="flex flex-wrap gap-6">
@@ -152,18 +144,14 @@
                         </h3>
                         <span id="request-count" class="bg-pink-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</span>
                     </div>
-                    <div id="request-list" class="space-y-3 mb-6 max-h-[200px] overflow-y-auto custom-scrollbar">
-                        <!-- Items injected here -->
-                    </div>
-                    <button onclick="openRequestModal()" class="w-full bg-pink-500 text-white font-black py-4 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
+                    <div id="request-list" class="space-y-3 mb-6 max-h-[200px] overflow-y-auto custom-scrollbar"></div>
+                    <button onclick="window.requests.openRequestModal()" class="w-full bg-pink-500 text-white font-black py-4 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
                         Send Forespørsel
                     </button>
                 </div>
                 
-                <!-- NEW: My Requests (Tracker) -->
-                <div id="my-requests-container" class="hidden glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-emerald-500/30">
-                    <!-- Populated by JS -->
-                </div>
+                <!-- My Requests (Tracker) -->
+                <div id="my-requests-container" class="hidden glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-emerald-500/30"></div>
 
                 <!-- Lookup Panel -->
                 <div id="lookup-panel" class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-dynamic lg:sticky lg:top-24">
@@ -183,7 +171,7 @@
                                 <input type="date" id="lookup-end" class="w-full">
                             </div>
                         </div>
-                        <button onclick="runLookup()" class="w-full bg-dynamic hover-bg-dynamic border border-dynamic text-[var(--text-color)] font-black py-4 lg:py-5 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em]" data-tr="searchBtn">
+                        <button onclick="window.ui.runLookup()" class="w-full bg-dynamic hover-bg-dynamic border border-dynamic text-[var(--text-color)] font-black py-4 lg:py-5 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em]" data-tr="searchBtn">
                             Søk i periode
                         </button>
                     </div>
@@ -195,7 +183,7 @@
         </div>
     </main>
 
-    <!-- Footer updated with dynamic borders and text colors -->
+    <!-- Footer -->
     <footer class="container mx-auto px-6 lg:px-12 py-10 lg:py-16 mt-8 lg:mt-12 border-t border-dynamic">
         <div class="flex flex-col md:flex-row justify-between items-center gap-8">
             <div class="flex items-center gap-4 lg:gap-6">
@@ -203,7 +191,7 @@
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v3.6</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v4.0</p>
                 </div>
             </div>
             
@@ -212,19 +200,20 @@
                 <div class="px-5 py-2 rounded-xl bg-dynamic border border-dynamic text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 text-center sm:text-left">
                     &copy; 2026 PROJECT BY Z03Y
                 </div>
-                <button onclick="toggleAuthModal()" class="px-2 py-2 text-[10px] font-black uppercase tracking-widest opacity-20 hover:opacity-100 transition-opacity">
+                <button onclick="window.authModule.toggleAuthModal()" class="px-2 py-2 text-[10px] font-black uppercase tracking-widest opacity-20 hover:opacity-100 transition-opacity">
                     <i class="fas fa-lock"></i>
                 </button>
             </div>
         </div>
     </footer>
 
-    <!-- Tutorial Modal (The Glass Guide) -->
+    <!-- MODALS -->
+    
+    <!-- Tutorial Modal -->
     <div id="tutorial-modal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeTutorial()"></div>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.ui.closeTutorial()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 lg:p-10 border border-dynamic shadow-2xl transform transition-all flex flex-col items-center text-center">
             
-            <!-- Slide 1: Status -->
             <div id="tut-slide-0" class="flex flex-col items-center animate-fade-in">
                 <div class="flex gap-4 mb-6">
                     <div class="w-8 h-8 rounded-full border border-green-500/30 bg-green-500/20 text-green-500 flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.3)]"><i class="fas fa-check"></i></div>
@@ -232,94 +221,71 @@
                     <div class="w-8 h-8 rounded-full border border-yellow-500/30 bg-yellow-500/20 text-yellow-500 flex items-center justify-center"><i class="fas fa-question"></i></div>
                 </div>
                 <h3 class="text-xl font-black uppercase tracking-widest mb-3" data-tr="tutHeader1">Sjekk Status</h3>
-                <p class="text-sm opacity-70 font-medium leading-relaxed" data-tr="tutBody1">
-                    Grønn betyr ledig. Rød betyr opptatt. Gul betyr delvis tilgjengelig - ta kontakt.
-                </p>
+                <p class="text-sm opacity-70 font-medium leading-relaxed" data-tr="tutBody1">Grønn betyr ledig. Rød betyr opptatt. Gul betyr delvis tilgjengelig.</p>
             </div>
 
-            <!-- Slide 2: Selection -->
             <div id="tut-slide-1" class="hidden flex flex-col items-center animate-fade-in">
                 <div class="w-16 h-16 mb-6 rounded-2xl bg-dynamic border border-dynamic flex items-center justify-center relative">
                     <i class="fas fa-calendar text-2xl opacity-50"></i>
                     <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-hand-pointer text-white text-xs"></i></div>
                 </div>
                 <h3 class="text-xl font-black uppercase tracking-widest mb-3" data-tr="tutHeader2">Velg Datoer</h3>
-                <p class="text-sm opacity-70 font-medium leading-relaxed" data-tr="tutBody2">
-                    Trykk på dager i kalenderen for å markere dem. Du kan velge flere dager samtidig.
-                </p>
+                <p class="text-sm opacity-70 font-medium leading-relaxed" data-tr="tutBody2">Trykk på dager i kalenderen for å markere dem.</p>
             </div>
 
-            <!-- Slide 3: Request -->
             <div id="tut-slide-2" class="hidden flex flex-col items-center animate-fade-in">
                 <div class="w-16 h-16 mb-6 rounded-full bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-500 shadow-[0_0_20px_rgba(244,114,182,0.2)]">
                     <i class="fas fa-heart text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-black uppercase tracking-widest mb-3" data-tr="tutHeader3">Send Forespørsel</h3>
-                <p class="text-sm opacity-70 font-medium leading-relaxed" data-tr="tutBody3">
-                    Fyll ut navn og melding i menyen som dukker opp for å sende en forespørsel.
-                </p>
+                <p class="text-sm opacity-70 font-medium leading-relaxed" data-tr="tutBody3">Legg til notater per dag i menyen som dukker opp.</p>
             </div>
 
-            <!-- Dots -->
             <div class="flex gap-2 mt-8 mb-8">
                 <div id="tut-dot-0" class="w-2 h-2 rounded-full bg-[var(--text-color)] transition-all duration-300"></div>
                 <div id="tut-dot-1" class="w-2 h-2 rounded-full bg-[var(--text-color)] opacity-20 transition-all duration-300"></div>
                 <div id="tut-dot-2" class="w-2 h-2 rounded-full bg-[var(--text-color)] opacity-20 transition-all duration-300"></div>
             </div>
 
-            <!-- Actions -->
-            <button onclick="nextTutorialStep()" id="tut-next-btn" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20 mb-3" data-tr="tutNext">
-                Neste
-            </button>
-            <button onclick="closeTutorial()" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition" data-tr="tutSkip">
-                Hopp over
-            </button>
+            <button onclick="window.ui.nextTutorialStep()" id="tut-next-btn" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20 mb-3" data-tr="tutNext">Neste</button>
+            <button onclick="window.ui.closeTutorial()" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition" data-tr="tutSkip">Hopp over</button>
         </div>
     </div>
     
-    <!-- NEW: Request Confirmation Modal -->
+    <!-- Request Confirmation Modal -->
     <div id="request-sent-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeRequestSentModal()"></div>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.requests.closeRequestSentModal()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 lg:p-10 border border-dynamic shadow-2xl transform transition-all flex flex-col items-center text-center">
             <div class="w-20 h-20 mb-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)] animate-pulse">
                 <i class="fas fa-paper-plane text-3xl"></i>
             </div>
             <h3 class="text-2xl font-black uppercase tracking-tight mb-3" data-tr="sentTitle">Forespørsel Sendt!</h3>
-            <p class="text-sm opacity-70 font-medium leading-relaxed mb-8" data-tr="sentBody">
-                Jeg sjekker den så fort jeg kan. Sjekk status her i appen senere.
-            </p>
-            <button onclick="closeRequestSentModal()" class="w-full bg-emerald-500 text-white font-black py-4 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20" data-tr="sentClose">
-                Den er grei
-            </button>
+            <p class="text-sm opacity-70 font-medium leading-relaxed mb-8" data-tr="sentBody">Jeg sjekker den så fort jeg kan.</p>
+            <button onclick="window.requests.closeRequestSentModal()" class="w-full bg-emerald-500 text-white font-black py-4 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20" data-tr="sentClose">Den er grei</button>
         </div>
     </div>
 
-    <!-- NEW: Notification Modal (For Status Updates) -->
+    <!-- Notification Modal -->
     <div id="notification-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeNotificationModal()"></div>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.requests.closeNotificationModal()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 lg:p-10 border border-dynamic shadow-2xl transform transition-all flex flex-col items-center text-center">
             <div class="w-20 h-20 mb-6 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.3)] animate-bounce">
                 <i class="fas fa-bell text-3xl"></i>
             </div>
             <h3 class="text-2xl font-black uppercase tracking-tight mb-3" data-tr="updateTitle">Oppdatering!</h3>
-            <p id="notification-text" class="text-sm opacity-70 font-medium leading-relaxed mb-4">
-                ...
-            </p>
+            <p id="notification-text" class="text-sm opacity-70 font-medium leading-relaxed mb-4">...</p>
             <div id="notification-message" class="w-full bg-dynamic border border-dynamic p-3 rounded-xl mb-6 text-sm font-bold italic opacity-80 hidden"></div>
-            
-            <button onclick="closeNotificationModal()" class="w-full bg-blue-500 text-white font-black py-4 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-500/20" data-tr="sentClose">
-                Den er grei
-            </button>
+            <button onclick="window.requests.closeNotificationModal()" class="w-full bg-blue-500 text-white font-black py-4 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-500/20" data-tr="sentClose">Den er grei</button>
         </div>
     </div>
 
     <!-- Print Modal -->
     <div id="print-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-6">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="togglePrintModal()"></div>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.ui.togglePrintModal()"></div>
         <div class="glass-panel relative w-full max-w-md rounded-[2rem] lg:rounded-[2.5rem] p-8 lg:p-10 overflow-hidden shadow-2xl">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg lg:text-xl font-black uppercase tracking-widest" data-tr="printSettings">Utskrift</h3>
-                <button onclick="togglePrintModal()" class="text-gray-500 hover:text-[var(--text-color)] transition p-2"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="window.ui.togglePrintModal()" class="text-gray-500 hover:text-[var(--text-color)] transition p-2"><i class="fas fa-times text-xl"></i></button>
             </div>
             <div id="certainty-notice" class="mb-6 lg:mb-8 p-4 rounded-xl lg:rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-4">
                 <div class="shrink-0 w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400"><i class="fas fa-shield-alt"></i></div>
@@ -339,36 +305,33 @@
                         <input type="month" id="print-end-month" class="w-full">
                     </div>
                 </div>
-                <button onclick="executePrint()" class="w-full bg-pink-500 text-white font-black py-4 lg:py-5 rounded-xl lg:rounded-2xl transition-all active:scale-95 text-xs lg:text-sm uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20 mt-2 flex items-center justify-center gap-3">
+                <button onclick="window.ui.executePrint()" class="w-full bg-pink-500 text-white font-black py-4 lg:py-5 rounded-xl lg:rounded-2xl transition-all active:scale-95 text-xs lg:text-sm uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20 mt-2 flex items-center justify-center gap-3">
                     <i class="fas fa-file-pdf"></i> <span data-tr="generatePdf">Generer PDF</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Dual Purpose Auth Modal -->
+    <!-- Auth Modal -->
     <div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity" onclick="toggleAuthModal()"></div>
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity" onclick="window.authModule.toggleAuthModal()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-3xl p-8 border border-white/10 shadow-2xl transform transition-all scale-100 flex flex-col items-center text-center">
             
-            <!-- Dynamic Content Container -->
             <div id="auth-content" class="w-full">
-                <!-- Default (Not Logged In) -->
+                <!-- Guest View -->
                 <div id="auth-view-guest">
                     <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-dynamic border border-dynamic flex items-center justify-center text-muted-dynamic">
                         <i class="fas fa-user-lock text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-black uppercase tracking-widest mb-2 text-[var(--text-color)]" data-tr="signInTitle">Logg inn</h3>
-                    <p class="text-xs opacity-60 mb-8 font-medium leading-relaxed">
-                        Logg inn med Google for å lagre dine forespørsler permanent og få oppdateringer hvor som helst.
-                    </p>
-                    <button id="google-login-btn" class="w-full bg-[var(--text-color)] text-[var(--card-bg)] font-bold py-3.5 rounded-xl uppercase tracking-widest text-xs transition shadow-lg active:scale-95 flex items-center justify-center gap-3 hover:opacity-90">
+                    <p class="text-xs opacity-60 mb-8 font-medium leading-relaxed">Logg inn med Google for å lagre dine forespørsler permanent.</p>
+                    <button id="google-login-btn" onclick="window.authModule.loginGoogle()" class="w-full bg-[var(--text-color)] text-[var(--card-bg)] font-bold py-3.5 rounded-xl uppercase tracking-widest text-xs transition shadow-lg active:scale-95 flex items-center justify-center gap-3 hover:opacity-90">
                         <i class="fab fa-google text-lg"></i>
                         <span data-tr="signInGoogle">Logg inn med Google</span>
                     </button>
                 </div>
 
-                <!-- Logged In View -->
+                <!-- User View -->
                 <div id="auth-view-user" class="hidden">
                     <img id="profile-pic-large" src="" class="w-20 h-20 mx-auto mb-4 rounded-full border-4 border-emerald-500/30 shadow-lg object-cover">
                     <h3 class="text-lg font-black uppercase tracking-widest mb-1 text-[var(--text-color)]" data-tr="profileTitle">Din Profil</h3>
@@ -378,56 +341,53 @@
                         <i class="fas fa-shield-alt mr-2"></i> <span data-tr="adminAccess">Administrator</span>
                     </div>
 
-                    <button onclick="signOutUser()" class="w-full bg-red-500/10 text-red-500 border border-red-500/20 font-bold py-3 rounded-xl uppercase tracking-widest text-xs transition active:scale-95 hover:bg-red-500/20" data-tr="signOut">
+                    <button onclick="window.authModule.signOutUser()" class="w-full bg-red-500/10 text-red-500 border border-red-500/20 font-bold py-3 rounded-xl uppercase tracking-widest text-xs transition active:scale-95 hover:bg-red-500/20" data-tr="signOut">
                         Logg ut
                     </button>
                 </div>
             </div>
-
             <p id="auth-error" class="text-red-400 text-xs mt-4 text-center font-bold hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20 w-full"></p>
         </div>
     </div>
     
     <!-- Admin Settings Modal -->
     <div id="admin-settings-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeAdminSettings()"></div>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.closeAdminSettings()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all">
             <h3 class="text-xl font-black uppercase tracking-widest mb-6 flex items-center gap-3">
-                <i class="fas fa-cog text-gray-500"></i>
-                <span>Innstillinger</span>
+                <i class="fas fa-cog text-gray-500"></i> <span>Innstillinger</span>
             </h3>
             <div class="space-y-4">
                 <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Sikker til dato</label>
                     <input type="date" id="admin-certain-date" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition">
-                    <p class="text-[9px] opacity-50 mt-1 ml-1">Datoen hvor vaktlisten er "låst" / ferdig.</p>
                 </div>
                 <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Telefonnummer</label>
                     <input type="text" id="admin-phone" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition">
                 </div>
-                <button onclick="saveAdminSettings()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Lagre</button>
+                <button onclick="window.saveAdminSettings()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Lagre</button>
             </div>
         </div>
     </div>
 
     <!-- Edit Modal (For Admin) -->
     <div id="edit-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeEditModal()"></div>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.closeEditModal()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all">
             <h3 class="text-xl font-black uppercase tracking-widest mb-6" id="edit-date-display">...</h3>
             <div class="space-y-4">
                 <div class="grid grid-cols-3 gap-2">
-                    <button onclick="setEditStatus('available')" class="edit-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
-                    <button onclick="setEditStatus('busy')" class="edit-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
-                    <button onclick="setEditStatus('partial')" class="edit-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
+                    <button onclick="window.setEditStatus('available')" class="edit-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
+                    <button onclick="window.setEditStatus('busy')" class="edit-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
+                    <button onclick="window.setEditStatus('partial')" class="edit-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
                 </div>
                  <div>
-                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Badge (Valgfritt)</label>
+                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Badge</label>
                     <div class="flex gap-2">
-                        <button onclick="toggleBadge('NR')" id="badge-nr" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
-                        <button onclick="toggleBadge('PM')" id="badge-pm" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
-                        <button onclick="toggleBadge('ST')" id="badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
+                        <button onclick="window.toggleBadge('NR')" id="badge-nr" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
+                        <button onclick="window.toggleBadge('PM')" id="badge-pm" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
+                        <button onclick="window.toggleBadge('ST')" id="badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
                     </div>
                 </div>
                 <div>
@@ -435,8 +395,8 @@
                     <textarea id="edit-note" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                 </div>
                 <div class="flex gap-3 mt-4">
-                    <button onclick="deleteDay()" class="px-4 py-3 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 font-black text-xs uppercase tracking-widest"><i class="fas fa-trash"></i></button>
-                    <button onclick="saveDay()" class="flex-1 bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Lagre</button>
+                    <button onclick="window.deleteDay()" class="px-4 py-3 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 font-black text-xs uppercase tracking-widest"><i class="fas fa-trash"></i></button>
+                    <button onclick="window.saveDay()" class="flex-1 bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Lagre</button>
                 </div>
             </div>
         </div>
@@ -444,7 +404,7 @@
     
     <!-- Bulk Edit Modal -->
     <div id="bulk-modal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeBulkModal()"></div>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.closeBulkModal()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all flex flex-col max-h-[90vh]">
             <div class="mb-6">
                 <h3 class="text-xl font-black uppercase tracking-widest" id="bulk-title">...</h3>
@@ -457,23 +417,22 @@
 
                 <div class="space-y-4">
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="setBulkStatus('available')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
-                        <button onclick="setBulkStatus('busy')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
-                        <button onclick="setBulkStatus('partial')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
+                        <button onclick="window.setBulkStatus('available')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
+                        <button onclick="window.setBulkStatus('busy')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
+                        <button onclick="window.setBulkStatus('partial')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
                     </div>
                      <div>
                         <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Badge</label>
                         <div class="flex gap-2">
-                            <button onclick="toggleBulkBadge('NR')" id="bulk-badge-nr" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
-                            <button onclick="toggleBulkBadge('PM')" id="bulk-badge-pm" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
-                            <button onclick="toggleBulkBadge('ST')" id="bulk-badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
+                            <button onclick="window.toggleBulkBadge('NR')" id="bulk-badge-nr" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
+                            <button onclick="window.toggleBulkBadge('PM')" id="bulk-badge-pm" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
+                            <button onclick="window.toggleBulkBadge('ST')" id="bulk-badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
                         </div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Intern Notat (Kalender)</label>
                         <textarea id="bulk-note" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-20 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                     </div>
-                    <!-- NEW: Response Message -->
                     <div>
                         <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest" data-tr="adminResponseLabel">Svar til bruker (Valgfritt)</label>
                         <textarea id="bulk-response" placeholder="Skriv en beskjed..." class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-20 focus:outline-none focus:border-pink-500/50 transition"></textarea>
@@ -482,19 +441,15 @@
             </div>
 
             <div class="flex flex-col gap-2 mt-2">
-                <button onclick="saveBulkAction()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20" data-tr="applyToDates">
-                    Lagre
-                </button>
-                <button onclick="archiveBulkRequest()" class="w-full bg-dynamic text-muted-dynamic hover:text-red-400 font-black py-3 rounded-xl transition text-[10px] uppercase tracking-widest" data-tr="archive">
-                    Arkiver / Slett
-                </button>
+                <button onclick="window.saveBulkAction()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20" data-tr="applyToDates">Lagre</button>
+                <button onclick="window.archiveBulkRequest()" class="w-full bg-dynamic text-muted-dynamic hover:text-red-400 font-black py-3 rounded-xl transition text-[10px] uppercase tracking-widest" data-tr="archive">Arkiver / Slett</button>
             </div>
         </div>
     </div>
     
     <!-- Request Modal (For Guests) -->
     <div id="request-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeRequestModal()"></div>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.requests.closeRequestModal()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all flex flex-col max-h-[90vh]">
             <h3 class="text-lg lg:text-xl font-black uppercase tracking-widest mb-2" data-tr="reqTitle">Send Forespørsel</h3>
             <p class="text-[10px] opacity-60 font-bold uppercase tracking-widest mb-2" id="req-subtitle">For ... dager</p>
@@ -506,222 +461,49 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Generell Melding</label>
-                    <textarea id="req-msg" placeholder="Valgfritt" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-20 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                    <textarea id="req-msg" placeholder="Valgfritt (Gjelder alle dager)" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-20 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                 </div>
                 
                 <!-- NEW: Specific Date Notes -->
                 <div>
                      <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Detaljer per dag (Valgfritt)</label>
                      <div id="req-date-list" class="space-y-2">
-                         <!-- Injected via JS -->
+                         <!-- Injected via requests.js -->
                      </div>
                 </div>
 
-                <div id="req-modal-footer"></div> <!-- Placeholder for Phone/Auth tip -->
+                <div id="req-modal-footer"></div>
             </div>
             
             <div class="mt-4 pt-4 border-t border-dynamic">
-                <button onclick="submitRequest()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Send</button>
+                <button onclick="window.requests.submitRequest()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Send</button>
             </div>
         </div>
     </div>
     
     <!-- Admin Inbox Modal -->
     <div id="admin-requests-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeAdminRequests()"></div>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.closeAdminRequests()"></div>
         <div class="glass-panel relative w-full max-w-lg rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all flex flex-col max-h-[80vh]">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-black uppercase tracking-widest flex items-center gap-3">
                     <i class="fas fa-inbox text-pink-500"></i>
                     <span data-tr="requestsTitle">Innboks</span>
                 </h3>
-                <button onclick="closeAdminRequests()" class="text-muted-dynamic hover:text-[var(--text-color)] transition"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="window.closeAdminRequests()" class="text-muted-dynamic hover:text-[var(--text-color)] transition"><i class="fas fa-times text-xl"></i></button>
             </div>
             <div id="admin-requests-list" class="space-y-4 overflow-y-auto custom-scrollbar pr-2 flex-1">
                 <p class="text-center opacity-50 py-10 font-bold uppercase tracking-widest text-xs">Ingen forespørsler</p>
             </div>
         </div>
     </div>
-
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-      import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-      import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc, updateDoc, getDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyC6wkHeUtbYdlYeZZA_4RDbjes7MuP-i4E",
-        authDomain: "availability-793c7.firebaseapp.com",
-        projectId: "availability-793c7",
-        storageBucket: "availability-793c7.firebasestorage.app",
-        messagingSenderId: "633994803232",
-        appId: "1:633994803232:web:9e91d4d4fefd928ef26445",
-        measurementId: "G-6QR4CTJCXD"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-      const auth = getAuth(app);
-      const provider = new GoogleAuthProvider();
-      const db = getFirestore(app);
-
-      window.db = db;
-      window.auth = auth;
-      window.dbFormat = { collection, getDocs, doc, setDoc, deleteDoc, writeBatch, addDoc, updateDoc, getDoc, query, where, onSnapshot };
-      
-      window.uploadLocalDataToFirestore = async function(localOverrides) {
-        if (!auth.currentUser) { alert("Please log in as admin first."); return; }
-        const count = Object.keys(localOverrides).length;
-        if(count === 0) { alert("No local data to migrate."); return; }
-        if(!confirm(`Migrate ${count} entries?`)) return;
-        updateStatus("Migrating...", "blue");
-        try {
-            let successCount = 0;
-            for (const [date, data] of Object.entries(localOverrides)) {
-                await setDoc(doc(db, "availability", date), data);
-                successCount++;
-            }
-            alert(`Migration Complete! ${successCount} entries uploaded.`);
-            window.location.reload(); 
-        } catch (e) {
-            console.error(e);
-            alert("Migration failed: " + e.message);
-            updateStatus("Error", "busy");
-        }
-      }
-
-      window.toggleAuthModal = function() {
-          const modal = document.getElementById('auth-modal');
-          modal.classList.toggle('hidden');
-          // Reset error message when opening
-          document.getElementById('auth-error').classList.add('hidden');
-      };
-
-      document.addEventListener('keydown', (e) => {
-          if (e.ctrlKey && e.shiftKey && (e.key === 'l' || e.key === 'L')) {
-              e.preventDefault();
-              toggleAuthModal();
-          }
-      });
-
-      document.getElementById('google-login-btn').addEventListener('click', async () => {
-          const errorMsg = document.getElementById('auth-error');
-          errorMsg.classList.add('hidden');
-          try {
-              await signInWithPopup(auth, provider);
-              toggleAuthModal();
-          } catch (error) {
-              console.error("Login Error:", error);
-              errorMsg.textContent = "Auth Failed: " + error.message;
-              errorMsg.classList.remove('hidden');
-          }
-      });
-
-      window.signOutUser = async function() {
-          try {
-              await signOut(auth);
-              toggleAuthModal();
-          } catch(e) {
-              console.error(e);
-          }
-      }
-
-      const ADMIN_EMAIL = "sofia.l.borch@gmail.com"; 
-
-      onAuthStateChanged(auth, (user) => {
-          const adminTools = document.getElementById('admin-tools');
-          
-          // 1. Handle Visuals based on User State
-          const authIcon = document.getElementById('auth-icon');
-          const authAvatar = document.getElementById('auth-avatar');
-          
-          // Elements inside the Auth Modal
-          const viewGuest = document.getElementById('auth-view-guest');
-          const viewUser = document.getElementById('auth-view-user');
-          const userEmailDisplay = document.getElementById('user-email-display');
-          const profilePicLarge = document.getElementById('profile-pic-large');
-          const adminBadge = document.getElementById('admin-badge');
-          
-          if (!user) {
-              // No user (unlikely if anon auth works, but possible initially)
-              console.log("No user session active. Signing in anonymously as fallback...");
-              signInAnonymously(auth).catch((error) => console.error("Anonymous auth failed", error));
-              
-              adminTools.classList.add('hidden');
-              window.isAdmin = false;
-              
-              // Visuals: Lock
-              authIcon.classList.remove('hidden');
-              authAvatar.classList.add('hidden');
-              
-              // Modal State
-              viewGuest.classList.remove('hidden');
-              viewUser.classList.add('hidden');
-
-          } else {
-              // User is present (Anonymous OR Google)
-              const isAnon = user.isAnonymous;
-              const isMe = user.email === ADMIN_EMAIL;
-              
-              if (isMe) {
-                  console.log("Admin Logged In");
-                  adminTools.classList.remove('hidden'); 
-                  window.isAdmin = true;
-                  
-                  // Start Realtime Inbox Listener
-                  if(window.subscribeToInbox) window.subscribeToInbox();
-
-              } else {
-                  console.log(isAnon ? "Guest (Anon) Logged In" : "User Logged In");
-                  adminTools.classList.add('hidden');
-                  window.isAdmin = false;
-              }
-              
-              if (!isAnon && window.subscribeToMyRequests) {
-                  // Start Realtime User Listener (Syncs across devices)
-                  window.subscribeToMyRequests(user);
-              }
-
-              // Update Header Icon
-              if (isAnon) {
-                  authIcon.classList.remove('hidden');
-                  authAvatar.classList.add('hidden');
-                  // Modal View for Anon is effectively "Guest/Sign In"
-                  viewGuest.classList.remove('hidden');
-                  viewUser.classList.add('hidden');
-              } else {
-                  // Real User
-                  authIcon.classList.add('hidden');
-                  authAvatar.classList.remove('hidden');
-                  authAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=' + user.displayName;
-                  
-                  // Modal View
-                  viewGuest.classList.add('hidden');
-                  viewUser.classList.remove('hidden');
-                  userEmailDisplay.innerText = user.email;
-                  profilePicLarge.src = user.photoURL || 'https://ui-avatars.com/api/?name=' + user.displayName;
-                  
-                  if(isMe) adminBadge.classList.remove('hidden');
-                  else adminBadge.classList.add('hidden');
-              }
-          }
-          
-          // Run App Init Logic
-          if(typeof window.init === 'function') {
-            window.init();
-            // Fallback polling for guests (handled internally by checkRequestStatus)
-            if(window.checkRequestStatus) {
-                window.checkRequestStatus();
-                // We keep interval for guests (localStorage polling)
-                // Logged in users return early from checkRequestStatus so it's safe to keep running
-                setInterval(window.checkRequestStatus, 60000); 
-            }
-          }
-      });
-    </script>
     
+    <!-- JS IMPORTS ORDER IS CRITICAL -->
     <script src="settings.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script src="ui.js"></script>
+    <script src="requests.js"></script>
     <script src="admin.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
