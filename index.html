@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tilgjengelighetsportal</title>
+    <title>ZHIFT</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,10 +13,29 @@
     <link rel="stylesheet" href="style.css">    
 </head>
 <body class="antialiased min-h-screen">
+    <!-- THEME INIT SCRIPT (Prevents Flashbang) -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            // Check saved theme or system preference
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.body.classList.add('dark-mode');
+            }
+        })();
+    </script>
 
     <!-- Preloader -->
     <div id="preloader">
-        <div class="preloader-logo">Z03Y</div>
+        <div class="loader-content">
+            <div class="zhift-logo-loader">
+                <span>Z</span><span>H</span><span>I</span><span>F</span><span>T</span>
+            </div>
+            <div class="loader-subtitle">AVAILABILITY PORTAL</div>
+            <div class="loading-line-wrapper">
+                <div class="loading-line"></div>
+            </div>
+            <div class="loader-credit">PROJECT BY Z03Y</div>
+        </div>
     </div>
 
     <div class="decor-blob bg-pink-500 w-[300px] h-[300px] lg:w-[500px] lg:h-[500px] -top-20 -left-20 lg:-top-60 lg:-left-20"></div>
@@ -24,7 +43,11 @@
 
     <header class="bg-[var(--card-bg)] backdrop-blur-xl sticky top-0 z-40 border-b border-dynamic shadow-sm transition-colors duration-300">
         <nav class="container mx-auto px-4 lg:px-6 flex items-center justify-between h-16 lg:h-20 flex-nowrap">
-            <span class="text-xs sm:text-lg lg:text-2xl font-black uppercase tracking-[0.15em] lg:tracking-[0.2em] truncate mr-2" data-tr="title">Tilgjengelighet</span>
+            <div class="flex items-center gap-3 mr-2">
+                <span class="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-[0.1em] italic text-pink-500">ZHIFT</span>
+                <div class="h-6 w-px bg-dynamic hidden sm:block"></div>
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-widest opacity-50 hidden sm:block pt-1">Availability</span>
+            </div>
             
             <div class="flex items-center gap-2 lg:gap-4 flex-shrink-0">
                 <button onclick="window.ui.toggleTheme()" class="w-8 h-8 lg:w-11 lg:h-11 flex items-center justify-center rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
@@ -187,11 +210,11 @@
     <footer class="container mx-auto px-6 lg:px-12 py-10 lg:py-16 mt-8 lg:mt-12 border-t border-dynamic">
         <div class="flex flex-col md:flex-row justify-between items-center gap-8">
             <div class="flex items-center gap-4 lg:gap-6">
-                <span class="text-xl lg:text-2xl font-black uppercase tracking-[0.3em] lg:tracking-[0.4em] opacity-30 select-none">Z03Y</span>
+                <span class="text-xl lg:text-2xl font-black uppercase tracking-[0.2em] italic opacity-30 select-none">ZHIFT</span>
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Tilgjengelighetsportal v4.0</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.0</p>
                 </div>
             </div>
             

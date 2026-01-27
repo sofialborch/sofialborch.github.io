@@ -1,7 +1,7 @@
 // Global Configuration and State
 const TR = {
     nb: {
-        title: "Tilgjengelighet", printBtn: "Skriv ut", today: "I dag", quickOutlook: "Hurtigoversikt",
+        title: "ZHIFT", printBtn: "Skriv ut", today: "I dag", quickOutlook: "Hurtigoversikt",
         selectWeek: "Velg uke", wk: "Uke", ledig: "Ledig", opptatt: "Opptatt", delvis: "Delvis",
         lookup: "Søk", start: "Fra dato", end: "Til dato", searchBtn: "Søk i periode",
         fra: "Fra", til: "Til",
@@ -55,7 +55,7 @@ const TR = {
         tutSkip: "Hopp over"
     },
     en: {
-        title: "Availability", printBtn: "Print Schedule", today: "Today", quickOutlook: "Quick Outlook",
+        title: "ZHIFT", printBtn: "Print Schedule", today: "Today", quickOutlook: "Quick Outlook",
         selectWeek: "Select Week", wk: "Wk", ledig: "Available", opptatt: "Busy", delvis: "Partial",
         lookup: "Lookup", start: "Start Date", end: "End Date", searchBtn: "Search Range",
         fra: "From", til: "To",
