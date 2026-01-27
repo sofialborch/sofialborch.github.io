@@ -1,51 +1,5 @@
 // admin.js - Admin Tools & Logic
 
-const STANDARD_SHIFTS = [
-    "07:00 - 14:30", 
-    "07:30 - 14:00", 
-    "08:00 - 15:30", 
-    "08:15 - 15:45", 
-    "08:30 - 16:00", 
-    "09:00 - 16:30"
-];
-
-// --- Shift Logic ---
-function getSortedShifts() {
-    const usage = JSON.parse(localStorage.getItem('shift_usage') || '{}');
-    return [...STANDARD_SHIFTS].sort((a, b) => (usage[b] || 0) - (usage[a] || 0));
-}
-
-function trackShiftUsage(shift) {
-    if(!shift || !STANDARD_SHIFTS.includes(shift)) return; // Only track standard ones
-    const usage = JSON.parse(localStorage.getItem('shift_usage') || '{}');
-    usage[shift] = (usage[shift] || 0) + 1;
-    localStorage.setItem('shift_usage', JSON.stringify(usage));
-}
-
-function renderShiftButtons(containerId, inputId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    container.innerHTML = '';
-    const sorted = getSortedShifts();
-    
-    sorted.forEach(shift => {
-        const btn = document.createElement('button');
-        // Compact pill styling
-        btn.className = "px-3 py-1.5 rounded-lg border border-dynamic bg-dynamic hover-bg-dynamic text-[10px] font-black transition opacity-70 hover:opacity-100 whitespace-nowrap";
-        btn.innerText = shift;
-        btn.onclick = () => {
-            const input = document.getElementById(inputId);
-            input.value = shift;
-            // Visual feedback
-            container.querySelectorAll('button').forEach(b => b.classList.remove('ring-2', 'ring-pink-500'));
-            btn.classList.add('ring-2', 'ring-pink-500');
-        };
-        container.appendChild(btn);
-    });
-}
-// ------------------
-
 function triggerMigration() {
     if(window.uploadLocalDataToFirestore && DATA_STORE.overrides) {
         window.uploadLocalDataToFirestore(DATA_STORE.overrides);
@@ -164,6 +118,7 @@ function renderAdminRequestList(reqs) {
 
         // Handle detailed messages nicely
         let displayMsg = req.message || '';
+        // Bold the "Details:" header if present
         displayMsg = displayMsg.replace('Detaljer:', '<strong>Detaljer:</strong>');
 
         el.innerHTML = `
@@ -203,11 +158,7 @@ function openBulkAction(reqId) {
     document.getElementById('bulk-subtitle').innerText = `${req.dates ? req.dates.length : 0} dager`;
     document.getElementById('bulk-note').value = `${req.name}: ${req.message}`; 
     document.getElementById('bulk-response').value = ''; 
-    document.getElementById('bulk-time').value = ''; 
     
-    // Render sorted buttons
-    renderShiftButtons('bulk-shift-suggestions', 'bulk-time');
-
     const dateList = document.getElementById('bulk-date-list');
     dateList.innerHTML = '';
     
@@ -243,17 +194,13 @@ window.deleteRequest = async function(id) {
 window.saveBulkAction = async function() {
     if(!currentBulkRequest || !window.isAdmin) return;
     const note = document.getElementById('bulk-note').value;
-    const time = document.getElementById('bulk-time').value; 
     const responseMsg = document.getElementById('bulk-response').value;
     const batch = window.dbFormat.writeBatch(window.db);
     
-    // TRACK USAGE
-    trackShiftUsage(time);
-
     if(currentBulkRequest.dates) {
         currentBulkRequest.dates.forEach(dateStr => {
             const ref = window.dbFormat.doc(window.db, "availability", dateStr);
-            const data = { status: currentEditStatus, note: note, time: time, badge: currentBadge || null };
+            const data = { status: currentEditStatus, note: note, badge: currentBadge || null };
             batch.set(ref, data);
             DATA_STORE.overrides[dateStr] = data;
         });
@@ -290,11 +237,6 @@ window.openEditModal = function(dateStr, info) {
     document.getElementById('edit-modal').classList.remove('hidden');
     window.setEditStatus(info.status === 'weekend' ? 'available' : info.status);
     document.getElementById('edit-note').value = info.note || '';
-    document.getElementById('edit-time').value = info.time || ''; 
-    
-    // Render sorted buttons
-    renderShiftButtons('edit-shift-suggestions', 'edit-time');
-
     ['NR', 'PM', 'ST'].forEach(b => {
         const el = document.getElementById(`badge-${b.toLowerCase()}`);
         if(el) el.style.opacity = '0.5';
@@ -306,12 +248,7 @@ window.openEditModal = function(dateStr, info) {
 window.saveDay = async function() {
     if (!currentEditDate || !window.isAdmin) return;
     const note = document.getElementById('edit-note').value;
-    const time = document.getElementById('edit-time').value; 
-    
-    // TRACK USAGE
-    trackShiftUsage(time);
-
-    const data = { status: currentEditStatus, note: note, time: time, badge: currentBadge || null };
+    const data = { status: currentEditStatus, note: note, badge: currentBadge || null };
     try {
         await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "availability", currentEditDate), data);
         DATA_STORE.overrides[currentEditDate] = data;
@@ -394,7 +331,7 @@ window.closeBulkModal = () => {
 window.closeEditModal = () => document.getElementById('edit-modal').classList.add('hidden');
 window.openAdminRequests = openAdminRequests;
 
-// Print Logic
+// Print Logic (Moved here as it's often admin-triggered)
 window.generatePrintSummary = function(start, end) {
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent("sofialborch.github.io")}`;
     const printWindow = window.open('', '_blank');
@@ -451,7 +388,6 @@ window.generatePrintSummary = function(start, end) {
         iter = next;
     }
     
-    // NEW FOOTER
     html += `</div>
     <div class="footer">
         <div>
