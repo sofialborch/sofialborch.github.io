@@ -71,7 +71,7 @@ window.requests.openRequestModal = function() {
             row.className = "flex items-center gap-2 group";
             row.innerHTML = `
                 <div class="flex-shrink-0 w-16 text-[10px] font-black uppercase tracking-widest opacity-60 leading-tight">${niceDate}</div>
-                <input type="text" data-date="${ds}" class="req-date-input flex-1 bg-dynamic border border-dynamic rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:border-pink-500/50 transition placeholder-opacity-40" placeholder="Notat (f.eks 'Kommer')">
+                <input type="text" data-date="${ds}" class="req-date-input flex-1 bg-dynamic border border-dynamic rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:border-pink-500/50 transition placeholder-opacity-40" placeholder="${t('optional')}">
                 <button onclick="window.requests.removeDateFromModal('${ds}')" class="w-6 h-6 flex items-center justify-center rounded-md text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition"><i class="fas fa-times text-xs"></i></button>
             `;
             listContainer.appendChild(row);

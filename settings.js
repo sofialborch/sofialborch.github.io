@@ -13,7 +13,7 @@ const TR = {
         requestsTitle: "Innboks", noReq: "Ingen nye forespørsler", delete: "Slett",
         approve: "Behandle", conflictsFound: "Konflikt: Noen datoer er ikke ledige",
         bulkEditTitle: "Behandle forespørsel", applyToDates: "Godkjenn & Lagre",
-        archive: "Avvis / Arkiver",
+        archive: "Avvis",
         
         callMe: "Haster det? Ring meg på:",
         loginTip: "Tips: Logg inn for å spore forespørsler permanent.",
@@ -52,7 +52,10 @@ const TR = {
         tutBody3: "Fyll ut navn og melding i menyen som dukker opp for å sende en forespørsel.",
         tutNext: "Neste",
         tutGotIt: "Forstått",
-        tutSkip: "Hopp over"
+        tutSkip: "Hopp over",
+        
+        // Misc
+        optional: "Valgfritt..."
     },
     en: {
         title: "ZHIFT", printBtn: "Print Schedule", today: "Today", quickOutlook: "Quick Outlook",
@@ -67,7 +70,7 @@ const TR = {
         requestsTitle: "Inbox", noReq: "No new requests", delete: "Delete",
         approve: "Process", conflictsFound: "Conflict: Dates not fully available",
         bulkEditTitle: "Process Request", applyToDates: "Approve & Save",
-        archive: "Reject / Archive",
+        archive: "Reject",
         
         callMe: "Urgent? Call me at:",
         loginTip: "Tip: Log in to track requests permanently.",
@@ -106,7 +109,10 @@ const TR = {
         tutBody3: "Fill out your name and message in the menu that appears to send a request.",
         tutNext: "Next",
         tutGotIt: "Got it",
-        tutSkip: "Skip"
+        tutSkip: "Skip",
+        
+        // Misc
+        optional: "Optional..."
     }
 };
 
@@ -125,4 +131,7 @@ let currentBadge = null;
 let selectedRequestDates = new Set();
 let loadedRequestsCache = {}; 
 let currentBulkRequest = null;
+// Admin Wizard State
+let bulkWizardData = [];
+let bulkWizardIndex = 0;
 let currentTutorialStep = 0;

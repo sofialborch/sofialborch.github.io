@@ -214,7 +214,7 @@
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.0</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.1</p>
                 </div>
             </div>
             
@@ -394,7 +394,7 @@
         </div>
     </div>
 
-    <!-- Edit Modal (For Admin) -->
+    <!-- Edit Modal (For Admin Single Day Manual Edit) -->
     <div id="edit-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.closeEditModal()"></div>
         <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all">
@@ -425,47 +425,61 @@
         </div>
     </div>
     
-    <!-- Bulk Edit Modal -->
+    <!-- Bulk Edit Modal (Wizard Style) -->
     <div id="bulk-modal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.closeBulkModal()"></div>
-        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all flex flex-col max-h-[90vh]">
-            <div class="mb-6">
-                <h3 class="text-xl font-black uppercase tracking-widest" id="bulk-title">...</h3>
-                <p class="text-[10px] opacity-60 font-bold uppercase tracking-widest mt-1" id="bulk-subtitle">... dager</p>
-            </div>
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-6 border border-dynamic shadow-2xl transform transition-all flex flex-col">
             
-            <div class="flex-1 overflow-y-auto custom-scrollbar mb-4 pr-2">
-                <!-- Date list with status -->
-                <div id="bulk-date-list" class="space-y-1 mb-6"></div>
+            <!-- Header -->
+            <div class="text-center mb-6">
+                <h3 class="text-lg font-black uppercase tracking-widest" id="bulk-wizard-title">...</h3>
+                <div class="flex items-center justify-center gap-2 mt-2">
+                    <span id="bulk-step-indicator" class="text-[10px] font-bold px-2 py-1 rounded bg-white/10 text-white/50">1 / 5</span>
+                </div>
+            </div>
 
-                <div class="space-y-4">
+            <!-- Wizard Content -->
+            <div id="bulk-wizard-content" class="flex-1 space-y-6">
+                <!-- Date Display -->
+                <div class="text-center">
+                    <h2 id="bulk-current-date" class="text-3xl font-black mb-1">...</h2>
+                    <p id="bulk-current-day" class="text-xs font-black uppercase tracking-widest opacity-50 text-pink-500">...</p>
+                </div>
+
+                <!-- Controls -->
+                 <div class="space-y-4">
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="window.setBulkStatus('available')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
-                        <button onclick="window.setBulkStatus('busy')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
-                        <button onclick="window.setBulkStatus('partial')" class="bulk-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
+                        <button onclick="window.setBulkStepStatus('available')" class="bulk-step-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="available">Ledig</button>
+                        <button onclick="window.setBulkStepStatus('busy')" class="bulk-step-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
+                        <button onclick="window.setBulkStepStatus('partial')" class="bulk-step-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
                     </div>
                      <div>
-                        <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Badge</label>
-                        <div class="flex gap-2">
-                            <button onclick="window.toggleBulkBadge('NR')" id="bulk-badge-nr" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
-                            <button onclick="window.toggleBulkBadge('PM')" id="bulk-badge-pm" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
-                            <button onclick="window.toggleBulkBadge('ST')" id="bulk-badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
+                        <div class="flex gap-2 justify-center">
+                            <button onclick="window.toggleBulkStepBadge('NR')" id="bulk-step-badge-nr" class="badge-btn w-12 py-2 rounded-lg border border-dynamic text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
+                            <button onclick="window.toggleBulkStepBadge('PM')" id="bulk-step-badge-pm" class="badge-btn w-12 py-2 rounded-lg border border-dynamic text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
+                            <button onclick="window.toggleBulkStepBadge('ST')" id="bulk-step-badge-st" class="badge-btn w-12 py-2 rounded-lg border border-dynamic text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Intern Notat (Kalender)</label>
-                        <textarea id="bulk-note" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-20 focus:outline-none focus:border-pink-500/50 transition"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest" data-tr="adminResponseLabel">Svar til bruker (Valgfritt)</label>
-                        <textarea id="bulk-response" placeholder="Skriv en beskjed..." class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-20 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                        <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest text-center">Notat</label>
+                        <textarea id="bulk-step-note" oninput="window.updateBulkStepNote(this.value)" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-20 focus:outline-none focus:border-pink-500/50 transition text-center"></textarea>
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-col gap-2 mt-2">
-                <button onclick="window.saveBulkAction()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20" data-tr="applyToDates">Lagre</button>
-                <button onclick="window.archiveBulkRequest()" class="w-full bg-dynamic text-muted-dynamic hover:text-red-400 font-black py-3 rounded-xl transition text-[10px] uppercase tracking-widest" data-tr="archive">Arkiver / Slett</button>
+            <!-- Navigation -->
+            <div class="flex items-center justify-between mt-8 pt-4 border-t border-dynamic">
+                <button onclick="window.prevBulkStep()" id="bulk-prev-btn" class="w-10 h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover:text-white transition"><i class="fas fa-arrow-left"></i></button>
+                
+                <button onclick="window.saveBulkWizard()" class="bg-pink-500 text-white font-black px-8 py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
+                    Lagre Alt
+                </button>
+
+                <button onclick="window.nextBulkStep()" id="bulk-next-btn" class="w-10 h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover:text-white transition"><i class="fas fa-arrow-right"></i></button>
+            </div>
+            
+            <div class="mt-4 text-center">
+                 <button onclick="window.closeBulkModal()" class="text-[9px] font-bold uppercase tracking-widest opacity-30 hover:opacity-100 transition">Avbryt</button>
             </div>
         </div>
     </div>
