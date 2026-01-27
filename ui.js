@@ -47,7 +47,14 @@ window.ui.updateStatus = function(text, color) {
 window.ui.renderHero = function(todayStr) {
     const info = getInfo(todayStr);
     document.getElementById('hero-date').innerText = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }).replace('/', '.');
-    document.getElementById('hero-note').innerText = info.note || t('noPlans');
+    
+    // Updated: Show Time if available, else show Note
+    const mainText = info.time ? `${info.time}` : (info.note || t('noPlans'));
+    document.getElementById('hero-note').innerText = mainText;
+    
+    // If we have both time AND note, maybe append note in smaller text? 
+    // For now, let's stick to the cleanest option: Time takes precedence in the big text if present.
+    
     document.getElementById('hero-label').innerText = translateNote(t(info.status));
     const statusColor = getComputedStyle(document.documentElement).getPropertyValue(`--${info.status}`).trim();
     document.getElementById('hero-dot').style.backgroundColor = statusColor || '#333';
@@ -69,13 +76,23 @@ window.ui.renderWeekSummary = function(weekNumber) {
             else window.requests.toggleRequestDate(ds);
         };
 
+        // NEW: Display Time if exists, otherwise badge or icon
+        let centerContent = '';
+        if (info.time) {
+            centerContent = `<span class="text-sm lg:text-lg font-black opacity-80 whitespace-nowrap">${info.time}</span>`;
+        } else if (info.badge) {
+            centerContent = `<span class="badge badge-${info.badge.toLowerCase()} text-lg lg:text-2xl font-black">${info.badge}</span>`;
+        } else {
+            centerContent = `<i class="fas ${info.status === 'available' ? 'fa-check text-[var(--available)]' : 'fa-minus text-[var(--busy)]'} text-lg lg:text-2xl opacity-40"></i>`;
+        }
+
         div.innerHTML = `
             <div class="flex flex-col gap-0.5 mb-1 lg:mb-2">
                 <span class="text-[14px] lg:text-[16px] font-black opacity-90 tracking-tighter">${String(curr.getDate()).padStart(2, '0')}.${String(curr.getMonth() + 1).padStart(2, '0')}</span>
                 <span class="text-[9px] lg:text-xs font-black uppercase opacity-60 tracking-widest">${curr.toLocaleDateString(t('monthLocale'), {weekday: 'short'})}</span>
             </div>
-            <div class="py-2 lg:py-4 flex flex-col items-center">
-                ${info.badge ? `<span class="badge badge-${info.badge.toLowerCase()} text-lg lg:text-2xl font-black">${info.badge}</span>` : `<i class="fas ${info.status === 'available' ? 'fa-check text-[var(--available)]' : 'fa-minus text-[var(--busy)]'} text-lg lg:text-2xl opacity-40"></i>`}
+            <div class="py-2 lg:py-4 flex flex-col items-center justify-center min-h-[40px]">
+                ${centerContent}
             </div>
             <span class="text-[10px] lg:text-sm font-bold opacity-90 line-clamp-2 leading-tight">${info.note || translateNote(t(info.status))}</span>`;
         container.appendChild(div);
@@ -127,7 +144,24 @@ window.ui.renderCalendar = function(todayStr) {
                     else window.requests.toggleRequestDate(ds);
                 };
 
-                div.innerHTML = info.badge ? `<span class=\"badge badge-${info.badge.toLowerCase()}\">${info.badge}</span>` : `<span class=\"font-bold\">${currentDay}</span>`;
+                // NEW: Render Time or Badge. Time takes priority for visual info if present.
+                let content = '';
+                if(info.time) {
+                     content = `<span class="text-[9px] font-black uppercase tracking-tighter opacity-90 truncate w-full text-center mt-1">${info.time}</span>`;
+                } else if(info.badge) {
+                    content = `<span class=\"badge badge-${info.badge.toLowerCase()}\">${info.badge}</span>`;
+                }
+
+                div.innerHTML = `
+                    <div class="flex justify-between items-start w-full">
+                         <span class=\"font-bold text-[10px]\">${currentDay}</span>
+                         ${info.badge && info.time ? `<span class=\"badge badge-${info.badge.toLowerCase()} scale-75 origin-top-right\">${info.badge}</span>` : ''} 
+                    </div>
+                    <div class="flex items-center justify-center flex-1 w-full">
+                        ${content}
+                    </div>
+                `;
+                
                 if (info.note) {
                     const tip = document.createElement('span'); tip.className = 'tooltip'; tip.innerText = info.note; div.appendChild(tip);
                 }

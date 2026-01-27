@@ -390,6 +390,13 @@
                         <button onclick="window.toggleBadge('ST')" id="badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
                     </div>
                 </div>
+                <!-- Time Input with Suggestions -->
+                <div>
+                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Tid / Skift</label>
+                    <input type="text" id="edit-time" placeholder="f.eks 08:00 - 16:00" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition mb-2">
+                    <!-- NEW: Suggestions Container -->
+                    <div id="edit-shift-suggestions" class="flex flex-wrap gap-2"></div>
+                </div>
                 <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Notat</label>
                     <textarea id="edit-note" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
@@ -428,6 +435,13 @@
                             <button onclick="window.toggleBulkBadge('PM')" id="bulk-badge-pm" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-pink-400 opacity-50 hover:opacity-100">PM</button>
                             <button onclick="window.toggleBulkBadge('ST')" id="bulk-badge-st" class="badge-btn flex-1 py-2 rounded-lg border border-dynamic text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">ST</button>
                         </div>
+                    </div>
+                    <!-- Bulk Time Input -->
+                    <div>
+                        <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Tid / Skift</label>
+                        <input type="text" id="bulk-time" placeholder="Sett samme tid for alle (Valgfritt)" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition mb-2">
+                         <!-- NEW: Suggestions Container -->
+                        <div id="bulk-shift-suggestions" class="flex flex-wrap gap-2"></div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Intern Notat (Kalender)</label>
