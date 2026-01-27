@@ -154,7 +154,7 @@ function renderAdminRequestList(reqs) {
             </div>
             
             <div class="mb-4">
-                <p class="text-sm font-medium opacity-80 leading-relaxed bg-black/5 dark:bg-black/20 p-3 rounded-lg border border-dynamic italic">"${req.message || ''}"</p>
+                <p class="text-sm font-medium opacity-80 leading-relaxed bg-black/5 dark:bg-black/20 p-3 rounded-lg border border-dynamic italic whitespace-pre-wrap">"${req.message || ''}"</p>
                 ${warningHTML}
             </div>
 

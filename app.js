@@ -383,9 +383,29 @@ function updateRequestSidebar() {
 }
 
 function openRequestModal() {
-    document.getElementById('req-subtitle').innerText = `For ${selectedRequestDates.size} dager`;
+    const subtitle = document.getElementById('req-subtitle');
+    const listContainer = document.getElementById('req-date-list');
+    
+    subtitle.innerText = `For ${selectedRequestDates.size} dager`;
     document.getElementById('request-modal').classList.remove('hidden');
     
+    // NEW: Render Inputs Per Date
+    listContainer.innerHTML = '';
+    const dates = Array.from(selectedRequestDates).sort();
+    
+    dates.forEach(ds => {
+        const d = new Date(ds);
+        const niceDate = d.toLocaleDateString(t('monthLocale'), { weekday: 'short', day: 'numeric', month: 'short' });
+        
+        const row = document.createElement('div');
+        row.className = "flex items-center gap-3";
+        row.innerHTML = `
+            <span class="text-[10px] font-black uppercase tracking-widest w-16 opacity-60">${niceDate}</span>
+            <input type="text" data-date="${ds}" class="req-date-input flex-1 bg-dynamic border border-dynamic rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:border-pink-500/50 transition placeholder-opacity-40" placeholder="Notat...">
+        `;
+        listContainer.appendChild(row);
+    });
+
     // NEW: Auto-fill Name if Logged In
     const user = window.auth.currentUser;
     if (user && !user.isAnonymous && user.displayName) {
@@ -417,7 +437,24 @@ window.closeRequestModal = function() {
 
 window.submitRequest = async function() {
     const name = document.getElementById('req-name').value;
-    const msg = document.getElementById('req-msg').value;
+    const globalMsg = document.getElementById('req-msg').value;
+    
+    // Gather Specific Notes
+    let specificNotes = [];
+    document.querySelectorAll('.req-date-input').forEach(input => {
+        if(input.value.trim()) {
+            const ds = input.dataset.date;
+            specificNotes.push(`- ${ds}: ${input.value.trim()}`);
+        }
+    });
+    
+    // Construct Final Message
+    let finalMsg = globalMsg;
+    if(specificNotes.length > 0) {
+        if(finalMsg) finalMsg += "\n\n";
+        finalMsg += "Detaljer:\n" + specificNotes.join("\n");
+    }
+
     if(!name) { alert("Vennligst skriv inn navn"); return; }
     
     // NEW: ID Generation & UID linking
@@ -427,7 +464,8 @@ window.submitRequest = async function() {
     
     const reqData = {
         id: reqId,
-        name, message: msg, 
+        name, 
+        message: finalMsg, 
         dates: Array.from(selectedRequestDates), 
         submittedAt: new Date().toISOString(),
         status: 'pending', // pending, approved, rejected

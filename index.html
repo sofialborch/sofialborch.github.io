@@ -495,20 +495,33 @@
     <!-- Request Modal (For Guests) -->
     <div id="request-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeRequestModal()"></div>
-        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all">
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all flex flex-col max-h-[90vh]">
             <h3 class="text-lg lg:text-xl font-black uppercase tracking-widest mb-2" data-tr="reqTitle">Send Forespørsel</h3>
-            <p class="text-[10px] opacity-60 font-bold uppercase tracking-widest mb-6" id="req-subtitle">For ... dager</p>
-            <div class="space-y-4">
+            <p class="text-[10px] opacity-60 font-bold uppercase tracking-widest mb-2" id="req-subtitle">For ... dager</p>
+            
+            <div class="flex-1 overflow-y-auto custom-scrollbar space-y-4">
                 <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Navn / Kontakt</label>
                     <input type="text" id="req-name" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Melding</label>
-                    <textarea id="req-msg" placeholder="Valgfritt" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Generell Melding</label>
+                    <textarea id="req-msg" placeholder="Valgfritt" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-20 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                 </div>
-                <button onclick="submitRequest()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Send</button>
+                
+                <!-- NEW: Specific Date Notes -->
+                <div>
+                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Detaljer per dag (Valgfritt)</label>
+                     <div id="req-date-list" class="space-y-2">
+                         <!-- Injected via JS -->
+                     </div>
+                </div>
+
                 <div id="req-modal-footer"></div> <!-- Placeholder for Phone/Auth tip -->
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-dynamic">
+                <button onclick="submitRequest()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Send</button>
             </div>
         </div>
     </div>
