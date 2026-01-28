@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZHIFT</title>
     
+    <!-- Icons (Browser Tab) -->
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="icon" type="image/x-icon" href="icon.ico">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,6 +31,9 @@
     <!-- Preloader -->
     <div id="preloader">
         <div class="loader-content">
+            <!-- Icon added to Preloader with animation -->
+            <img src="icon.png" class="w-20 h-20 mb-2 rounded-3xl object-cover" style="opacity: 0; transform: translateY(20px); animation: letterFadeIn 0.5s forwards ease-out;">
+            
             <div class="zhift-logo-loader">
                 <span>Z</span><span>H</span><span>I</span><span>F</span><span>T</span>
             </div>
@@ -44,6 +51,9 @@
     <header class="bg-[var(--card-bg)] backdrop-blur-xl sticky top-0 z-40 border-b border-dynamic shadow-sm transition-colors duration-300">
         <nav class="container mx-auto px-4 lg:px-6 flex items-center justify-between h-16 lg:h-20 flex-nowrap">
             <div class="flex items-center gap-3 mr-2">
+                <!-- ADDED LOGO HERE (Shadow removed) -->
+                <img src="icon.png" alt="Logo" class="w-8 h-8 lg:w-10 lg:w-10 rounded-lg object-cover">
+                
                 <span class="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-[0.1em] italic text-pink-500">ZHIFT</span>
                 <div class="h-6 w-px bg-dynamic hidden sm:block"></div>
                 <span class="text-[10px] sm:text-xs font-bold uppercase tracking-widest opacity-50 hidden sm:block pt-1">Availability</span>
@@ -214,7 +224,7 @@
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.2</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.21</p>
                 </div>
             </div>
             
