@@ -117,7 +117,7 @@ const TR = {
 };
 
 const DYNAMIC_TR = {
-    "studying": "studerer", "working": "jobber", "norønna": "norønna",
+    "studying": "studerer", "working": "jobber", "norønna": "norønna", "internship": "praksis"
     "weekend": "helg", "vacation": "ferie", "traveling": "reiser",
     "at home": "hjemme", "busy": "opptatt", "available": "tilgjengelig"
 };
