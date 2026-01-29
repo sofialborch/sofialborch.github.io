@@ -247,3 +247,183 @@ window.ui.updateTutorialUI = function() {
     if (currentTutorialStep === 2) btn.innerText = t('tutGotIt');
     else btn.innerText = t('tutNext');
 }
+
+// ============================================
+// CHRONOS CYLINDER TIME SELECTOR LOGIC
+// ============================================
+
+let timeSelectorTarget = null;
+let timeSelectorLinked = null;
+let timeState = { h: '08', m: '00' };
+
+window.ui.initTimeSelector = function() {
+    const HOURS = Array.from({length: 18}, (_, i) => i + 6); // 06 to 23
+    const MINS = ['00', '15', '30', '45'];
+    
+    const wheelH = document.getElementById('cylinder-wheel-h');
+    const wheelM = document.getElementById('cylinder-wheel-m');
+
+    if(!wheelH || !wheelM) return; // Guard
+
+    // Populate Hours
+    wheelH.innerHTML = '';
+    HOURS.forEach(h => {
+        const el = document.createElement('div');
+        el.className = 'cylinder-slot';
+        el.innerText = h.toString().padStart(2, '0');
+        el.dataset.val = el.innerText;
+        el.onclick = () => scrollToSlot(wheelH, el, 'h');
+        wheelH.appendChild(el);
+    });
+
+    // Populate Mins
+    wheelM.innerHTML = '';
+    MINS.forEach(m => {
+        const el = document.createElement('div');
+        el.className = 'cylinder-slot';
+        el.innerText = m;
+        el.dataset.val = m;
+        el.onclick = () => scrollToSlot(wheelM, el, 'm');
+        wheelM.appendChild(el);
+    });
+
+    // Attach Physics
+    attachPhysics(wheelH, 'h');
+    attachPhysics(wheelM, 'm');
+}
+
+function attachPhysics(element, type) {
+    let timeout;
+    element.addEventListener('scroll', () => {
+        requestAnimationFrame(() => {
+            const center = element.scrollTop + (element.clientHeight / 2);
+            const slots = element.children;
+            let closest = null;
+            let minDiff = Infinity;
+
+            for (let slot of slots) {
+                const slotCenter = slot.offsetTop + (slot.clientHeight / 2);
+                const dist = Math.abs(center - slotCenter);
+                
+                // 3D Rotation Effect
+                let rotateX = (slotCenter - center) * 0.15;
+                rotateX = Math.max(Math.min(rotateX, 60), -60);
+                
+                let scale = 1 - (dist / 500);
+                scale = Math.max(scale, 0.5);
+                
+                let opacity = 1 - (dist / 150);
+                opacity = Math.max(opacity, 0.1);
+
+                slot.style.transform = `rotateX(${-rotateX}deg) scale(${scale})`;
+                slot.style.opacity = opacity;
+
+                if(dist < minDiff) {
+                    minDiff = dist;
+                    closest = slot;
+                }
+            }
+            
+            if(closest) {
+                timeState[type] = closest.dataset.val;
+                // Highlight active text
+                Array.from(slots).forEach(s => s.style.color = '');
+                closest.style.color = 'var(--pink)';
+            }
+        });
+
+        // Snap to grid when scrolling stops
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            // Find closest slot again to be sure
+            const center = element.scrollTop + (element.clientHeight / 2);
+            const slots = element.children;
+            let closest = null;
+            let minDiff = Infinity;
+            for (let slot of slots) {
+                const dist = Math.abs((slot.offsetTop + (slot.clientHeight / 2)) - center);
+                if(dist < minDiff) { minDiff = dist; closest = slot; }
+            }
+            if(closest) scrollToSlot(element, closest, type);
+        }, 150);
+    });
+}
+
+function scrollToSlot(container, slot, type) {
+    if(!slot) return;
+    const padding = (container.clientHeight - slot.clientHeight) / 2; // Center it
+    container.scrollTo({
+        top: slot.offsetTop - padding,
+        behavior: 'smooth'
+    });
+    timeState[type] = slot.dataset.val;
+}
+
+window.ui.openTimeSelector = function(targetId, linkedId = null) {
+    // 1. Init if empty (first run)
+    if(document.getElementById('cylinder-wheel-h').children.length === 0) {
+        window.ui.initTimeSelector();
+    }
+
+    timeSelectorTarget = targetId;
+    timeSelectorLinked = linkedId;
+    
+    // 2. Get current value from hidden input or button text
+    const input = document.getElementById(targetId);
+    const val = input.value || "08:00";
+    const [h, m] = val.split(':');
+    
+    timeState = { h: h, m: m };
+
+    // 3. Open Modal
+    document.getElementById('cylinder-overlay').classList.add('open');
+    
+    // 4. Scroll to value after slight delay (for layout)
+    setTimeout(() => {
+        const wheelH = document.getElementById('cylinder-wheel-h');
+        const wheelM = document.getElementById('cylinder-wheel-m');
+        
+        const slotH = Array.from(wheelH.children).find(s => s.dataset.val === timeState.h);
+        const slotM = Array.from(wheelM.children).find(s => s.dataset.val === timeState.m);
+        
+        scrollToSlot(wheelH, slotH, 'h');
+        scrollToSlot(wheelM, slotM, 'm');
+    }, 50);
+}
+
+window.ui.closeTimeSelector = function() {
+    document.getElementById('cylinder-overlay').classList.remove('open');
+}
+
+window.ui.confirmTimeSelector = function() {
+    if(!timeSelectorTarget) return;
+    
+    const newVal = `${timeState.h}:${timeState.m}`;
+    
+    // Update Hidden Input
+    const input = document.getElementById(timeSelectorTarget);
+    if(input) {
+        input.value = newVal;
+        // Manually trigger change for admin.js
+        input.dispatchEvent(new Event('change'));
+    }
+    
+    // Update Button Text
+    const btn = document.getElementById(timeSelectorTarget + '-btn');
+    if(btn) btn.innerText = newVal;
+    
+    // Auto-Calc Logic (if linked)
+    if(timeSelectorLinked && window.autoCalculateEndTime) {
+        const endVal = window.autoCalculateEndTime(newVal);
+        const linkedInput = document.getElementById(timeSelectorLinked);
+        const linkedBtn = document.getElementById(timeSelectorLinked + '-btn');
+        
+        if(linkedInput) {
+            linkedInput.value = endVal;
+            linkedInput.dispatchEvent(new Event('change')); // Trigger any other logic
+        }
+        if(linkedBtn) linkedBtn.innerText = endVal;
+    }
+    
+    window.ui.closeTimeSelector();
+}

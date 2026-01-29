@@ -19,6 +19,7 @@
     
     /* Accents */
     --pink: #db2777; /* Darker pink for light mode */
+    --pink-dim: rgba(219, 39, 119, 0.1); /* Added for Time Selector */
     
     /* Status Colors */
     --available: #15803d; 
@@ -32,6 +33,9 @@
     --panel-blur: 40px;
     --panel-opacity: 0.95;
     --shadow-style: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    /* Time Selector Vars */
+    --item-h: 60px;
 }
 
 body.dark-mode {
@@ -55,6 +59,7 @@ body.dark-mode {
     
     /* Accents */
     --pink: #f472b6;
+    --pink-dim: rgba(244, 114, 182, 0.15);
     
     /* Status Colors */
     --available: #22c55e; 
@@ -323,3 +328,99 @@ body.dark-mode .week-select {
 .pulse-pink { animation: pulse-glow 2s infinite; }
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 10px; }
+
+
+/* ========================================= */
+/* CHRONOS CYLINDER TIME SELECTOR STYLES    */
+/* ========================================= */
+
+.cylinder-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(8px);
+    opacity: 0; pointer-events: none;
+    transition: 0.4s ease;
+    display: grid; place-items: center;
+    z-index: 200; /* Higher than other modals */
+}
+.cylinder-overlay.open { opacity: 1; pointer-events: auto; }
+
+.cylinder-panel {
+    width: 320px;
+    background: var(--card-bg);
+    border-radius: 2.5rem;
+    padding: 2rem;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.4);
+    transform: translateY(50px) rotateX(10deg);
+    opacity: 0;
+    transition: 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    border: 1px solid var(--glass-border);
+}
+.cylinder-overlay.open .cylinder-panel { transform: translateY(0) rotateX(0); opacity: 1; }
+
+.cylinder-stage {
+    height: 240px; /* 4 items visible (60px * 4) */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, transparent 0%, black 25%, black 75%, transparent 100%);
+    perspective: 500px;
+}
+
+.cylinder-highlight {
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    height: var(--item-h);
+    transform: translateY(-50%);
+    border-top: 1px solid var(--pink);
+    border-bottom: 1px solid var(--pink);
+    background: linear-gradient(90deg, transparent, var(--pink-dim), transparent);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.cylinder-wheel {
+    width: 80px;
+    height: 100%;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding: calc(var(--item-h) * 1.5) 0;
+    scroll-snap-type: y mandatory;
+    z-index: 1;
+    transform-style: preserve-3d;
+}
+.cylinder-wheel::-webkit-scrollbar { display: none; }
+
+.cylinder-slot {
+    height: var(--item-h);
+    display: grid;
+    place-items: center;
+    scroll-snap-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color);
+    opacity: 0.3;
+    transform-origin: center;
+    transition: opacity 0.1s;
+    cursor: pointer;
+}
+
+.cylinder-col-title {
+    position: absolute; top: -15px; width: 100%; text-align: center;
+    font-size: 0.65rem; font-weight: 900; letter-spacing: 0.2em; color: var(--pink);
+    opacity: 0.6;
+}
+
+.cylinder-actions { display: flex; justify-content: space-between; margin-top: 2rem; align-items: center; }
+.cylinder-confirm {
+    background: var(--pink); color: white;
+    padding: 0.8rem 2rem; border-radius: 1rem;
+    font-weight: 800; letter-spacing: 0.05em; font-size: 0.9rem;
+    transition: 0.2s; cursor: pointer; border: none;
+    box-shadow: 0 10px 20px -5px var(--pink-dim);
+}
+.cylinder-confirm:hover { transform: translateY(-2px); box-shadow: 0 15px 25px -5px var(--pink-dim); }
+.cylinder-confirm:active { transform: scale(0.95); }

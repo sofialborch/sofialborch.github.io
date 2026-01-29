@@ -160,6 +160,26 @@ function renderAdminRequestList(reqs) {
 }
 
 // ----------------------------------------------------
+// TIME CALCULATION HELPERS
+// ----------------------------------------------------
+function autoCalculateEndTime(startTime) {
+    if(!startTime) return '';
+    const [h, m] = startTime.split(':').map(Number);
+    
+    // Add 7.5 hours (450 minutes)
+    let totalMins = (h * 60) + m + 450;
+    
+    // Wrap around 24h
+    totalMins = totalMins % 1440;
+    
+    const newH = Math.floor(totalMins / 60);
+    const newM = totalMins % 60;
+    
+    return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
+}
+window.autoCalculateEndTime = autoCalculateEndTime; // Export for UI.js
+
+// ----------------------------------------------------
 // NEW WIZARD LOGIC (Multi-step + Summary)
 // ----------------------------------------------------
 
@@ -197,11 +217,19 @@ function openBulkAction(reqId) {
             let initialBadge = null;
             if(existing && existing.badge) initialBadge = existing.badge;
 
+            // Times
+            let initialStart = '';
+            let initialEnd = '';
+            if(existing && existing.startTime) initialStart = existing.startTime;
+            if(existing && existing.endTime) initialEnd = existing.endTime;
+
             bulkWizardData.push({
                 date: d,
                 status: initialStatus,
                 note: initialNote,
-                badge: initialBadge
+                badge: initialBadge,
+                startTime: initialStart,
+                endTime: initialEnd
             });
         });
     }
@@ -282,6 +310,13 @@ function renderBulkStep() {
         
         document.getElementById('bulk-step-note').value = data.note || '';
         
+        // Update Time Inputs & Buttons
+        document.getElementById('bulk-start-time').value = data.startTime || '';
+        document.getElementById('bulk-start-time-btn').innerText = data.startTime || '08:00';
+        
+        document.getElementById('bulk-end-time').value = data.endTime || '';
+        document.getElementById('bulk-end-time-btn').innerText = data.endTime || '15:30';
+        
         prevBtn.style.visibility = bulkWizardIndex > 0 ? 'visible' : 'hidden';
         nextBtn.style.visibility = 'visible';
     }
@@ -319,6 +354,19 @@ window.updateBulkStepNote = function(val) {
     bulkWizardData[bulkWizardIndex].note = val;
 }
 
+// Bulk Time Updates with Auto-Calc
+window.updateBulkStepStartTime = function(val) {
+    bulkWizardData[bulkWizardIndex].startTime = val;
+    // Note: End time is auto-updated via UI.js -> confirmTimeSelector -> autoCalculateEndTime
+    // But we need to capture the value if it was updated automatically
+    const autoEnd = document.getElementById('bulk-end-time').value;
+    bulkWizardData[bulkWizardIndex].endTime = autoEnd;
+}
+
+window.updateBulkStepEndTime = function(val) {
+    bulkWizardData[bulkWizardIndex].endTime = val;
+}
+
 window.saveBulkWizard = async function() {
     if(!currentBulkRequest || !window.isAdmin) return;
     
@@ -335,7 +383,13 @@ window.saveBulkWizard = async function() {
     // 1. Commit Calendar Changes
     bulkWizardData.forEach(item => {
         const ref = window.dbFormat.doc(window.db, "availability", item.date);
-        const data = { status: item.status, note: item.note, badge: item.badge || null };
+        const data = { 
+            status: item.status, 
+            note: item.note, 
+            badge: item.badge || null,
+            startTime: item.startTime || null,
+            endTime: item.endTime || null
+        };
         batch.set(ref, data);
         DATA_STORE.overrides[item.date] = data; // Optimistic update
     });
@@ -385,7 +439,19 @@ window.openEditModal = function(dateStr, info) {
     document.getElementById('edit-date-display').innerText = dateObj.toLocaleDateString(t('monthLocale'), { weekday: 'long', day: 'numeric', month: 'long' });
     document.getElementById('edit-modal').classList.remove('hidden');
     window.setEditStatus(info.status === 'weekend' ? 'available' : info.status);
+    
+    // Load Data
     document.getElementById('edit-note').value = info.note || '';
+    
+    // Load Times (Need to look up raw data from STORE since info might be simplified)
+    const rawData = DATA_STORE.overrides[dateStr] || {};
+    
+    document.getElementById('edit-start-time').value = rawData.startTime || '';
+    document.getElementById('edit-start-time-btn').innerText = rawData.startTime || '08:00';
+    
+    document.getElementById('edit-end-time').value = rawData.endTime || '';
+    document.getElementById('edit-end-time-btn').innerText = rawData.endTime || '15:30';
+
     ['NR', 'PM', 'ST'].forEach(b => {
         const el = document.getElementById(`badge-${b.toLowerCase()}`);
         if(el) el.style.opacity = '0.5';
@@ -394,10 +460,22 @@ window.openEditModal = function(dateStr, info) {
     if (info.badge) window.toggleBadge(info.badge);
 }
 
+// Auto-Calc for Single Edit handled via UI.js + linkedInput
+
 window.saveDay = async function() {
     if (!currentEditDate || !window.isAdmin) return;
     const note = document.getElementById('edit-note').value;
-    const data = { status: currentEditStatus, note: note, badge: currentBadge || null };
+    const sTime = document.getElementById('edit-start-time').value;
+    const eTime = document.getElementById('edit-end-time').value;
+    
+    const data = { 
+        status: currentEditStatus, 
+        note: note, 
+        badge: currentBadge || null,
+        startTime: sTime || null,
+        endTime: eTime || null
+    };
+    
     try {
         await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "availability", currentEditDate), data);
         DATA_STORE.overrides[currentEditDate] = data;

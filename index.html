@@ -76,6 +76,10 @@
                         <i class="fas fa-inbox text-xs"></i>
                         <span id="admin-inbox-dot" class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[var(--card-bg)] hidden animate-pulse"></span>
                     </button>
+                    <!-- NEW STATS BUTTON -->
+                    <a href="stats.html" title="Mission Control" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-all">
+                        <i class="fas fa-chart-pie text-xs"></i>
+                    </a>
                     <button onclick="openAdminSettings()" title="Global Settings" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-gray-500/20 text-gray-500 border border-gray-500/30 hover:bg-gray-500/30 transition-all">
                         <i class="fas fa-cog text-xs"></i>
                     </button>
@@ -224,7 +228,7 @@
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.21</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.4</p>
                 </div>
             </div>
             
@@ -415,6 +419,25 @@
                     <button onclick="window.setEditStatus('busy')" class="edit-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
                     <button onclick="window.setEditStatus('partial')" class="edit-status-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
                 </div>
+                
+                <!-- NEW: CHRONOS TIME TRIGGERS (Single Edit) -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest text-center">Start</label>
+                        <input type="hidden" id="edit-start-time">
+                        <button id="edit-start-time-btn" onclick="window.ui.openTimeSelector('edit-start-time', 'edit-end-time')" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold hover:border-pink-500/50 transition text-center text-[var(--text-color)]">
+                            08:00
+                        </button>
+                    </div>
+                    <div>
+                         <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest text-center">Slutt</label>
+                        <input type="hidden" id="edit-end-time">
+                        <button id="edit-end-time-btn" onclick="window.ui.openTimeSelector('edit-end-time')" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold hover:border-pink-500/50 transition text-center text-[var(--text-color)]">
+                            15:30
+                        </button>
+                    </div>
+                </div>
+
                  <div>
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Badge</label>
                     <div class="flex gap-2">
@@ -463,6 +486,25 @@
                         <button onclick="window.setBulkStepStatus('busy')" class="bulk-step-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="busy">Opptatt</button>
                         <button onclick="window.setBulkStepStatus('partial')" class="bulk-step-btn p-3 rounded-xl border border-dynamic hover-bg-dynamic text-[10px] font-black uppercase tracking-widest transition" data-val="partial">Delvis</button>
                     </div>
+
+                     <!-- NEW: CHRONOS TIME TRIGGERS (Bulk Wizard) -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest text-center">Start</label>
+                            <input type="hidden" id="bulk-start-time" onchange="window.updateBulkStepStartTime(this.value)">
+                            <button id="bulk-start-time-btn" onclick="window.ui.openTimeSelector('bulk-start-time', 'bulk-end-time')" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold hover:border-pink-500/50 transition text-center text-[var(--text-color)]">
+                                08:00
+                            </button>
+                        </div>
+                        <div>
+                             <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest text-center">Slutt</label>
+                            <input type="hidden" id="bulk-end-time" onchange="window.updateBulkStepEndTime(this.value)">
+                            <button id="bulk-end-time-btn" onclick="window.ui.openTimeSelector('bulk-end-time')" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold hover:border-pink-500/50 transition text-center text-[var(--text-color)]">
+                                15:30
+                            </button>
+                        </div>
+                    </div>
+
                      <div>
                         <div class="flex gap-2 justify-center">
                             <button onclick="window.toggleBulkStepBadge('NR')" id="bulk-step-badge-nr" class="badge-btn w-12 py-2 rounded-lg border border-dynamic text-[10px] font-black text-purple-400 opacity-50 hover:opacity-100">NR</button>
@@ -559,6 +601,28 @@
         </div>
     </div>
     
+    <!-- CHRONOS CYLINDER TIME SELECTOR MODAL -->
+    <div id="cylinder-overlay" class="cylinder-overlay">
+        <div class="cylinder-panel">
+            <div class="cylinder-stage">
+                <div class="cylinder-highlight"></div>
+                <div style="position: relative;">
+                    <div class="cylinder-col-title">HOUR</div>
+                    <div class="cylinder-wheel" id="cylinder-wheel-h"></div>
+                </div>
+                <div class="text-2xl font-black self-center pb-1 opacity-30">:</div>
+                <div style="position: relative;">
+                    <div class="cylinder-col-title">MIN</div>
+                    <div class="cylinder-wheel" id="cylinder-wheel-m"></div>
+                </div>
+            </div>
+            <div class="cylinder-actions">
+                <button onclick="window.ui.closeTimeSelector()" class="text-xs font-bold opacity-40 hover:opacity-100 tracking-widest">AVBRYT</button>
+                <button onclick="window.ui.confirmTimeSelector()" class="cylinder-confirm">BEKREFT</button>
+            </div>
+        </div>
+    </div>
+
     <!-- JS IMPORTS ORDER IS CRITICAL -->
     <script src="js/settings.js"></script>
     <script type="module" src="js/auth.js"></script>
