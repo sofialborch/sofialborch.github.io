@@ -151,7 +151,10 @@ window.ui.populateWeekDropdown = function(currentWeek) {
 }
 
 window.ui.onWeekChange = function(week) { window.ui.renderWeekSummary(parseInt(week)); }
+
 window.ui.changeMonth = function(offset) { 
+    // FIX: Force date to 1st to prevent month skipping (e.g. Jan 31 -> Feb -> March)
+    currentViewDate.setDate(1); 
     currentViewDate.setMonth(currentViewDate.getMonth() + offset); 
     window.ui.renderCalendar(getLocalDateString(new Date())); 
 }
