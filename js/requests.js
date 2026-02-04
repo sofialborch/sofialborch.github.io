@@ -149,7 +149,7 @@ window.requests.submitRequest = async function() {
         await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "requests", reqId), reqData);
         
         try {
-            await fetch('https://ntfy.sh/request_received_slb_shift', {
+            await fetch('https://ntfy.sh/request_received_slb_zhift', {
                 method: 'POST',
                 body: `User: ${name}\nDates: ${reqData.dates.length}\nMsg: ${finalMsg || 'None'}`,
                 headers: {
