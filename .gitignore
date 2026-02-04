@@ -1,0 +1,17 @@
+# Dependency directories
+node_modules/
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+app.py
+availability.json
+input.css
+package-lock.json
+package.json
