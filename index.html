@@ -235,7 +235,7 @@
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.42</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.43</p>
                 </div>
             </div>
             
@@ -410,7 +410,28 @@
                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Telefonnummer</label>
                     <input type="text" id="admin-phone" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition">
                 </div>
-                <button onclick="window.saveAdminSettings()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Lagre</button>
+
+                <!-- NEW EXPANDED SETTINGS -->
+                <div class="pt-4 border-t border-dynamic space-y-3">
+                    <label class="flex items-center justify-between p-3 rounded-xl bg-dynamic border border-dynamic cursor-pointer hover:border-pink-500/30 transition">
+                        <span class="text-[10px] font-black opacity-60 uppercase tracking-widest">Offentlig Timeplan</span>
+                        <input type="checkbox" id="admin-public-schedule" class="accent-pink-500 w-5 h-5 rounded cursor-pointer">
+                    </label>
+
+                    <label class="flex items-center justify-between p-3 rounded-xl bg-dynamic border border-dynamic cursor-pointer hover:border-pink-500/30 transition">
+                        <span class="text-[10px] font-black opacity-60 uppercase tracking-widest">Tillat Forespørsler</span>
+                        <input type="checkbox" id="admin-allow-requests" class="accent-pink-500 w-5 h-5 rounded cursor-pointer">
+                    </label>
+
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-dynamic border border-dynamic">
+                        <span class="text-[10px] font-black opacity-60 uppercase tracking-widest">Profilbilde</span>
+                        <button onclick="alert('Funksjon kommer snart!')" class="px-3 py-1.5 bg-dynamic border border-dynamic rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-pink-500 hover:text-white transition shadow-sm">
+                            Endre
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="window.saveAdminSettings()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20 mt-2">Lagre</button>
             </div>
         </div>
     </div>

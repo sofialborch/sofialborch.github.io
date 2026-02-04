@@ -123,7 +123,7 @@ const DYNAMIC_TR = {
 };
 
 let CURRENT_LANG = 'nb';
-let DATA_STORE = { overrides: {}, settings: { certainUntil: '', phone: '' } };
+let DATA_STORE = { overrides: {}, settings: { certainUntil: '', phone: '', publicSchedule: true, allowRequests: true } };
 let currentViewDate = new Date();
 let currentEditDate = null;
 let currentEditStatus = 'available';

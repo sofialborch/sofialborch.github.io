@@ -530,6 +530,72 @@ window.closeBulkModal = () => {
 window.closeEditModal = () => document.getElementById('edit-modal').classList.add('hidden');
 window.openAdminRequests = openAdminRequests;
 
+// ----------------------------------------------------
+// SETTINGS MODAL LOGIC (UPDATED)
+// ----------------------------------------------------
+
+window.openAdminSettings = function() {
+    if(!window.isAdmin) return;
+    const modal = document.getElementById('admin-settings-modal');
+    modal.classList.remove('hidden');
+    
+    // Load current values
+    document.getElementById('admin-certain-date').value = DATA_STORE.settings.certainUntil || '';
+    document.getElementById('admin-phone').value = DATA_STORE.settings.phone || '';
+    
+    // Load New Toggles (Default to true if undefined)
+    document.getElementById('admin-public-schedule').checked = DATA_STORE.settings.publicSchedule !== false;
+    document.getElementById('admin-allow-requests').checked = DATA_STORE.settings.allowRequests !== false;
+}
+
+window.closeAdminSettings = function() {
+    document.getElementById('admin-settings-modal').classList.add('hidden');
+}
+
+window.saveAdminSettings = async function() {
+    const certainDate = document.getElementById('admin-certain-date').value;
+    const phone = document.getElementById('admin-phone').value;
+    const publicSchedule = document.getElementById('admin-public-schedule').checked;
+    const allowRequests = document.getElementById('admin-allow-requests').checked;
+    
+    const newSettings = {
+        certainUntil: certainDate,
+        phone: phone,
+        publicSchedule: publicSchedule,
+        allowRequests: allowRequests
+    };
+    
+    try {
+        await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "config", "main"), newSettings, { merge: true });
+        
+        // Update Local Store
+        DATA_STORE.settings = { ...DATA_STORE.settings, ...newSettings };
+        
+        // Refresh UI Elements that use these settings
+        if (certainDate) {
+            const cDate = new Date(certainDate + "T00:00:00");
+            document.getElementById('certainty-date-label').innerText = cDate.toLocaleDateString(t('monthLocale'), { day:'2-digit', month:'long', year:'numeric' });
+            document.getElementById('certainty-notice').classList.remove('hidden');
+        } else {
+            document.getElementById('certainty-notice').classList.add('hidden');
+        }
+        
+        // Refresh Phone in Footer
+        const phoneEl = document.getElementById('footer-phone');
+        if(phone) {
+            phoneEl.innerText = t('callMe') + ' ' + phone;
+            phoneEl.classList.remove('hidden');
+        } else {
+            phoneEl.classList.add('hidden');
+        }
+
+        window.closeAdminSettings();
+        
+    } catch(e) {
+        alert("Failed to save settings: " + e.message);
+    }
+}
+
 // Print Logic
 window.generatePrintSummary = function(start, end) {
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent("sofialborch.github.io")}`;
