@@ -9,11 +9,11 @@
     <link rel="icon" type="image/png" href="images/icon.png">
     <link rel="icon" type="image/x-icon" href="images/icon.ico">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="output.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
@@ -419,6 +419,37 @@
         </div>
     </div>
     
+    <!-- Request Modal -->
+    <div id="request-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.requests.closeRequestModal()"></div>
+        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all flex flex-col max-h-[80vh]">
+            <h3 class="text-xl font-black uppercase tracking-widest mb-2" data-tr="reqTitle">Send Forespørsel</h3>
+            <p id="req-subtitle" class="text-xs opacity-50 mb-6 font-bold uppercase tracking-widest">...</p>
+            
+            <div class="flex-1 overflow-y-auto custom-scrollbar mb-6 pr-2">
+                 <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Navn</label>
+                        <input type="text" id="req-name" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition">
+                    </div>
+                    <div>
+                         <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Datoer & Notater</label>
+                         <div id="req-date-list" class="space-y-2"></div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Melding (Valgfritt)</label>
+                        <textarea id="req-msg" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
+                    </div>
+                 </div>
+            </div>
+
+            <button onclick="window.requests.submitRequest()" class="w-full bg-pink-500 text-white font-black py-4 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
+                Send
+            </button>
+            <div id="req-modal-footer"></div>
+        </div>
+    </div>
+
     <!-- Request Confirmation Modal -->
     <div id="request-sent-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.requests.closeRequestSentModal()"></div>
@@ -555,6 +586,24 @@
                 </div>
 
                 <button onclick="window.saveAdminSettings()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20 mt-2">Lagre</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Requests Modal (Restored) -->
+    <div id="admin-requests-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.closeAdminRequests()"></div>
+        <div class="glass-panel relative w-full max-w-lg rounded-[2rem] p-6 lg:p-8 border border-dynamic shadow-2xl transform transition-all flex flex-col max-h-[80vh]">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-black uppercase tracking-widest flex items-center gap-3">
+                    <i class="fas fa-inbox text-pink-500"></i> <span data-tr="requestsTitle">Innboks</span>
+                </h3>
+                <button onclick="window.closeAdminRequests()" class="w-8 h-8 flex items-center justify-center rounded-full bg-dynamic hover:bg-pink-500/10 hover:text-pink-500 transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="admin-requests-list" class="flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
+                <!-- Populated by JS -->
             </div>
         </div>
     </div>
