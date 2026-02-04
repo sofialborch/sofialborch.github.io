@@ -53,10 +53,9 @@ async function signOutUser() {
 
 // Global Auth State Listener
 onAuthStateChanged(auth, (user) => {
-    // Admin Tools: Now targeting a CLASS so we can have multiple instances (Header + Mobile Sidebar)
+    // Select all instances of the admin wrapper (Desktop + Mobile)
     const adminWrappers = document.querySelectorAll('.admin-tools-wrapper');
     
-    // Legacy elements for Auth button visual state
     const authIcon = document.getElementById('auth-icon');
     const authAvatar = document.getElementById('auth-avatar');
     const viewGuest = document.getElementById('auth-view-guest');
@@ -82,8 +81,10 @@ onAuthStateChanged(auth, (user) => {
         
         window.isAdmin = isMe;
         if(isMe) {
-            // Show Admin Tools Everywhere
+            // SHOW Admin Tools (Removes hidden class)
+            // This ensures the desktop bar appears (it has 'flex' in its class list so removing hidden reveals it)
             adminWrappers.forEach(el => el.classList.remove('hidden'));
+            
             if(window.subscribeToInbox) window.subscribeToInbox();
         } else {
             adminWrappers.forEach(el => el.classList.add('hidden'));

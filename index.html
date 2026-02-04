@@ -38,7 +38,7 @@
         <div class="loader-content">
             <img src="images/icon.png" class="w-20 h-20 mb-2 rounded-3xl object-cover" style="opacity: 0; transform: translateY(20px); animation: letterFadeIn 0.5s forwards ease-out;">
             <div class="zhift-logo-loader">
-                <span>Z</span><span>H</span><span>F</span><span>I</span><span>T</span>
+                <span>Z</span><span>H</span><span>I</span><span>F</span><span>T</span>
             </div>
             <div class="loader-subtitle">AVAILABILITY PORTAL</div>
             <div class="loading-line-wrapper">
@@ -51,11 +51,11 @@
     <div class="decor-blob bg-pink-500 w-[300px] h-[300px] lg:w-[500px] lg:h-[500px] -top-20 -left-20 lg:-top-60 lg:-left-20"></div>
     <div class="decor-blob bg-blue-600 w-[300px] h-[300px] lg:w-[400px] lg:h-[400px] bottom-0 -right-20 lg:-right-40"></div>
 
-    <!-- NEW HEADER STRUCTURE -->
+    <!-- HEADER -->
     <header class="bg-[var(--card-bg)] backdrop-blur-xl sticky top-0 z-40 border-b border-dynamic shadow-sm transition-colors duration-300">
         <nav class="container mx-auto px-4 lg:px-6 flex items-center justify-between h-16 lg:h-20 flex-nowrap">
-            <!-- Left: Logo -->
-            <div class="flex items-center gap-3 mr-2">
+            <!-- Left: Logo (Clicking logo returns to Dashboard) -->
+            <div class="flex items-center gap-3 mr-2 cursor-pointer" onclick="switchView('dashboard')">
                 <img src="images/icon.png" alt="Logo" class="w-8 h-8 lg:w-10 lg:w-10 rounded-lg object-cover">
                 <span class="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-[0.1em] italic text-pink-500">ZHIFT</span>
                 <div class="h-6 w-px bg-dynamic hidden sm:block"></div>
@@ -74,18 +74,24 @@
                 
                 <div class="h-6 w-px bg-dynamic"></div>
                 
-                <!-- Admin Tools (Desktop) -->
+                <!-- Admin Tools (Desktop) - Populated via auth.js -->
                 <div class="admin-tools-wrapper hidden flex items-center gap-2">
                     <button onclick="openAdminRequests()" title="Inbox" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 hover:bg-pink-500/30 transition-all">
                         <i class="fas fa-inbox text-xs"></i>
                         <span id="admin-inbox-dot" class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[var(--card-bg)] hidden animate-pulse"></span>
                     </button>
-                    <!-- Tabs++ (Desktop) -->
-                    <button onclick="alert('Tabs++ Feature Active')" title="Tabs++" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all">
-                        <i class="fas fa-plus-square text-xs"></i>
+                    <!-- ROSTER TAB (Desktop) -->
+                    <button onclick="switchView('roster')" title="Roster / Week View" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 hover:bg-orange-500/30 transition-all">
+                        <i class="fas fa-calendar-week text-xs"></i>
                     </button>
+                    <a href="stats.html" title="Mission Control" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-all">
+                        <i class="fas fa-chart-pie text-xs"></i>
+                    </a>
                     <button onclick="openAdminSettings()" title="Global Settings" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-gray-500/20 text-gray-500 border border-gray-500/30 hover:bg-gray-500/30 transition-all">
                         <i class="fas fa-cog text-xs"></i>
+                    </button>
+                    <button onclick="triggerMigration()" title="Sync Data" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all">
+                        <i class="fas fa-cloud-upload-alt text-xs"></i>
                     </button>
                 </div>
 
@@ -93,7 +99,7 @@
                     <i class="fas fa-question text-xs"></i>
                 </button>
 
-                <!-- Auth Trigger (Desktop ID) -->
+                <!-- Auth Trigger -->
                 <button id="auth-trigger-btn" onclick="window.authModule.toggleAuthModal()" class="group relative w-10 h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Sign In">
                     <i id="auth-icon" class="fas fa-lock text-xs"></i>
                     <img id="auth-avatar" src="" alt="User" class="hidden w-full h-full rounded-full object-cover border-2 border-emerald-500/50">
@@ -112,7 +118,6 @@
 
             <!-- Right: Mobile Hamburger (Visible on Mobile) -->
             <div class="flex lg:hidden items-center gap-3">
-                 <!-- Keep Status visible on mobile but smaller -->
                 <span id="sync-status-mobile" onclick="document.getElementById('manual-upload').click()" class="text-[10px] font-black uppercase tracking-widest text-gray-500/50">
                     ...
                 </span>
@@ -135,14 +140,12 @@
             </button>
         </div>
 
-        <!-- Mobile Actions Grid -->
         <div class="space-y-6 flex-1">
             
             <!-- Auth Section -->
             <div class="p-4 rounded-2xl bg-dynamic border border-dynamic flex items-center justify-between cursor-pointer" onclick="window.authModule.toggleAuthModal(); window.ui.toggleMobileMenu();">
                  <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-color)] overflow-hidden">
-                        <!-- We clone the auth avatar logic visually here via JS or just simplify -->
                         <i class="fas fa-user text-sm"></i>
                     </div>
                     <div class="flex flex-col">
@@ -161,6 +164,11 @@
                         <i class="fas fa-inbox text-xl"></i>
                         <span class="text-[9px] font-black uppercase tracking-widest">Innboks</span>
                     </button>
+                    <!-- ROSTER TAB (Mobile) -->
+                    <button onclick="switchView('roster'); window.ui.toggleMobileMenu();" class="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex flex-col items-center gap-2">
+                        <i class="fas fa-calendar-week text-xl"></i>
+                        <span class="text-[9px] font-black uppercase tracking-widest">Roster</span>
+                    </button>
                     <a href="stats.html" class="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-500 flex flex-col items-center gap-2">
                         <i class="fas fa-chart-pie text-xl"></i>
                         <span class="text-[9px] font-black uppercase tracking-widest">Stats</span>
@@ -168,11 +176,6 @@
                     <button onclick="openAdminSettings(); window.ui.toggleMobileMenu();" class="p-3 rounded-xl bg-gray-500/10 border border-gray-500/20 text-gray-500 flex flex-col items-center gap-2">
                         <i class="fas fa-cog text-xl"></i>
                         <span class="text-[9px] font-black uppercase tracking-widest">Settings</span>
-                    </button>
-                    <!-- Tabs++ Mobile -->
-                    <button onclick="alert('Tabs++ Active');" class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex flex-col items-center gap-2">
-                        <i class="fas fa-plus-square text-xl"></i>
-                        <span class="text-[9px] font-black uppercase tracking-widest">Tabs++</span>
                     </button>
                      <button onclick="triggerMigration();" class="col-span-2 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500 flex items-center justify-center gap-2">
                         <i class="fas fa-cloud-upload-alt"></i>
@@ -209,108 +212,135 @@
         </div>
     </div>
 
+    <!-- MAIN APP CONTENT (Split into Views) -->
     <main class="container mx-auto px-4 lg:px-12 py-6 lg:py-10 min-h-[calc(100vh-280px)]">
-        <section class="mb-8 lg:mb-12">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-1 glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col justify-center border-l-4 border-pink-500/50">
-                    <p class="text-[10px] lg:text-s font-black uppercase tracking-[0.3em] text-pink-500/60 mb-2 lg:mb-3" data-tr="today">I dag</p>
-                    <h2 id="hero-date" class="text-3xl lg:text-5xl font-black tracking-tight mb-2 lg:mb-3">...</h2>
-                    <p id="hero-note" class="text-sm lg:text-base opacity-90 font-bold italic leading-relaxed mb-6 lg:mb-10">....</p>
-                    <div id="hero-status-pill" class="inline-flex items-center gap-3 lg:gap-4 px-4 py-2 lg:px-6 lg:py-3 rounded-xl lg:rounded-2xl bg-dynamic border border-dynamic w-fit">
-                        <span id="hero-dot" class="w-2.5 h-2.5 lg:w-3 h-3 rounded-full"></span>
-                        <span id="hero-label" class="text-[11px] lg:text-sm font-black uppercase tracking-widest">...</span>
+        
+        <!-- VIEW 1: DASHBOARD (Standard) -->
+        <div id="view-dashboard" class="animate-fade-in">
+            <section class="mb-8 lg:mb-12">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col justify-center border-l-4 border-pink-500/50">
+                        <p class="text-[10px] lg:text-s font-black uppercase tracking-[0.3em] text-pink-500/60 mb-2 lg:mb-3" data-tr="today">I dag</p>
+                        <h2 id="hero-date" class="text-3xl lg:text-5xl font-black tracking-tight mb-2 lg:mb-3">...</h2>
+                        <p id="hero-note" class="text-sm lg:text-base opacity-90 font-bold italic leading-relaxed mb-6 lg:mb-10">....</p>
+                        <div id="hero-status-pill" class="inline-flex items-center gap-3 lg:gap-4 px-4 py-2 lg:px-6 lg:py-3 rounded-xl lg:rounded-2xl bg-dynamic border border-dynamic w-fit">
+                            <span id="hero-dot" class="w-2.5 h-2.5 lg:w-3 h-3 rounded-full"></span>
+                            <span id="hero-label" class="text-[11px] lg:text-sm font-black uppercase tracking-widest">...</span>
+                        </div>
                     </div>
-                </div>
 
-                <div class="lg:col-span-2 glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-10">
-                        <div class="flex items-center gap-3 lg:gap-4">
-                            <i class="fas fa-bolt text-pink-500 text-base lg:text-lg"></i>
-                            <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest opacity-60" data-tr="quickOutlook">Hurtigoversikt</h3>
-                        </div>
-                        <div class="flex items-center gap-3 lg:gap-4 w-full sm:w-auto">
-                            <label class="text-[13px] lg:text-[16px] font-black opacity-60 uppercase tracking-widest whitespace-nowrap" data-tr="selectWeek">Velg uke</label>
-                            <select id="week-selector" class="week-select flex-grow sm:flex-grow-0" onchange="window.ui.onWeekChange(this.value)"></select>
-                        </div>
-                    </div>
-                    <div id="week-summary-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 lg:gap-5"></div>
-                </div>
-            </div>
-        </section>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
-            <div class="lg:col-span-8">
-                <div class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10">
-                    <div class="flex items-center justify-between mb-8 lg:mb-12">
-                        <h2 id="calendar-month" class="text-2xl lg:text-4xl font-black tracking-tighter uppercase">...</h2>
-                        <div class="flex gap-2 lg:gap-4">
-                            <button onclick="window.ui.changeMonth(-1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-left text-sm lg:text-lg"></i></button>
-                            <button onclick="window.ui.changeMonth(1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-right text-sm lg:text-lg"></i></button>
-                        </div>
-                    </div>
-                    <div id="calendar-header" class="calendar-grid text-center mb-4 lg:mb-8 text-[10px] lg:text-s font-black uppercase tracking-widest opacity-80"></div>
-                    <div id="calendar-days" class="calendar-grid"></div>
-                    <div class="mt-8 lg:mt-14 flex flex-col sm:flex-row flex-wrap gap-4 lg:gap-10 text-[10px] lg:text-s font-black uppercase tracking-widest border-t border-dynamic pt-8 lg:pt-12">
-                        <div class="flex flex-wrap gap-6">
-                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[var(--available)]"></span> <span data-tr="ledig">Ledig</span></div>
-                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[var(--busy)]"></span> <span data-tr="opptatt">Opptatt</span></div>
-                        </div>
-                        <div class="sm:ml-auto flex flex-wrap gap-4 lg:gap-6 font-bold">
-                            <span class="text-purple-500">NR - Norønna</span> 
-                            <span class="text-pink-500">PM - Polarmåsen</span> 
-                            <span class="text-red-500">ST - Studie</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sidebar -->
-            <div class="lg:col-span-4 space-y-6">
-                <!-- Request Panel -->
-                <div id="request-panel" class="hidden glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-pink-500/50 lg:sticky lg:top-24 transition-all duration-300">
-                     <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest text-pink-500 flex items-center gap-2">
-                            <i class="fas fa-heart"></i> <span>Forespørsler</span>
-                        </h3>
-                        <span id="request-count" class="bg-pink-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</span>
-                    </div>
-                    <div id="request-list" class="space-y-3 mb-6 max-h-[200px] overflow-y-auto custom-scrollbar"></div>
-                    <button onclick="window.requests.openRequestModal()" class="w-full bg-pink-500 text-white font-black py-4 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
-                        Send Forespørsel
-                    </button>
-                </div>
-                
-                <!-- My Requests (Tracker) -->
-                <div id="my-requests-container" class="hidden glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-emerald-500/30"></div>
-
-                <!-- Lookup Panel -->
-                <div id="lookup-panel" class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-dynamic lg:sticky lg:top-24">
-                    <div class="flex items-center justify-between mb-6 lg:mb-10">
-                        <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest opacity-40 flex items-center gap-2">
-                            <i class="fas fa-search"></i> <span data-tr="lookup">Søk</span>
-                        </h3>
-                    </div>
-                    <div class="space-y-6 lg:space-y-8">
-                        <div class="grid grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-6">
-                            <div>
-                                <label class="block text-[10px] font-black opacity-70 uppercase mb-2 lg:mb-3 tracking-widest" data-tr="start">Fra</label>
-                                <input type="date" id="lookup-start" class="w-full">
+                    <div class="lg:col-span-2 glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-10">
+                            <div class="flex items-center gap-3 lg:gap-4">
+                                <i class="fas fa-bolt text-pink-500 text-base lg:text-lg"></i>
+                                <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest opacity-60" data-tr="quickOutlook">Hurtigoversikt</h3>
                             </div>
-                            <div>
-                                <label class="block text-[10px] font-black opacity-70 uppercase mb-2 lg:mb-3 tracking-widest" data-tr="end">Til</label>
-                                <input type="date" id="lookup-end" class="w-full">
+                            <div class="flex items-center gap-3 lg:gap-4 w-full sm:w-auto">
+                                <label class="text-[13px] lg:text-[16px] font-black opacity-60 uppercase tracking-widest whitespace-nowrap" data-tr="selectWeek">Velg uke</label>
+                                <select id="week-selector" class="week-select flex-grow sm:flex-grow-0" onchange="window.ui.onWeekChange(this.value)"></select>
                             </div>
                         </div>
-                        <button onclick="window.ui.runLookup()" class="w-full bg-dynamic hover-bg-dynamic border border-dynamic text-[var(--text-color)] font-black py-4 lg:py-5 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em]" data-tr="searchBtn">
-                            Søk i periode
+                        <div id="week-summary-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 lg:gap-5"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+                <div class="lg:col-span-8">
+                    <div class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10">
+                        <div class="flex items-center justify-between mb-8 lg:mb-12">
+                            <h2 id="calendar-month" class="text-2xl lg:text-4xl font-black tracking-tighter uppercase">...</h2>
+                            <div class="flex gap-2 lg:gap-4">
+                                <button onclick="window.ui.changeMonth(-1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-left text-sm lg:text-lg"></i></button>
+                                <button onclick="window.ui.changeMonth(1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-right text-sm lg:text-lg"></i></button>
+                            </div>
+                        </div>
+                        <div id="calendar-header" class="calendar-grid text-center mb-4 lg:mb-8 text-[10px] lg:text-s font-black uppercase tracking-widest opacity-80"></div>
+                        <div id="calendar-days" class="calendar-grid"></div>
+                        <div class="mt-8 lg:mt-14 flex flex-col sm:flex-row flex-wrap gap-4 lg:gap-10 text-[10px] lg:text-s font-black uppercase tracking-widest border-t border-dynamic pt-8 lg:pt-12">
+                            <div class="flex flex-wrap gap-6">
+                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[var(--available)]"></span> <span data-tr="ledig">Ledig</span></div>
+                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[var(--busy)]"></span> <span data-tr="opptatt">Opptatt</span></div>
+                            </div>
+                            <div class="sm:ml-auto flex flex-wrap gap-4 lg:gap-6 font-bold">
+                                <span class="text-purple-500">NR - Norønna</span> 
+                                <span class="text-pink-500">PM - Polarmåsen</span> 
+                                <span class="text-red-500">ST - Studie</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="lg:col-span-4 space-y-6">
+                    <!-- Request Panel -->
+                    <div id="request-panel" class="hidden glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-pink-500/50 lg:sticky lg:top-24 transition-all duration-300">
+                         <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest text-pink-500 flex items-center gap-2">
+                                <i class="fas fa-heart"></i> <span>Forespørsler</span>
+                            </h3>
+                            <span id="request-count" class="bg-pink-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</span>
+                        </div>
+                        <div id="request-list" class="space-y-3 mb-6 max-h-[200px] overflow-y-auto custom-scrollbar"></div>
+                        <button onclick="window.requests.openRequestModal()" class="w-full bg-pink-500 text-white font-black py-4 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
+                            Send Forespørsel
                         </button>
                     </div>
-                    <div id="lookup-container" class="mt-8 lg:mt-12 hidden border-t border-dynamic pt-6 lg:pt-10">
-                        <div id="lookup-results" class="space-y-6 lg:space-y-10 max-h-[400px] lg:max-h-[600px] overflow-y-auto pr-2 custom-scrollbar"></div>
+                    
+                    <!-- My Requests (Tracker) -->
+                    <div id="my-requests-container" class="hidden glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-emerald-500/30"></div>
+
+                    <!-- Lookup Panel -->
+                    <div id="lookup-panel" class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-dynamic lg:sticky lg:top-24">
+                        <div class="flex items-center justify-between mb-6 lg:mb-10">
+                            <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest opacity-40 flex items-center gap-2">
+                                <i class="fas fa-search"></i> <span data-tr="lookup">Søk</span>
+                            </h3>
+                        </div>
+                        <div class="space-y-6 lg:space-y-8">
+                            <div class="grid grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-6">
+                                <div>
+                                    <label class="block text-[10px] font-black opacity-70 uppercase mb-2 lg:mb-3 tracking-widest" data-tr="start">Fra</label>
+                                    <input type="date" id="lookup-start" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black opacity-70 uppercase mb-2 lg:mb-3 tracking-widest" data-tr="end">Til</label>
+                                    <input type="date" id="lookup-end" class="w-full">
+                                </div>
+                            </div>
+                            <button onclick="window.ui.runLookup()" class="w-full bg-dynamic hover-bg-dynamic border border-dynamic text-[var(--text-color)] font-black py-4 lg:py-5 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em]" data-tr="searchBtn">
+                                Søk i periode
+                            </button>
+                        </div>
+                        <div id="lookup-container" class="mt-8 lg:mt-12 hidden border-t border-dynamic pt-6 lg:pt-10">
+                            <div id="lookup-results" class="space-y-6 lg:space-y-10 max-h-[400px] lg:max-h-[600px] overflow-y-auto pr-2 custom-scrollbar"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- VIEW 2: ROSTER / EXPERIMENTAL (Hidden by default) -->
+        <div id="view-roster" class="hidden animate-fade-in">
+             <div class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 min-h-[60vh] border-l-4 border-orange-500/50">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black uppercase tracking-tight mb-2">Roster View</h2>
+                        <p class="text-sm font-bold opacity-50 uppercase tracking-widest">Experimental Admin Space</p>
+                    </div>
+                    <button onclick="switchView('dashboard')" class="px-4 py-2 rounded-xl bg-dynamic border border-dynamic text-xs font-black uppercase tracking-widest hover:bg-orange-500 hover:text-white transition">
+                        Back to Dashboard
+                    </button>
+                </div>
+                
+                <div class="p-10 border-2 border-dashed border-dynamic rounded-2xl flex flex-col items-center justify-center opacity-50">
+                    <i class="fas fa-hammer text-4xl mb-4 text-orange-500"></i>
+                    <p class="font-black uppercase tracking-widest">Under Construction</p>
+                    <p class="text-sm mt-2">This is where the new team roster view will live.</p>
+                </div>
+             </div>
+        </div>
+
     </main>
 
     <!-- Footer -->
@@ -321,7 +351,7 @@
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.5</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.44</p>
                 </div>
             </div>
             
@@ -664,57 +694,6 @@
         </div>
     </div>
     
-    <!-- Request Modal (For Guests) -->
-    <div id="request-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.requests.closeRequestModal()"></div>
-        <div class="glass-panel relative w-full max-w-sm rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all flex flex-col max-h-[90vh]">
-            <h3 class="text-lg lg:text-xl font-black uppercase tracking-widest mb-2" data-tr="reqTitle">Send Forespørsel</h3>
-            <p class="text-[10px] opacity-60 font-bold uppercase tracking-widest mb-2" id="req-subtitle">For ... dager</p>
-            
-            <div class="flex-1 overflow-y-auto custom-scrollbar space-y-4">
-                <div>
-                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Navn / Kontakt</label>
-                    <input type="text" id="req-name" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-pink-500/50 transition">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Generell Melding</label>
-                    <textarea id="req-msg" placeholder="Valgfritt (Gjelder alle dager)" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-20 focus:outline-none focus:border-pink-500/50 transition"></textarea>
-                </div>
-                
-                <!-- NEW: Specific Date Notes -->
-                <div>
-                     <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Detaljer per dag (Valgfritt)</label>
-                     <div id="req-date-list" class="space-y-2">
-                         <!-- Injected via requests.js -->
-                     </div>
-                </div>
-
-                <div id="req-modal-footer"></div>
-            </div>
-            
-            <div class="mt-4 pt-4 border-t border-dynamic">
-                <button onclick="window.requests.submitRequest()" class="w-full bg-pink-500 text-white font-black py-3 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">Send</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Admin Inbox Modal -->
-    <div id="admin-requests-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="window.closeAdminRequests()"></div>
-        <div class="glass-panel relative w-full max-w-lg rounded-[2rem] p-8 border border-dynamic shadow-2xl transform transition-all flex flex-col max-h-[80vh]">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-black uppercase tracking-widest flex items-center gap-3">
-                    <i class="fas fa-inbox text-pink-500"></i>
-                    <span data-tr="requestsTitle">Innboks</span>
-                </h3>
-                <button onclick="window.closeAdminRequests()" class="text-muted-dynamic hover:text-[var(--text-color)] transition"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div id="admin-requests-list" class="space-y-4 overflow-y-auto custom-scrollbar pr-2 flex-1">
-                <p class="text-center opacity-50 py-10 font-bold uppercase tracking-widest text-xs">Ingen forespørsler</p>
-            </div>
-        </div>
-    </div>
-    
     <!-- CHRONOS CYLINDER TIME SELECTOR MODAL -->
     <div id="cylinder-overlay" class="cylinder-overlay">
         <div class="cylinder-panel">
@@ -745,4 +724,4 @@
     <script src="js/admin.js"></script>
     <script src="js/app.js"></script>
 </body>
-</html>s
+</html>

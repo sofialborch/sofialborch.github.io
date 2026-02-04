@@ -9,6 +9,22 @@ function triggerMigration() {
 }
 window.triggerMigration = triggerMigration;
 
+// --- VIEW SWITCHER (New Tab Logic) ---
+window.switchView = function(viewName) {
+    const dashboard = document.getElementById('view-dashboard');
+    const roster = document.getElementById('view-roster');
+    
+    if (viewName === 'roster') {
+        dashboard.classList.add('hidden');
+        roster.classList.remove('hidden');
+    } else {
+        roster.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+    }
+}
+
+// -------------------------------------
+
 let inboxUnsub = null;
 
 async function openAdminRequests() {
