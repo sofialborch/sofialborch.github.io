@@ -1,14 +1,5 @@
 // admin.js - Admin Tools & Logic
 
-function triggerMigration() {
-    if(window.uploadLocalDataToFirestore && DATA_STORE.overrides) {
-        window.uploadLocalDataToFirestore(DATA_STORE.overrides);
-    } else {
-        alert("Migration tool not ready.");
-    }
-}
-window.triggerMigration = triggerMigration;
-
 // --- VIEW SWITCHER (New Tab Logic) ---
 window.switchView = function(viewName) {
     const dashboard = document.getElementById('view-dashboard');
