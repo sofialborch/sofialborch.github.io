@@ -92,8 +92,8 @@ body.dark-mode {
     background-color: var(--bg-color);
 }
 
-.hidden {
-    display: none !important;
+button {
+    cursor: pointer;
 }
 
 /* PRELOADER - NEW ADAPTIVE ANIMATION */
