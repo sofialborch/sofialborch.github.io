@@ -55,6 +55,8 @@ async function signOutUser() {
 onAuthStateChanged(auth, (user) => {
     // Select all instances of the admin wrapper (Desktop + Mobile)
     const adminWrappers = document.querySelectorAll('.admin-tools-wrapper');
+    const adminRosterDesktop = document.getElementById('desktop-roster-btn');
+    const adminRosterMobile = document.getElementById('mobile-roster-btn');
     
     const authIcon = document.getElementById('auth-icon');
     const authAvatar = document.getElementById('auth-avatar');
@@ -69,6 +71,9 @@ onAuthStateChanged(auth, (user) => {
         
         // Hide Admin Tools Everywhere
         adminWrappers.forEach(el => el.classList.add('hidden'));
+        if(adminRosterDesktop) adminRosterDesktop.classList.add('hidden');
+        if(adminRosterMobile) adminRosterMobile.classList.add('hidden');
+        
         window.isAdmin = false;
         
         authIcon.classList.remove('hidden');
@@ -81,13 +86,16 @@ onAuthStateChanged(auth, (user) => {
         
         window.isAdmin = isMe;
         if(isMe) {
-            // SHOW Admin Tools (Removes hidden class)
-            // This ensures the desktop bar appears (it has 'flex' in its class list so removing hidden reveals it)
+            // SHOW Admin Tools
             adminWrappers.forEach(el => el.classList.remove('hidden'));
+            if(adminRosterDesktop) adminRosterDesktop.classList.remove('hidden');
+            if(adminRosterMobile) adminRosterMobile.classList.remove('hidden');
             
             if(window.subscribeToInbox) window.subscribeToInbox();
         } else {
             adminWrappers.forEach(el => el.classList.add('hidden'));
+            if(adminRosterDesktop) adminRosterDesktop.classList.add('hidden');
+            if(adminRosterMobile) adminRosterMobile.classList.add('hidden');
         }
         
         if (!isAnon && window.requests && window.requests.subscribeToMyRequests) {

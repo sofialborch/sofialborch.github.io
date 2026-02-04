@@ -85,6 +85,14 @@
                     </button>
                 </div>
 
+                <!-- DESKTOP ROSTER BUTTON (Admin Only) -->
+                <button id="desktop-roster-btn" onclick="switchView('roster')" class="hidden group relative flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20 transition-all">
+                    <i class="fas fa-users text-xs"></i>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Roster</span>
+                </button>
+
+                <div class="h-6 w-px bg-dynamic"></div>
+
                 <button onclick="window.ui.openTutorial()" class="w-10 h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Help">
                     <i class="fas fa-question text-xs"></i>
                 </button>
@@ -146,6 +154,20 @@
                  <i class="fas fa-chevron-right text-xs opacity-50"></i>
             </div>
 
+            <!-- MOBILE ROSTER BUTTON (Admin Only) -->
+            <div id="mobile-roster-btn" class="hidden p-4 rounded-2xl bg-orange-500/5 border border-orange-500/20 flex items-center justify-between cursor-pointer hover:bg-orange-500/10 transition" onclick="switchView('roster'); window.ui.toggleMobileMenu();">
+                 <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
+                        <i class="fas fa-users text-sm"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs font-black uppercase tracking-widest text-orange-500">Team Roster</span>
+                        <span class="text-[10px] opacity-60 font-bold">Admin Workspace</span>
+                    </div>
+                 </div>
+                 <i class="fas fa-arrow-right text-xs text-orange-500 opacity-50"></i>
+            </div>
+
             <!-- Admin Grid (Hidden by default, shown via auth.js) -->
             <div class="admin-tools-wrapper hidden">
                 <p class="text-[10px] font-black uppercase tracking-widest opacity-50 mb-3 ml-1">Admin Tools</p>
@@ -153,11 +175,6 @@
                     <button onclick="openAdminRequests(); window.ui.toggleMobileMenu();" class="p-3 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-500 flex flex-col items-center gap-2">
                         <i class="fas fa-inbox text-xl"></i>
                         <span class="text-[9px] font-black uppercase tracking-widest">Innboks</span>
-                    </button>
-                    <!-- ROSTER TAB (Mobile) -->
-                    <button onclick="switchView('roster'); window.ui.toggleMobileMenu();" class="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex flex-col items-center gap-2">
-                        <i class="fas fa-calendar-week text-xl"></i>
-                        <span class="text-[9px] font-black uppercase tracking-widest">Roster</span>
                     </button>
                     <a href="stats.html" class="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-500 flex flex-col items-center gap-2">
                         <i class="fas fa-chart-pie text-xl"></i>
@@ -207,27 +224,6 @@
         
         <!-- VIEW 1: DASHBOARD (Standard) -->
         <div id="view-dashboard" class="animate-fade-in">
-            
-            <!-- ADMIN ONLY: ROSTER ACCESS -->
-            <div class="admin-tools-wrapper hidden mb-8">
-                 <div onclick="switchView('roster')" class="cursor-pointer group relative overflow-hidden rounded-[2rem] p-8 border border-orange-500/30 bg-orange-500/5 hover:bg-orange-500/10 transition-all duration-300 shadow-xl shadow-orange-500/5">
-                    <div class="flex items-center justify-between relative z-10">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center text-xl shadow-lg shadow-orange-500/30">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-xl lg:text-2xl font-black uppercase tracking-tight text-orange-500 leading-none mb-1">Team Roster</h3>
-                                <p class="text-[10px] lg:text-xs font-bold opacity-60 uppercase tracking-widest">Admin Workspace</p>
-                            </div>
-                        </div>
-                        <div class="w-10 h-10 rounded-full border border-orange-500/30 flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-all">
-                            <i class="fas fa-arrow-right"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <section class="mb-8 lg:mb-12">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-1 glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col justify-center border-l-4 border-pink-500/50">
