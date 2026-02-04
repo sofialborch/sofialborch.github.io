@@ -1,3 +1,4 @@
+// requests.js - Handles request logic, sidebar, modal, and tracking
 window.requests = {};
 
 let userRequestsUnsub = null;
@@ -6,6 +7,7 @@ window.requests.toggleRequestDate = function(dateStr) {
     if(selectedRequestDates.has(dateStr)) selectedRequestDates.delete(dateStr);
     else selectedRequestDates.add(dateStr);
     
+    // Refresh UI to show selection rings
     window.ui.renderCalendar(getLocalDateString(new Date()));
     const weekSel = document.getElementById('week-selector').value;
     if(weekSel) window.ui.renderWeekSummary(parseInt(weekSel));
@@ -148,19 +150,22 @@ window.requests.submitRequest = async function() {
     try {
         await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "requests", reqId), reqData);
         
-        try {
-            await fetch('https://ntfy.sh/request_received_slb_zhift', {
-                method: 'POST',
-                body: `User: ${name}\nDates: ${reqData.dates.length}\nMsg: ${finalMsg || 'None'}`,
-                headers: {
-                    'Title': 'New Shift Request',
-                    'Priority': 'urgent',
-                    'Tags': 'calendar,bell'
-                }
+        // EmailJS Implementation
+        // Ensure you have initialized emailjs in your HTML head: emailjs.init("YOUR_PUBLIC_KEY");
+        const templateParams = {
+            from_name: name,
+            message: finalMsg,
+            date_count: reqData.dates.length,
+            // Add other parameters that match your EmailJS template variables
+        };
+
+        emailjs.send('service_nccndyk', 'template_w5gr4sm', templateParams)
+            .then(function(response) {
+                console.log('SUCCESS!', response.status, response.text);
+            }, function(error) {
+                console.log('FAILED...', error);
+                // Optional: alert user that email failed even if DB save worked
             });
-        } catch(err) {
-            console.error("Notification failed:", err);
-        }
 
         let localTracks = JSON.parse(localStorage.getItem('my_requests') || '[]');
         localTracks.push(reqId);
