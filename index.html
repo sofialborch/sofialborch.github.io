@@ -63,7 +63,7 @@
             </div>
             
             <!-- Right: Desktop Nav (Hidden on Mobile) -->
-            <div class="lg:flex items-center gap-4 flex-shrink-0">
+            <div class="hidden lg:flex items-center gap-4 flex-shrink-0">
                 <button onclick="window.ui.toggleTheme()" class="w-11 h-11 flex items-center justify-center rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
                     <i id="theme-icon" class="fas fa-sun text-lg"></i>
                 </button>
@@ -79,11 +79,7 @@
                     <button onclick="openAdminRequests()" title="Inbox" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 hover:bg-pink-500/30 transition-all">
                         <i class="fas fa-inbox text-xs"></i>
                         <span id="admin-inbox-dot" class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[var(--card-bg)] hidden animate-pulse"></span>
-                    </button>
-                    <!-- ROSTER TAB (Desktop) -->
-                    <button onclick="switchView('roster')" title="Roster / Week View" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 hover:bg-orange-500/30 transition-all">
-                        <i class="fas fa-calendar-week text-xs"></i>
-                    </button>                
+                    </button>         
                     <button onclick="openAdminSettings()" title="Global Settings" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-gray-500/20 text-gray-500 border border-gray-500/30 hover:bg-gray-500/30 transition-all">
                         <i class="fas fa-cog text-xs"></i>
                     </button>
@@ -167,7 +163,7 @@
                         <i class="fas fa-chart-pie text-xl"></i>
                         <span class="text-[9px] font-black uppercase tracking-widest">Stats</span>
                     </a>
-                    <button onclick="openAdminSettings(); window.ui.toggleMobileMenu();" class="p-3 rounded-xl bg-gray-500/10 border border-gray-500/20 text-gray-500 flex flex-col items-center gap-2">
+                    <button onclick="openAdminSettings(); window.ui.toggleMobileMenu();" class="col-span-2 p-3 rounded-xl bg-gray-500/10 border border-gray-500/20 text-gray-500 flex flex-col items-center gap-2">
                         <i class="fas fa-cog text-xl"></i>
                         <span class="text-[9px] font-black uppercase tracking-widest">Settings</span>
                     </button>
@@ -211,6 +207,27 @@
         
         <!-- VIEW 1: DASHBOARD (Standard) -->
         <div id="view-dashboard" class="animate-fade-in">
+            
+            <!-- ADMIN ONLY: ROSTER ACCESS -->
+            <div class="admin-tools-wrapper hidden mb-8">
+                 <div onclick="switchView('roster')" class="cursor-pointer group relative overflow-hidden rounded-[2rem] p-8 border border-orange-500/30 bg-orange-500/5 hover:bg-orange-500/10 transition-all duration-300 shadow-xl shadow-orange-500/5">
+                    <div class="flex items-center justify-between relative z-10">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center text-xl shadow-lg shadow-orange-500/30">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl lg:text-2xl font-black uppercase tracking-tight text-orange-500 leading-none mb-1">Team Roster</h3>
+                                <p class="text-[10px] lg:text-xs font-bold opacity-60 uppercase tracking-widest">Admin Workspace</p>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full border border-orange-500/30 flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-all">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <section class="mb-8 lg:mb-12">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-1 glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col justify-center border-l-4 border-pink-500/50">
@@ -345,7 +362,7 @@
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.44</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.51</p>
                 </div>
             </div>
             
