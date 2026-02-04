@@ -7,7 +7,6 @@ window.requests.toggleRequestDate = function(dateStr) {
     if(selectedRequestDates.has(dateStr)) selectedRequestDates.delete(dateStr);
     else selectedRequestDates.add(dateStr);
     
-    // Refresh UI to show selection rings
     window.ui.renderCalendar(getLocalDateString(new Date()));
     const weekSel = document.getElementById('week-selector').value;
     if(weekSel) window.ui.renderWeekSummary(parseInt(weekSel));
@@ -56,7 +55,6 @@ window.requests.openRequestModal = function() {
     subtitle.innerText = `For ${selectedRequestDates.size} dager`;
     document.getElementById('request-modal').classList.remove('hidden');
     
-    // NEW: Render Inputs Per Date
     listContainer.innerHTML = '';
     const dates = Array.from(selectedRequestDates).sort();
     
@@ -78,13 +76,11 @@ window.requests.openRequestModal = function() {
         });
     }
 
-    // Auto-fill Name if Logged In
     const user = window.auth.currentUser;
     if (user && !user.isAnonymous && user.displayName) {
         document.getElementById('req-name').value = user.displayName;
     }
     
-    // Inject Phone / Auth Tip
     const footer = document.getElementById('req-modal-footer');
     if(footer) {
         let footerHtml = '';
@@ -102,13 +98,10 @@ window.requests.openRequestModal = function() {
     }
 }
 
-// Allows removing a date directly from the modal if user changes mind
 window.requests.removeDateFromModal = function(ds) {
     if(selectedRequestDates.has(ds)) {
         selectedRequestDates.delete(ds);
-        // Re-render the modal list
         window.requests.openRequestModal();
-        // Update background UI so it stays in sync
         window.ui.renderCalendar(getLocalDateString(new Date()));
         window.requests.updateRequestSidebar();
     }
@@ -125,7 +118,6 @@ window.requests.submitRequest = async function() {
     if(!name) { alert("Vennligst skriv inn navn"); return; }
     if(selectedRequestDates.size === 0) { alert("Ingen datoer valgt"); return; }
 
-    // Gather Specific Notes
     let specificNotes = [];
     document.querySelectorAll('.req-date-input').forEach(input => {
         if(input.value.trim()) {
@@ -134,7 +126,6 @@ window.requests.submitRequest = async function() {
         }
     });
     
-    // Construct Final Message
     let finalMsg = globalMsg;
     if(specificNotes.length > 0) {
         if(finalMsg) finalMsg += "\n\n";
@@ -158,7 +149,16 @@ window.requests.submitRequest = async function() {
     try {
         await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "requests", reqId), reqData);
         
-        // Backup to LocalStorage
+        // ntfy.sh notification
+        fetch('https://ntfy.sh/request_recieved_slb_zhift', {
+            method: 'POST',
+            body: `User: ${name}\nDates: ${reqData.dates.length}\nMsg: ${finalMsg || 'None'}`,
+            headers: {
+                'Title': 'New Shift Request',
+                'Tags': 'calendar,bell'
+            }
+        }).catch(err => console.error("Notification failed", err));
+
         let localTracks = JSON.parse(localStorage.getItem('my_requests') || '[]');
         localTracks.push(reqId);
         localStorage.setItem('my_requests', JSON.stringify(localTracks));
