@@ -1,4 +1,3 @@
-// requests.js - Handles request logic, sidebar, modal, and tracking
 window.requests = {};
 
 let userRequestsUnsub = null;
@@ -149,15 +148,19 @@ window.requests.submitRequest = async function() {
     try {
         await window.dbFormat.setDoc(window.dbFormat.doc(window.db, "requests", reqId), reqData);
         
-        // ntfy.sh notification
-        fetch('https://ntfy.sh/request_recieved_slb_zhift', {
-            method: 'POST',
-            body: `User: ${name}\nDates: ${reqData.dates.length}\nMsg: ${finalMsg || 'None'}`,
-            headers: {
-                'Title': 'New Shift Request',
-                'Tags': 'calendar,bell'
-            }
-        }).catch(err => console.error("Notification failed", err));
+        try {
+            await fetch('https://ntfy.sh/request_received_slb_shift', {
+                method: 'POST',
+                body: `User: ${name}\nDates: ${reqData.dates.length}\nMsg: ${finalMsg || 'None'}`,
+                headers: {
+                    'Title': 'New Shift Request',
+                    'Priority': 'urgent',
+                    'Tags': 'calendar,bell'
+                }
+            });
+        } catch(err) {
+            console.error("Notification failed:", err);
+        }
 
         let localTracks = JSON.parse(localStorage.getItem('my_requests') || '[]');
         localTracks.push(reqId);
