@@ -92,6 +92,10 @@ body.dark-mode {
     background-color: var(--bg-color);
 }
 
+.hidden {
+    display: none !important;
+}
+
 /* PRELOADER - NEW ADAPTIVE ANIMATION */
 #preloader {
     position: fixed;
