@@ -53,7 +53,10 @@ async function signOutUser() {
 
 // Global Auth State Listener
 onAuthStateChanged(auth, (user) => {
-    const adminTools = document.getElementById('admin-tools');
+    // Admin Tools: Now targeting a CLASS so we can have multiple instances (Header + Mobile Sidebar)
+    const adminWrappers = document.querySelectorAll('.admin-tools-wrapper');
+    
+    // Legacy elements for Auth button visual state
     const authIcon = document.getElementById('auth-icon');
     const authAvatar = document.getElementById('auth-avatar');
     const viewGuest = document.getElementById('auth-view-guest');
@@ -64,7 +67,9 @@ onAuthStateChanged(auth, (user) => {
     
     if (!user) {
         signInAnonymously(auth).catch((error) => console.error("Anonymous auth failed", error));
-        adminTools.classList.add('hidden');
+        
+        // Hide Admin Tools Everywhere
+        adminWrappers.forEach(el => el.classList.add('hidden'));
         window.isAdmin = false;
         
         authIcon.classList.remove('hidden');
@@ -77,10 +82,11 @@ onAuthStateChanged(auth, (user) => {
         
         window.isAdmin = isMe;
         if(isMe) {
-            adminTools.classList.remove('hidden'); 
+            // Show Admin Tools Everywhere
+            adminWrappers.forEach(el => el.classList.remove('hidden'));
             if(window.subscribeToInbox) window.subscribeToInbox();
         } else {
-            adminTools.classList.add('hidden');
+            adminWrappers.forEach(el => el.classList.add('hidden'));
         }
         
         if (!isAnon && window.requests && window.requests.subscribeToMyRequests) {

@@ -18,17 +18,15 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
        (function(){
-          // Replace with your actual Public Key from Account > General
           emailjs.init("Etym9oXs0F3FnI4v2");
        })();
     </script>
 </head>
 <body class="antialiased min-h-screen">
-    <!-- THEME INIT SCRIPT (Prevents Flashbang) -->
+    <!-- THEME INIT SCRIPT -->
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme');
-            // Check saved theme or system preference
             if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.body.classList.add('dark-mode');
             }
@@ -38,11 +36,9 @@
     <!-- Preloader -->
     <div id="preloader">
         <div class="loader-content">
-            <!-- Icon added to Preloader with animation -->
             <img src="images/icon.png" class="w-20 h-20 mb-2 rounded-3xl object-cover" style="opacity: 0; transform: translateY(20px); animation: letterFadeIn 0.5s forwards ease-out;">
-            
             <div class="zhift-logo-loader">
-                <span>Z</span><span>H</span><span>I</span><span>F</span><span>T</span>
+                <span>Z</span><span>H</span><span>F</span><span>I</span><span>T</span>
             </div>
             <div class="loader-subtitle">AVAILABILITY PORTAL</div>
             <div class="loading-line-wrapper">
@@ -55,73 +51,163 @@
     <div class="decor-blob bg-pink-500 w-[300px] h-[300px] lg:w-[500px] lg:h-[500px] -top-20 -left-20 lg:-top-60 lg:-left-20"></div>
     <div class="decor-blob bg-blue-600 w-[300px] h-[300px] lg:w-[400px] lg:h-[400px] bottom-0 -right-20 lg:-right-40"></div>
 
+    <!-- NEW HEADER STRUCTURE -->
     <header class="bg-[var(--card-bg)] backdrop-blur-xl sticky top-0 z-40 border-b border-dynamic shadow-sm transition-colors duration-300">
         <nav class="container mx-auto px-4 lg:px-6 flex items-center justify-between h-16 lg:h-20 flex-nowrap">
+            <!-- Left: Logo -->
             <div class="flex items-center gap-3 mr-2">
-                <!-- ADDED LOGO HERE (Shadow removed) -->
                 <img src="images/icon.png" alt="Logo" class="w-8 h-8 lg:w-10 lg:w-10 rounded-lg object-cover">
-                
                 <span class="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-[0.1em] italic text-pink-500">ZHIFT</span>
                 <div class="h-6 w-px bg-dynamic hidden sm:block"></div>
                 <span class="text-[10px] sm:text-xs font-bold uppercase tracking-widest opacity-50 hidden sm:block pt-1">Availability</span>
             </div>
             
-            <div class="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-                <button onclick="window.ui.toggleTheme()" class="w-8 h-8 lg:w-11 lg:h-11 flex items-center justify-center rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
-                    <i id="theme-icon" class="fas fa-sun text-xs lg:text-lg"></i>
+            <!-- Right: Desktop Nav (Hidden on Mobile) -->
+            <div class="hidden lg:flex items-center gap-4 flex-shrink-0">
+                <button onclick="window.ui.toggleTheme()" class="w-11 h-11 flex items-center justify-center rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
+                    <i id="theme-icon" class="fas fa-sun text-lg"></i>
                 </button>
-                <button onclick="window.ui.toggleLanguage()" class="flex items-center gap-2 px-2 py-1.5 lg:px-3 lg:py-2 rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
-                    <span id="lang-flag" class="text-sm lg:text-xl">🇳🇴</span>
-                    <span id="lang-label" class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest">NO</span>
+                <button onclick="window.ui.toggleLanguage()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-dynamic border border-dynamic hover-bg-dynamic transition">
+                    <span id="lang-flag" class="text-xl">🇳🇴</span>
+                    <span id="lang-label" class="text-[10px] font-black uppercase tracking-widest">NO</span>
                 </button>
                 
-                <div class="h-6 w-px bg-dynamic hidden sm:block"></div>
+                <div class="h-6 w-px bg-dynamic"></div>
                 
-                <!-- Admin Tools Container -->
-                <div id="admin-tools" class="hidden flex items-center gap-2">
+                <!-- Admin Tools (Desktop) -->
+                <div class="admin-tools-wrapper hidden flex items-center gap-2">
                     <button onclick="openAdminRequests()" title="Inbox" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 hover:bg-pink-500/30 transition-all">
                         <i class="fas fa-inbox text-xs"></i>
                         <span id="admin-inbox-dot" class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[var(--card-bg)] hidden animate-pulse"></span>
                     </button>
-                    <!-- NEW STATS BUTTON -->
-                    <a href="stats.html" title="Mission Control" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-all">
-                        <i class="fas fa-chart-pie text-xs"></i>
-                    </a>
+                    <!-- Tabs++ (Desktop) -->
+                    <button onclick="alert('Tabs++ Feature Active')" title="Tabs++" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all">
+                        <i class="fas fa-plus-square text-xs"></i>
+                    </button>
                     <button onclick="openAdminSettings()" title="Global Settings" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-gray-500/20 text-gray-500 border border-gray-500/30 hover:bg-gray-500/30 transition-all">
                         <i class="fas fa-cog text-xs"></i>
                     </button>
-                    <button onclick="triggerMigration()" title="Upload Local JSON to Cloud" class="group relative flex items-center gap-2 px-3 py-2 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all">
-                        <i class="fas fa-cloud-upload-alt text-xs"></i>
-                    </button>
                 </div>
 
-                <!-- Tutorial Trigger -->
-                <button onclick="window.ui.openTutorial()" class="w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Help">
-                    <i class="fas fa-question text-[10px] lg:text-xs"></i>
+                <button onclick="window.ui.openTutorial()" class="w-10 h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Help">
+                    <i class="fas fa-question text-xs"></i>
                 </button>
 
-                <!-- Auth Trigger -->
-                <button id="auth-trigger-btn" onclick="window.authModule.toggleAuthModal()" class="group relative w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Sign In">
-                    <i id="auth-icon" class="fas fa-lock text-[10px] lg:text-xs"></i>
+                <!-- Auth Trigger (Desktop ID) -->
+                <button id="auth-trigger-btn" onclick="window.authModule.toggleAuthModal()" class="group relative w-10 h-10 flex items-center justify-center rounded-full bg-dynamic text-muted-dynamic hover-bg-dynamic hover:text-[var(--text-color)] transition" title="Sign In">
+                    <i id="auth-icon" class="fas fa-lock text-xs"></i>
                     <img id="auth-avatar" src="" alt="User" class="hidden w-full h-full rounded-full object-cover border-2 border-emerald-500/50">
                 </button>
 
-                <!-- Print Button -->
-                <button onclick="window.ui.togglePrintModal()" 
-                        class="flex pulse-pink group relative items-center gap-2 px-3 py-2 lg:px-5 lg:py-2.5 rounded-full bg-pink-500 text-white text-[10px] lg:text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-pink-500/20">
+                <button onclick="window.ui.togglePrintModal()" class="flex pulse-pink group relative items-center gap-2 px-5 py-2.5 rounded-full bg-pink-500 text-white text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-pink-500/20">
                     <i class="fas fa-print"></i>
-                    <span class="hidden sm:inline" data-tr="printBtn">Skriv ut</span>
+                    <span data-tr="printBtn">Skriv ut</span>
                 </button>
                 
                 <input type="file" id="manual-upload" class="hidden" accept=".json" onchange="window.handleManualUpload(event)">
-                <span id="sync-status" 
-                      onclick="document.getElementById('manual-upload').click()"
-                      class="hidden md:inline-block text-xs font-bold text-gray-500 uppercase tracking-widest bg-dynamic px-4 py-2 rounded-full border border-dynamic cursor-pointer hover-bg-dynamic transition-all">
+                <span id="sync-status" onclick="document.getElementById('manual-upload').click()" class="cursor-pointer text-xs font-bold uppercase tracking-widest bg-dynamic px-4 py-2 rounded-full border border-dynamic hover-bg-dynamic transition-all text-gray-500">
                     Laster...
                 </span>
             </div>
+
+            <!-- Right: Mobile Hamburger (Visible on Mobile) -->
+            <div class="flex lg:hidden items-center gap-3">
+                 <!-- Keep Status visible on mobile but smaller -->
+                <span id="sync-status-mobile" onclick="document.getElementById('manual-upload').click()" class="text-[10px] font-black uppercase tracking-widest text-gray-500/50">
+                    ...
+                </span>
+                <button onclick="window.ui.toggleMobileMenu()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-dynamic border border-dynamic text-[var(--text-color)]">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+            </div>
         </nav>            
     </header>
+
+    <!-- MOBILE SIDEBAR (OFF-CANVAS) -->
+    <div id="mobile-sidebar-overlay" class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300" onclick="window.ui.toggleMobileMenu()"></div>
+    
+    <div id="mobile-sidebar" class="fixed top-0 right-0 h-full w-[85%] max-w-[320px] bg-[var(--card-bg)] border-l border-dynamic z-[70] transform translate-x-full transition-transform duration-300 shadow-2xl p-6 flex flex-col overflow-y-auto">
+        
+        <div class="flex items-center justify-between mb-8">
+            <span class="text-xl font-black uppercase tracking-widest italic text-pink-500">MENY</span>
+            <button onclick="window.ui.toggleMobileMenu()" class="w-10 h-10 flex items-center justify-center rounded-full bg-dynamic border border-dynamic text-[var(--text-color)]">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Actions Grid -->
+        <div class="space-y-6 flex-1">
+            
+            <!-- Auth Section -->
+            <div class="p-4 rounded-2xl bg-dynamic border border-dynamic flex items-center justify-between cursor-pointer" onclick="window.authModule.toggleAuthModal(); window.ui.toggleMobileMenu();">
+                 <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-color)] overflow-hidden">
+                        <!-- We clone the auth avatar logic visually here via JS or just simplify -->
+                        <i class="fas fa-user text-sm"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs font-black uppercase tracking-widest" data-tr="profileTitle">Profil</span>
+                        <span class="text-[10px] opacity-60 font-bold">Logg inn / Status</span>
+                    </div>
+                 </div>
+                 <i class="fas fa-chevron-right text-xs opacity-50"></i>
+            </div>
+
+            <!-- Admin Grid (Hidden by default, shown via auth.js) -->
+            <div class="admin-tools-wrapper hidden">
+                <p class="text-[10px] font-black uppercase tracking-widest opacity-50 mb-3 ml-1">Admin Tools</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="openAdminRequests(); window.ui.toggleMobileMenu();" class="p-3 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-500 flex flex-col items-center gap-2">
+                        <i class="fas fa-inbox text-xl"></i>
+                        <span class="text-[9px] font-black uppercase tracking-widest">Innboks</span>
+                    </button>
+                    <a href="stats.html" class="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-500 flex flex-col items-center gap-2">
+                        <i class="fas fa-chart-pie text-xl"></i>
+                        <span class="text-[9px] font-black uppercase tracking-widest">Stats</span>
+                    </a>
+                    <button onclick="openAdminSettings(); window.ui.toggleMobileMenu();" class="p-3 rounded-xl bg-gray-500/10 border border-gray-500/20 text-gray-500 flex flex-col items-center gap-2">
+                        <i class="fas fa-cog text-xl"></i>
+                        <span class="text-[9px] font-black uppercase tracking-widest">Settings</span>
+                    </button>
+                    <!-- Tabs++ Mobile -->
+                    <button onclick="alert('Tabs++ Active');" class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex flex-col items-center gap-2">
+                        <i class="fas fa-plus-square text-xl"></i>
+                        <span class="text-[9px] font-black uppercase tracking-widest">Tabs++</span>
+                    </button>
+                     <button onclick="triggerMigration();" class="col-span-2 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500 flex items-center justify-center gap-2">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span class="text-[9px] font-black uppercase tracking-widest">Sync Data</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="h-px w-full bg-dynamic"></div>
+
+            <!-- Settings Grid -->
+            <div class="grid grid-cols-2 gap-3">
+                 <button onclick="window.ui.toggleTheme();" class="p-4 rounded-xl bg-dynamic border border-dynamic flex flex-col items-center gap-2">
+                    <i class="fas fa-adjust text-lg opacity-70"></i>
+                    <span class="text-[9px] font-black uppercase tracking-widest">Theme</span>
+                </button>
+                 <button onclick="window.ui.toggleLanguage();" class="p-4 rounded-xl bg-dynamic border border-dynamic flex flex-col items-center gap-2">
+                    <span class="text-lg">🌍</span>
+                    <span class="text-[9px] font-black uppercase tracking-widest">Language</span>
+                </button>
+                <button onclick="window.ui.togglePrintModal(); window.ui.toggleMobileMenu();" class="col-span-2 p-4 rounded-xl bg-pink-500 text-white shadow-lg shadow-pink-500/20 flex items-center justify-center gap-3">
+                    <i class="fas fa-print"></i>
+                    <span class="text-[10px] font-black uppercase tracking-widest" data-tr="printBtn">Skriv ut</span>
+                </button>
+                 <button onclick="window.ui.openTutorial(); window.ui.toggleMobileMenu();" class="col-span-2 p-3 rounded-xl bg-dynamic border border-dynamic flex items-center justify-center gap-3 opacity-60">
+                    <i class="fas fa-question-circle"></i>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Hjelp / Tutorial</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center opacity-30">
+            <p class="text-[8px] font-black uppercase tracking-[0.2em]">Zhift Mobile v2.1</p>
+        </div>
+    </div>
 
     <main class="container mx-auto px-4 lg:px-12 py-6 lg:py-10 min-h-[calc(100vh-280px)]">
         <section class="mb-8 lg:mb-12">
@@ -235,7 +321,7 @@
                 <div class="h-8 w-px bg-dynamic hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest opacity-50 mb-0.5 lg:mb-1">Developed for Precision</p>
-                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.44</p>
+                    <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-pink-500/50">Zhift Portal v2.0.5</p>
                 </div>
             </div>
             
@@ -504,7 +590,7 @@
                 <!-- Date Display -->
                 <div class="text-center">
                     <h2 id="bulk-current-date" class="text-3xl font-black mb-1">...</h2>
-                    <p id="bulk-current-day" class="text-xs font-black uppercase tracking-widest opacity-50 text-pink-500">...</p>
+                    <p id="bulk-current-day" class="text-xs font-black uppercase tracking-widest opacity-50 text-pink-500">...<p>
                 </div>
 
                 <!-- Controls -->
@@ -659,4 +745,4 @@
     <script src="js/admin.js"></script>
     <script src="js/app.js"></script>
 </body>
-</html>
+</html>s

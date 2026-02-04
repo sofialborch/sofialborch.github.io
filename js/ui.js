@@ -1,6 +1,29 @@
 // ui.js - Handles visual rendering and interactions
 window.ui = {};
 
+window.ui.toggleMobileMenu = function() {
+    const overlay = document.getElementById('mobile-sidebar-overlay');
+    const sidebar = document.getElementById('mobile-sidebar');
+    
+    if (sidebar.classList.contains('translate-x-full')) {
+        // OPEN
+        overlay.classList.remove('hidden');
+        // Force reflow for transition
+        void overlay.offsetWidth; 
+        overlay.classList.remove('opacity-0');
+        
+        sidebar.classList.remove('translate-x-full');
+    } else {
+        // CLOSE
+        sidebar.classList.add('translate-x-full');
+        overlay.classList.add('opacity-0');
+        
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 300); // Match CSS duration
+    }
+}
+
 window.ui.toggleTheme = function() {
     const isDark = document.body.classList.toggle('dark-mode');
     const icon = document.getElementById('theme-icon');
@@ -29,6 +52,8 @@ window.ui.updateLanguageUI = function() {
 
 window.ui.updateStatus = function(text, color) {
     const el = document.getElementById('sync-status');
+    const mobEl = document.getElementById('sync-status-mobile'); // Update mobile indicator too
+    
     if (!el) return;
     const states = {
         blue:    { icon: 'fa-circle-notch fa-spin', color: 'text-blue-500' },
@@ -37,11 +62,19 @@ window.ui.updateStatus = function(text, color) {
         busy:    { icon: 'fa-exclamation-circle',   color: 'text-red-500' }
     };
     const state = states[color] || states.gray;
-    el.className = `inline-flex items-center gap-2 ${state.color}`;
+    
+    // Desktop update
+    el.className = `inline-flex items-center gap-2 ${state.color} cursor-pointer text-xs font-bold uppercase tracking-widest bg-dynamic px-4 py-2 rounded-full border border-dynamic hover-bg-dynamic transition-all`;
     el.innerHTML = `
         <i class="fas ${state.icon} text-lg lg:text-base"></i>
-        <span class="hidden sm:inline text-[10px] lg:text-xs font-black uppercase tracking-widest pt-0.5">${text}</span>
+        <span class="hidden sm:inline pt-0.5">${text}</span>
     `;
+
+    // Mobile update (simpler)
+    if(mobEl) {
+         mobEl.className = `text-[10px] font-black uppercase tracking-widest ${state.color} cursor-pointer`;
+         mobEl.innerText = text;
+    }
 }
 
 window.ui.renderHero = function(todayStr) {
@@ -207,9 +240,6 @@ window.ui.executePrint = function() {
     if(!sm || !em) return;
     const start = new Date(sm + "-01T00:00:00"); const end = new Date(em + "-01T00:00:00");
     end.setMonth(end.getMonth() + 1); end.setDate(0);
-    // This calls back to a global or app function, but let's inline the PDF gen here if it was separate, but admin.js has it. 
-    // Wait, admin.js has print logic? It was in admin.js in the previous version. I'll leave it there or move it.
-    // Let's assume generatePrintSummary is available globally. 
     if(window.generatePrintSummary) { window.generatePrintSummary(start, end); window.ui.togglePrintModal(); }
 }
 
