@@ -54,7 +54,7 @@ window.requests.updateRequestSidebar = function() {
             list.appendChild(item);
         });
         
-        if(window.innerWidth < 1024) panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Removed auto-scroll on mobile as it interrupts multi-select flow
     } else {
         panel.classList.add('hidden');
         lookupPanel.classList.remove('hidden');
