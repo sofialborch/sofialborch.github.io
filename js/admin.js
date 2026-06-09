@@ -190,6 +190,8 @@ window.autoCalculateEndTime = autoCalculateEndTime; // Export for UI.js
 // NEW WIZARD LOGIC (Multi-step + Summary)
 // ----------------------------------------------------
 
+
+
 function openBulkAction(reqId) {
     const req = loadedRequestsCache[reqId];
     if(!req) return;
@@ -247,6 +249,72 @@ function openBulkAction(reqId) {
     // Clear previous summary input
     document.getElementById('bulk-response-text').value = req.adminResponse || '';
     
+    // Reset save button state
+    const saveBtn = document.getElementById('bulk-save-btn');
+    if (saveBtn) {
+        saveBtn.innerText = t('applyToDates');
+        saveBtn.disabled = false;
+    }
+    
+    renderBulkStep();
+    
+    document.getElementById('bulk-modal').classList.remove('hidden');
+    document.getElementById('admin-requests-modal').classList.add('hidden');
+}
+
+window.openManualBulkEdit = function() {
+    if(selectedRequestDates.size === 0) return;
+    
+    // Mock a request object for the wizard
+    const req = {
+        id: 'manual_bulk_edit',
+        name: 'Manuell Redigering',
+        message: '',
+        dates: Array.from(selectedRequestDates),
+        adminResponse: ''
+    };
+    
+    currentBulkRequest = req;
+    document.getElementById('bulk-wizard-title').innerText = req.name;
+    
+    bulkWizardData = [];
+    req.dates.forEach(d => {
+        const existing = DATA_STORE.overrides[d];
+        let initialStatus = 'busy'; 
+        if(existing && existing.status) initialStatus = existing.status;
+        
+        let initialNote = '';
+        if(existing && existing.note) initialNote = existing.note; 
+
+        let initialBadge = null;
+        if(existing && existing.badge) initialBadge = existing.badge;
+
+        let initialStart = '';
+        let initialEnd = '';
+        if(existing && existing.startTime) initialStart = existing.startTime;
+        if(existing && existing.endTime) initialEnd = existing.endTime;
+
+        bulkWizardData.push({
+            date: d,
+            status: initialStatus,
+            note: initialNote,
+            badge: initialBadge,
+            startTime: initialStart,
+            endTime: initialEnd
+        });
+    });
+    
+    bulkWizardData.sort((a,b) => new Date(a.date) - new Date(b.date));
+    bulkWizardIndex = 0;
+    
+    document.getElementById('bulk-response-text').value = '';
+    
+    const saveBtn = document.getElementById('bulk-save-btn');
+    if (saveBtn) {
+        saveBtn.innerText = t('applyToDates');
+        saveBtn.disabled = false;
+    }
+    
     renderBulkStep();
     
     document.getElementById('bulk-modal').classList.remove('hidden');
@@ -284,6 +352,10 @@ function renderBulkStep() {
             <span class="text-emerald-500">${availCount} Ledige</span> / 
             <span class="text-red-500">${busyCount} Opptatt</span>
         `;
+        
+        if(window.ui.renderMiniCalendar) {
+            window.ui.renderMiniCalendar('bulk-mini-calendar', bulkWizardData.map(d => d.date));
+        }
         
     } else {
         // DATE VIEW
@@ -324,13 +396,70 @@ function renderBulkStep() {
         document.getElementById('bulk-end-time').value = data.endTime || '';
         document.getElementById('bulk-end-time-btn').innerText = data.endTime || '15:30';
         
+        // Render Recent Configs
+        const recentContainer = document.getElementById('bulk-recent-configs');
+        if(recentContainer) {
+            const recents = JSON.parse(localStorage.getItem('z03y_admin_recent_configs') || '[]');
+            recentContainer.innerHTML = '';
+            if(recents.length > 0) {
+                recents.forEach((conf, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "px-3 py-1.5 whitespace-nowrap bg-pink-500/10 text-pink-500 border border-pink-500/20 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-pink-500 hover:text-white transition flex-shrink-0";
+                    btn.innerText = `Sist brukt ${idx + 1}: ${conf.status}`;
+                    if(conf.badge) btn.innerText += ` [${conf.badge}]`;
+                    btn.onclick = () => window.applyRecentConfig(idx);
+                    recentContainer.appendChild(btn);
+                });
+            } else {
+                recentContainer.innerHTML = '<span class="text-[9px] font-bold uppercase tracking-widest opacity-40 italic w-full text-center">Lagrede konfigurasjoner dukker opp her etter lagring.</span>';
+            }
+            recentContainer.classList.remove('hidden');
+        }
+        
         prevBtn.style.visibility = bulkWizardIndex > 0 ? 'visible' : 'hidden';
         nextBtn.style.visibility = 'visible';
     }
 }
 
+function saveRecentConfig(data) {
+    if(!data) return;
+    let recents = JSON.parse(localStorage.getItem('z03y_admin_recent_configs') || '[]');
+    const config = {
+        status: data.status,
+        note: data.note || '',
+        badge: data.badge || null,
+        startTime: data.startTime || '',
+        endTime: data.endTime || ''
+    };
+    
+    // Default empty config shouldn't be saved if it's just 'busy' with nothing else
+    if(config.status === 'busy' && !config.note && !config.badge && !config.startTime) return;
+    
+    const exists = recents.findIndex(r => JSON.stringify(r) === JSON.stringify(config));
+    if(exists > -1) recents.splice(exists, 1);
+    
+    recents.unshift(config);
+    if(recents.length > 3) recents = recents.slice(0, 3);
+    localStorage.setItem('z03y_admin_recent_configs', JSON.stringify(recents));
+}
+
+window.applyRecentConfig = function(idx) {
+    const recents = JSON.parse(localStorage.getItem('z03y_admin_recent_configs') || '[]');
+    const conf = recents[idx];
+    if(conf && bulkWizardData[bulkWizardIndex]) {
+        bulkWizardData[bulkWizardIndex].status = conf.status;
+        bulkWizardData[bulkWizardIndex].note = conf.note;
+        bulkWizardData[bulkWizardIndex].badge = conf.badge;
+        bulkWizardData[bulkWizardIndex].startTime = conf.startTime;
+        bulkWizardData[bulkWizardIndex].endTime = conf.endTime;
+        renderBulkStep();
+    }
+}
+
 window.nextBulkStep = function() {
     if(bulkWizardIndex < bulkWizardData.length) {
+        // Save the config mid-wizard so it can be reused immediately on the next day
+        saveRecentConfig(bulkWizardData[bulkWizardIndex]);
         bulkWizardIndex++;
         renderBulkStep();
     }
@@ -389,6 +518,7 @@ window.saveBulkWizard = async function() {
     
     // 1. Commit Calendar Changes
     bulkWizardData.forEach(item => {
+        saveRecentConfig(item); // Save to recent configs
         const ref = window.dbFormat.doc(window.db, "availability", item.date);
         const data = { 
             status: item.status, 
@@ -401,12 +531,14 @@ window.saveBulkWizard = async function() {
         DATA_STORE.overrides[item.date] = data; // Optimistic update
     });
 
-    // 2. Update Request Status & Response
-    const reqRef = window.dbFormat.doc(window.db, "requests", currentBulkRequest.id);
-    batch.update(reqRef, { 
-        status: 'approved', // "Approved" implies processed/handled in this context
-        adminResponse: responseMsg 
-    });
+    // 2. Update Request Status & Response (if not manual)
+    if(currentBulkRequest.id !== 'manual_bulk_edit') {
+        const reqRef = window.dbFormat.doc(window.db, "requests", currentBulkRequest.id);
+        batch.update(reqRef, { 
+            status: 'approved', // "Approved" implies processed/handled in this context
+            adminResponse: responseMsg 
+        });
+    }
 
     try {
         await batch.commit();
@@ -415,11 +547,16 @@ window.saveBulkWizard = async function() {
         alert("Kalender oppdatert og svar sendt!");
         window.closeBulkModal();
         
+        if(currentBulkRequest.id === 'manual_bulk_edit') {
+            if(window.adminMultiSelectMode) window.ui.toggleAdminMultiSelect();
+            if(window.requests && window.requests.updateRequestSidebar) window.requests.updateRequestSidebar();
+        } else {
+            // Re-open list to show updated status only if it was a real request
+            openAdminRequests(); 
+        }
+        
         // Immediate Re-render of Calendar
         window.initApp(); 
-        
-        // Re-open list to show updated status
-        openAdminRequests(); 
 
     } catch(e) { 
         alert("Save failed: " + e.message); 
@@ -532,7 +669,9 @@ window.toggleBadge = function(badge) {
 window.closeAdminRequests = () => document.getElementById('admin-requests-modal').classList.add('hidden');
 window.closeBulkModal = () => {
     document.getElementById('bulk-modal').classList.add('hidden');
-    document.getElementById('admin-requests-modal').classList.remove('hidden'); 
+    if (window.currentBulkRequest && window.currentBulkRequest.id !== 'manual_bulk_edit') {
+        document.getElementById('admin-requests-modal').classList.remove('hidden'); 
+    }
 }
 window.closeEditModal = () => document.getElementById('edit-modal').classList.add('hidden');
 window.openAdminRequests = openAdminRequests;

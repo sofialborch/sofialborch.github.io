@@ -1,5 +1,39 @@
 // ui.js - Handles visual rendering and interactions
 window.ui = {};
+window.adminMultiSelectMode = false;
+
+window.ui.toggleAdminMultiSelect = function() {
+    window.adminMultiSelectMode = !window.adminMultiSelectMode;
+    const btn = document.getElementById('admin-multiselect-toggle');
+    if (window.adminMultiSelectMode) {
+        btn.classList.add('bg-pink-500', 'text-white', 'border-pink-500', 'shadow-lg', 'shadow-pink-500/20');
+        btn.classList.remove('hover-bg-dynamic', 'text-muted-dynamic', 'border-dynamic');
+    } else {
+        btn.classList.remove('bg-pink-500', 'text-white', 'border-pink-500', 'shadow-lg', 'shadow-pink-500/20');
+        btn.classList.add('hover-bg-dynamic', 'text-muted-dynamic', 'border-dynamic');
+        
+        // Clear selection if disabling
+        if(selectedRequestDates.size > 0) {
+            selectedRequestDates.clear();
+            window.ui.renderCalendar(getLocalDateString(new Date()));
+            const weekSel = document.getElementById('week-selector').value;
+            if(weekSel) window.ui.renderWeekSummary(parseInt(weekSel));
+            if(window.requests.updateRequestSidebar) window.requests.updateRequestSidebar();
+        }
+    }
+    
+    // Update button text in the request panel
+    const submitBtn = document.getElementById('request-submit-btn');
+    if(submitBtn) {
+        if(window.adminMultiSelectMode) {
+            submitBtn.innerText = 'Rediger Valgte';
+            submitBtn.onclick = () => window.openManualBulkEdit();
+        } else {
+            submitBtn.innerText = 'Send Forespørsel';
+            submitBtn.onclick = () => window.requests.openRequestModal();
+        }
+    }
+}
 
 window.ui.toggleMobileMenu = function() {
     const overlay = document.getElementById('mobile-sidebar-overlay');
@@ -98,7 +132,7 @@ window.ui.renderWeekSummary = function(weekNumber) {
         div.className = `summary-card status-${info.status}-card cursor-pointer last:col-span-2 sm:last:col-span-1 ${ds === todayStr ? 'is-today' : ''} ${selectedRequestDates.has(ds) ? 'request-selected' : ''}`;
         
         div.onclick = () => { 
-            if (window.isAdmin) window.openEditModal(ds, info);
+            if (window.isAdmin && !window.adminMultiSelectMode) window.openEditModal(ds, info);
             else window.requests.toggleRequestDate(ds);
         };
 
@@ -156,7 +190,7 @@ window.ui.renderCalendar = function(todayStr) {
                 div.className = `day-cell status-${info.status} ${date < todayObj ? 'day-past' : ''} ${ds === todayStr ? 'today-focus' : ''} ${isSelected ? 'request-selected' : ''}`;
                 
                 div.onclick = () => { 
-                    if (window.isAdmin) window.openEditModal(ds, info);
+                    if (window.isAdmin && !window.adminMultiSelectMode) window.openEditModal(ds, info);
                     else window.requests.toggleRequestDate(ds);
                 };
 
@@ -168,6 +202,76 @@ window.ui.renderCalendar = function(todayStr) {
             }
         }
     }
+}
+
+window.ui.renderMiniCalendar = function(containerId, dateStrings) {
+    const container = document.getElementById(containerId);
+    if(!container) return;
+    
+    if(!dateStrings || dateStrings.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    const dates = dateStrings.map(ds => new Date(ds)).sort((a, b) => a - b);
+    
+    // Group by month
+    const monthsMap = {};
+    dates.forEach(d => {
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        if(!monthsMap[key]) monthsMap[key] = { year: d.getFullYear(), month: d.getMonth(), selected: [] };
+        monthsMap[key].selected.push(getLocalDateString(d));
+    });
+    
+    const highlightedSet = new Set(dateStrings);
+    
+    let html = '';
+    Object.values(monthsMap).forEach(m => {
+        html += `<div class="mb-4 bg-dynamic border border-dynamic p-5 rounded-[2rem] shadow-sm">
+            <h4 class="text-xs font-black uppercase tracking-widest text-pink-500 mb-5 text-center">
+                ${new Date(m.year, m.month).toLocaleDateString(t('monthLocale'), { month: 'long', year: 'numeric' })}
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px;" class="text-center w-full">`;
+            
+        // Day Headers (Only Mon-Fri)
+        t('days').slice(0, 5).forEach((day) => {
+            html += `<div class="text-[10px] font-black opacity-40 mb-3">${day.charAt(0)}</div>`;
+        });
+        
+        const daysInMonth = new Date(m.year, m.month + 1, 0).getDate();
+        
+        // Calculate padding for the first day (only counting weekdays)
+        const firstDayOfWeek = new Date(m.year, m.month, 1).getDay(); // 0 is Sun, 1 is Mon...
+        let padding = 0;
+        if (firstDayOfWeek >= 1 && firstDayOfWeek <= 5) {
+            padding = firstDayOfWeek - 1; // Mon=0, Tue=1, Wed=2, Thu=3, Fri=4
+        }
+        
+        for(let p = 0; p < padding; p++) {
+            html += `<div></div>`;
+        }
+        
+        for(let d = 1; d <= daysInMonth; d++) {
+            const dateObj = new Date(m.year, m.month, d);
+            const dayOfWeek = dateObj.getDay();
+            
+            // Skip weekends (0 = Sunday, 6 = Saturday)
+            if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+            
+            const ds = getLocalDateString(dateObj);
+            const isSelected = highlightedSet.has(ds);
+            
+            if(isSelected) {
+                html += `<div class="text-xs font-black w-8 h-8 mx-auto flex items-center justify-center rounded-xl bg-pink-500 text-white shadow-lg shadow-pink-500/40 transform scale-110 z-10">${d}</div>`;
+            } else {
+                html += `<div class="text-xs font-bold w-8 h-8 mx-auto flex items-center justify-center rounded-xl text-[var(--text-color)] opacity-30">${d}</div>`;
+            }
+        }
+        
+        html += `</div></div>`;
+    });
+    
+    container.innerHTML = html;
 }
 
 window.ui.populateWeekDropdown = function(currentWeek) {

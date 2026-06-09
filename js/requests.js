@@ -21,6 +21,18 @@ window.requests.updateRequestSidebar = function() {
     const list = document.getElementById('request-list');
     const count = document.getElementById('request-count');
     
+    const titleSpan = document.getElementById('request-sidebar-title');
+    const titleIcon = document.getElementById('request-sidebar-icon');
+    if(titleSpan) {
+        if(window.adminMultiSelectMode) {
+            titleSpan.innerText = 'Valgte Datoer';
+            if(titleIcon) titleIcon.className = 'fas fa-layer-group';
+        } else {
+            titleSpan.innerText = 'Forespørsler';
+            if(titleIcon) titleIcon.className = 'fas fa-heart';
+        }
+    }
+    
     if (selectedRequestDates.size > 0) {
         panel.classList.remove('hidden');
         lookupPanel.classList.add('hidden'); 
@@ -96,6 +108,11 @@ window.requests.openRequestModal = function() {
              </p>`;
         }
         footer.innerHTML = footerHtml;
+    }
+    
+    // Render mini calendar overview
+    if(window.ui.renderMiniCalendar) {
+        window.ui.renderMiniCalendar('req-mini-calendar', Array.from(selectedRequestDates));
     }
 }
 

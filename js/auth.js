@@ -75,6 +75,9 @@ onAuthStateChanged(auth, (user) => {
         if(adminRosterMobile) adminRosterMobile.classList.add('hidden');
         
         window.isAdmin = false;
+        if(window.adminMultiSelectMode && window.ui && window.ui.toggleAdminMultiSelect) {
+            window.ui.toggleAdminMultiSelect();
+        }
         
         authIcon.classList.remove('hidden');
         authAvatar.classList.add('hidden');
@@ -96,6 +99,9 @@ onAuthStateChanged(auth, (user) => {
             adminWrappers.forEach(el => el.classList.add('hidden'));
             if(adminRosterDesktop) adminRosterDesktop.classList.add('hidden');
             if(adminRosterMobile) adminRosterMobile.classList.add('hidden');
+            if(window.adminMultiSelectMode && window.ui && window.ui.toggleAdminMultiSelect) {
+                window.ui.toggleAdminMultiSelect();
+            }
         }
         
         if (!isAnon && window.requests && window.requests.subscribeToMyRequests) {

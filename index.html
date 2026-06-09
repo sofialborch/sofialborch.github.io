@@ -257,7 +257,12 @@
                     <div class="glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10">
                         <div class="flex items-center justify-between mb-8 lg:mb-12">
                             <h2 id="calendar-month" class="text-2xl lg:text-4xl font-black tracking-tighter uppercase">...</h2>
-                            <div class="flex gap-2 lg:gap-4">
+                            <div class="flex items-center gap-2 lg:gap-4">
+                                <div class="admin-tools-wrapper hidden">
+                                    <button onclick="window.ui.toggleAdminMultiSelect()" id="admin-multiselect-toggle" class="h-10 lg:h-14 px-4 lg:px-6 flex items-center justify-center hover-bg-dynamic text-muted-dynamic hover:text-[var(--text-color)] rounded-xl lg:rounded-2xl transition border border-dynamic text-[10px] lg:text-[11px] font-black uppercase tracking-widest gap-2">
+                                        <i class="fas fa-layer-group text-sm lg:text-lg"></i> <span class="hidden md:inline">Flervalg</span>
+                                    </button>
+                                </div>
                                 <button onclick="window.ui.changeMonth(-1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-left text-sm lg:text-lg"></i></button>
                                 <button onclick="window.ui.changeMonth(1)" class="w-10 h-10 lg:w-14 lg:h-14 flex items-center justify-center hover-bg-dynamic rounded-xl lg:rounded-2xl transition border border-dynamic"><i class="fas fa-chevron-right text-sm lg:text-lg"></i></button>
                             </div>
@@ -284,12 +289,12 @@
                     <div id="request-panel" class="hidden glass-panel rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 border-t-2 border-pink-500/50 lg:sticky lg:top-24 transition-all duration-300">
                          <div class="flex items-center justify-between mb-6">
                             <h3 class="text-[11px] lg:text-sm font-black uppercase tracking-widest text-pink-500 flex items-center gap-2">
-                                <i class="fas fa-heart"></i> <span>Forespørsler</span>
+                                <i id="request-sidebar-icon" class="fas fa-heart"></i> <span id="request-sidebar-title">Forespørsler</span>
                             </h3>
                             <span id="request-count" class="bg-pink-500 text-white text-[10px] font-black px-2 py-1 rounded-full">0</span>
                         </div>
                         <div id="request-list" class="space-y-3 mb-6 max-h-[200px] overflow-y-auto custom-scrollbar"></div>
-                        <button onclick="window.requests.openRequestModal()" class="w-full bg-pink-500 text-white font-black py-4 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
+                        <button id="request-submit-btn" onclick="window.requests.openRequestModal()" class="w-full bg-pink-500 text-white font-black py-4 rounded-xl transition-all active:scale-95 text-[10px] lg:text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
                             Send Forespørsel
                         </button>
                     </div>
@@ -440,6 +445,7 @@
                         <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Melding (Valgfritt)</label>
                         <textarea id="req-msg" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition"></textarea>
                     </div>
+                    <div id="req-mini-calendar" class="mt-4 border-t border-dynamic pt-4"></div>
                  </div>
             </div>
 
@@ -679,6 +685,10 @@
                     <p id="bulk-current-day" class="text-xs font-black uppercase tracking-widest opacity-50 text-pink-500">...<p>
                 </div>
 
+                <!-- Recent Configs -->
+                <div id="bulk-recent-configs" class="hidden mb-4 p-3 rounded-xl bg-dynamic border border-dynamic flex gap-2 overflow-x-auto custom-scrollbar items-center justify-start">
+                </div>
+
                 <!-- Controls -->
                  <div class="space-y-4">
                     <div class="grid grid-cols-3 gap-2">
@@ -732,6 +742,7 @@
                          <label class="block text-[10px] font-black opacity-60 uppercase mb-2 tracking-widest">Svar til bruker (Valgfritt)</label>
                          <textarea id="bulk-response-text" class="w-full bg-dynamic border border-dynamic rounded-xl p-3 text-sm font-bold h-24 focus:outline-none focus:border-pink-500/50 transition" placeholder="F.eks: Jeg tok mandagen, men tirsdag passet ikke..."></textarea>
                     </div>
+                    <div id="bulk-mini-calendar" class="mt-4 border-t border-dynamic pt-4 text-left"></div>
                 </div>
                 <button id="bulk-save-btn" onclick="window.saveBulkWizard()" class="w-full bg-pink-500 text-white font-black py-4 rounded-xl hover:brightness-110 transition active:scale-95 text-xs uppercase tracking-[0.2em] shadow-lg shadow-pink-500/20">
                     Oppdater & Svar

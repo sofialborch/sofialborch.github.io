@@ -11,6 +11,7 @@ load_dotenv()
 app = Flask(__name__, template_folder="", static_folder="")
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+app.secret_key = os.getenv('SECRET_KEY', 'super_secret_dev_key_for_flash')
 
 ASSET_SERVER_URL = os.getenv('ASSET_SERVER_URL', 'http://127.0.0.1:4000')
 

@@ -259,7 +259,11 @@ body.dark-mode .status-busy { background: var(--card-bg-secondary); border: 1px 
 body.dark-mode .status-partial { background: var(--card-bg-secondary) !important; border: 1px solid var(--partial); }
 
 
-.today-focus { background: var(--text-color) !important; color: var(--bg-color) !important; transform: scale(1.1); border: none !important; }
+.today-focus { 
+    background: var(--button-bg) !important; 
+    font-weight: 900 !important; 
+    border: 2px dashed var(--text-muted) !important; 
+}
 
 /* NEW: Selection Ring for Requests */
 .request-selected {
